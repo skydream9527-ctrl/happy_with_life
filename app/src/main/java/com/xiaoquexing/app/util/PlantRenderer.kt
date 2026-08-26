@@ -599,14 +599,14 @@ object PlantRenderer {
                     val a = (i * 45f) * 0.01745f
                     val ox = cx + kotlin.math.cos(a.toDouble()).toFloat() * r * 0.7f
                     val oy = baseY - r * 0.9f + kotlin.math.sin(a.toDouble()).toFloat() * r * 0.4f
-                    drawOval(GREEN_PALE, topLeft = Offset(ox - 10f, oy - 20f), size = Size(20f, 30f)))
+                    drawOval(GREEN_PALE, topLeft = Offset(ox - 10f, oy - 20f), size = Size(20f, 30f))
                 }
                 // Inner leaves
                 for (i in 0 until 5) {
                     val a = (i * 72f + 20f) * 0.01745f
                     val ox = cx + kotlin.math.cos(a.toDouble()).toFloat() * r * 0.3f
                     val oy = baseY - r * 0.85f + kotlin.math.sin(a.toDouble()).toFloat() * r * 0.25f
-                    drawOval(GREEN_LIGHT, topLeft = Offset(ox - 7f, oy - 15f), size = Size(14f, 24f)))
+                    drawOval(GREEN_LIGHT, topLeft = Offset(ox - 7f, oy - 15f), size = Size(14f, 24f))
                 }
                 drawCircle(GREEN, radius = 8f, center = Offset(cx, baseY - r * 0.8f))
             }
@@ -659,13 +659,13 @@ object PlantRenderer {
             val a = (i * 45f) * 0.01745f
             val ox = cx + kotlin.math.cos(a.toDouble()).toFloat() * r * 0.6f
             val oy = cy + kotlin.math.sin(a.toDouble()).toFloat() * r * 0.4f
-            drawOval(outer, topLeft = Offset(ox - r * 0.2f, oy - r * 0.38f), size = Size(r * 0.4f, r * 0.55f)))
+            drawOval(outer, topLeft = Offset(ox - r * 0.2f, oy - r * 0.38f), size = Size(r * 0.4f, r * 0.55f))
         }
         for (i in 0 until 5) {
             val a = (i * 72f + 20f) * 0.01745f
             val ox = cx + kotlin.math.cos(a.toDouble()).toFloat() * r * 0.28f
             val oy = cy + kotlin.math.sin(a.toDouble()).toFloat() * r * 0.22f
-            drawOval(mid, topLeft = Offset(ox - r * 0.15f, oy - r * 0.3f), size = Size(r * 0.3f, r * 0.45f)))
+            drawOval(mid, topLeft = Offset(ox - r * 0.15f, oy - r * 0.3f), size = Size(r * 0.3f, r * 0.45f))
         }
         drawCircle(inner, radius = r * 0.15f, center = Offset(cx, cy))
     }
@@ -761,8 +761,8 @@ object PlantRenderer {
             val wave = kotlin.math.sin(t * 3.14159f * 2f) * amp * dir
             val px = sx + wave * t
             val py = sy - len * t
-            drawOval(GREEN_LIGHT, topLeft = Offset(px + dir * 3f, py - 6f), size = Size(14f, 10f)))
-            drawOval(GREEN, topLeft = Offset(px - dir * 13f, py - 4f), size = Size(12f, 8f)))
+            drawOval(GREEN_LIGHT, topLeft = Offset(px + dir * 3f, py - 6f), size = Size(14f, 10f))
+            drawOval(GREEN, topLeft = Offset(px - dir * 13f, py - 4f), size = Size(12f, 8f))
         }
     }
 
@@ -1010,7 +1010,7 @@ object PlantRenderer {
             1 -> {
                 val h = 25f * p
                 drawRoundRect(MUSHROOM_WHITE, topLeft = Offset(cx - 5f, baseY - h), size = Size(10f, h), cornerRadius = CornerRadius(3f, 3f))
-                drawOval(MUSHROOM_RED, topLeft = Offset(cx - 12f, baseY - h - 8f), size = Size(24f, 14f)))
+                drawOval(MUSHROOM_RED, topLeft = Offset(cx - 12f, baseY - h - 8f), size = Size(24f, 14f))
             }
             2 -> {
                 val h = 40f * p + 15f
