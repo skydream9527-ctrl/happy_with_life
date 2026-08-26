@@ -2,6 +2,7 @@ package com.xiaoquexing.app.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,6 +12,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.Link
+import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material.icons.filled.Place
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -76,34 +83,34 @@ fun AddContentRow(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 12.dp),
-        horizontalArrangement = androidx.compose.foundation.layout.Arrangement.SpaceEvenly
+        horizontalArrangement = Arrangement.SpaceEvenly
     ) {
         AddContentButton(
-            icon = androidx.compose.material.icons.Icons.Default.Photo,
+            icon = Icons.Default.Image,
             label = "照片",
             emoji = "📷",
             onClick = onPhotoClick
         )
         AddContentButton(
-            icon = androidx.compose.material.icons.Icons.Default.MusicNote,
+            icon = Icons.Default.Mic,
             label = "语音",
             emoji = "🎤",
             onClick = onVoiceClick
         )
         AddContentButton(
-            icon = androidx.compose.material.icons.Icons.Default.MusicNote,
+            icon = Icons.Default.MusicNote,
             label = "音乐",
             emoji = "🎵",
             onClick = onMusicClick
         )
         AddContentButton(
-            icon = androidx.compose.material.icons.Icons.Default.Place,
+            icon = Icons.Default.Link,
             label = "链接",
             emoji = "🔗",
             onClick = onLinkClick
         )
         AddContentButton(
-            icon = androidx.compose.material.icons.Icons.Default.Place,
+            icon = Icons.Default.Place,
             label = "地点",
             emoji = "📍",
             onClick = onLocationClick

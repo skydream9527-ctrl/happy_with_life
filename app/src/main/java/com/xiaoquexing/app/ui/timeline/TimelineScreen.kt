@@ -7,18 +7,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -28,9 +23,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.xiaoquexing.app.data.entity.Record
 import com.xiaoquexing.app.ui.components.RecordCard
+import com.xiaoquexing.app.viewmodel.TimelineViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TimelineScreen(
     onNavigateToShare: (Long) -> Unit,
@@ -58,9 +54,8 @@ fun TimelineScreen(
             )
         }
 
-        PullToRefreshBox(
-            isRefreshing = uiState.isRefreshing,
-            onRefresh = { viewModel.refresh() },
+        // Note: PullToRefreshBox requires BOM 2024.03+; replaced with plain Box for BOM 2024.02 compat.
+        Box(
             modifier = Modifier.fillMaxSize()
         ) {
             if (uiState.recordsByDate.isEmpty() && !uiState.isLoading) {
@@ -100,7 +95,7 @@ fun TimelineScreen(
                                 modifier = Modifier.padding(vertical = 4.dp, horizontal = 4.dp)
                             )
                         }
-                        items(records, key = { it.id }) { record ->
+                        items(records, key = { record: Record -> record.id }) { record ->
                             RecordCard(
                                 record = record,
                                 onClick = { onNavigateToShare(record.id) }

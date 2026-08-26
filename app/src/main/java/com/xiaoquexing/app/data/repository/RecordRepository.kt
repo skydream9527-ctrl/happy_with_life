@@ -42,9 +42,8 @@ class RecordRepository(private val recordDao: RecordDao) {
     suspend fun delete(record: Record) = recordDao.delete(record)
 
     suspend fun calculateStreakDays(): Int {
-        val allRecords = kotlinx.coroutines.flow.first
-        // We'll use a simpler approach - query all records and calculate
-        return 1 // Simplified for demo
+        // Simplified streak calculation for demo
+        return 1
     }
 
     suspend fun calculateGpForRecord(record: Record, streakDays: Int, todayGpSoFar: Int): Int {

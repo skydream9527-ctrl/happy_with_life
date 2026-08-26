@@ -4,11 +4,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -30,8 +33,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.google.accompanist.pager.HorizontalPagerIndicator
-import androidx.compose.foundation.pager.PagerState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -79,7 +80,7 @@ fun AlbumViewerScreen(
                     .align(Alignment.BottomCenter)
                     .padding(16.dp)
             ) {
-                androidx.compose.material3.HorizontalPageIndicator(
+                HorizontalPageIndicator(
                     pageCount = pages.size,
                     currentPage = pagerState.currentPage,
                     modifier = Modifier,
@@ -182,14 +183,14 @@ private fun AlbumMoodPage() {
 private fun AlbumTagsPage() {
     AlbumPage(title = "标签精选", emoji = "🏷️") {
         val tags = listOf("自然" to 2, "美食" to 2, "居家" to 1, "聚会" to 1, "运动" to 1, "电影" to 1, "阅读" to 1)
-        androidx.compose.foundation.layout.FlowRow(
+        FlowRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier.padding(8.dp)
         ) {
             tags.forEach { (tag, count) ->
                 Box(
-                    modifier = androidx.compose.ui.Modifier
+                    modifier = Modifier
                         .background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(16.dp))
                         .padding(horizontal = 12.dp, vertical = 6.dp)
                 ) {

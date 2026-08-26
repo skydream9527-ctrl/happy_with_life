@@ -80,7 +80,6 @@ object ShareCardRenderer {
                 textSize = 32f * density
                 isAntiAlias = true
                 typeface = Typeface.create(Typeface.DEFAULT, Typeface.NORMAL)
-                lineSpacing = 12f * density
             }
             val maxTextWidth = cardRect.width() - innerPadding * 2
             val textToShow = if (data.recordText.length > 120) data.recordText.take(117) + "..." else data.recordText
