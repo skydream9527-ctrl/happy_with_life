@@ -42,7 +42,7 @@ object ShareCardRenderer {
         }
         canvas.drawRoundRect(cardRect, 24f * density, 24f * density, cardPaint)
 
-        val innerPadding = (30 * density).toInt()
+        val innerPadding = 30f * density
         var y = cardRect.top + innerPadding
 
         // Header: date + plant emoji
@@ -61,7 +61,7 @@ object ShareCardRenderer {
         }
         canvas.drawText(data.plantType.emoji, cardRect.right - innerPadding, y + 40f * density, emojiPaint)
 
-        y += (60 * density).toInt()
+        y += 60f * density
 
         // Mood emoji (large)
         if (data.moodEmoji.isNotEmpty()) {
@@ -70,7 +70,7 @@ object ShareCardRenderer {
                 isAntiAlias = true
             }
             canvas.drawText(data.moodEmoji, cardRect.left + innerPadding, y + 70f * density, moodPaint)
-            y += (90 * density).toInt()
+            y += 90f * density
         }
 
         // Record text
@@ -84,7 +84,7 @@ object ShareCardRenderer {
             val maxTextWidth = cardRect.width() - innerPadding * 2
             val textToShow = if (data.recordText.length > 120) data.recordText.take(117) + "..." else data.recordText
             val textY = drawMultilineText(canvas, textToShow, cardRect.left + innerPadding, y.toFloat(), maxTextWidth, textPaint)
-            y = textY.toInt() + (20 * density).toInt()
+            y = textY + 20f * density
         }
 
         // Photo placeholder area
@@ -109,7 +109,7 @@ object ShareCardRenderer {
             }
             canvas.drawText("📷 ${data.photoUris.size} 张照片", photoRect.centerX(), photoRect.centerY() + 8f * density, placeholderPaint)
 
-            y += (photoAreaH + 20 * density).toInt()
+            y += photoAreaH + 20f * density
         }
 
         // Music bar
@@ -140,7 +140,7 @@ object ShareCardRenderer {
                 }
                 canvas.drawText(data.musicArtist, musicRect.left + 70f * density, musicRect.centerY() + 22f * density, subPaint)
             }
-            y += (musicH + 20 * density).toInt()
+            y += musicH + 20f * density
         }
 
         // GP info
@@ -153,7 +153,7 @@ object ShareCardRenderer {
         canvas.drawText("🌱 ${data.totalGp} GP", cardRect.left + innerPadding, y + 30f * density, gpPaint)
 
         // Divider
-        y += (50 * density).toInt()
+        y += 50f * density
         val dividerPaint = Paint().apply {
             color = android.graphics.Color.parseColor("#E0E0E0")
             strokeWidth = 1f * density
@@ -163,7 +163,7 @@ object ShareCardRenderer {
             cardRect.right - innerPadding, y.toFloat(),
             dividerPaint
         )
-        y += (20 * density).toInt()
+        y += 20f * density
 
         // Footer
         val footerPaint = Paint().apply {
