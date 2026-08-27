@@ -1,11 +1,8 @@
 package com.xiaoquexing.app.data.entity
 
-import androidx.room.Entity
-import androidx.room.PrimaryKey
-
-@Entity(tableName = "achievements")
+/** 领域层成就（v1 兼容形状）。定义与进度在 v2 中拆为三张表，由仓储层联查拼装。 */
 data class Achievement(
-    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val id: Long = 0,
     val code: String,
     val title: String,
     val description: String,

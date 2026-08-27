@@ -1,11 +1,12 @@
 package com.xiaoquexing.app.ui.share
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import android.content.Context
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.xiaoquexing.app.XiaoQueXingApp
 import com.xiaoquexing.app.data.entity.PlantType
 import com.xiaoquexing.app.data.model.ShareCardData
+import com.xiaoquexing.app.data.repository.PlantRepository
+import com.xiaoquexing.app.data.repository.RecordRepository
 import com.xiaoquexing.app.util.PhotoSaver
 import com.xiaoquexing.app.util.ShareCardRenderer
 import kotlinx.coroutines.Dispatchers
@@ -31,8 +32,11 @@ data class ShareUiState(
     val saveState: ShareSaveState = ShareSaveState.Idle
 )
 
-class ShareViewModel(application: Application) : AndroidViewModel(application) {
-    private val app = application as XiaoQueXingApp
+class ShareViewModel(
+    private val appContext: Context,
+    private val recordRepo: RecordRepository,
+    private val plantRepo: PlantRepository
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ShareUiState())
     val uiState: StateFlow<ShareUiState> = _uiState.asStateFlow()
@@ -59,16 +63,16 @@ class ShareViewModel(application: Application) : AndroidViewModel(application) {
 
     fun loadByRecordId(recordId: Long) {
         viewModelScope.launch {
-            val record = app.recordRepository.getRecordById(recordId)
+            val record = recordRepo.getRecordById(recordId)
             if (record == null) {
                 loadDemo()
                 return@launch
             }
             val activePlant = withContext(Dispatchers.IO) {
-                app.plantRepository.getActivePlant().firstOrNull()
+                plantRepo.getActivePlant().firstOrNull()
             }
             val totalGp = withContext(Dispatchers.IO) {
-                app.recordRepository.getTotalGp().firstOrNull() ?: 0
+                recordRepo.getTotalGp().firstOrNull() ?: 0
             }
             _uiState.value = _uiState.value.copy(
                 cardData = ShareCardData(
@@ -95,7 +99,7 @@ class ShareViewModel(application: Application) : AndroidViewModel(application) {
                 ShareCardRenderer.render(data, width = 1080)
             }
             val title = "XiaoQueXing_${System.currentTimeMillis()}"
-            val result = PhotoSaver.saveShareCard(getApplication(), bitmap, title)
+            val result = PhotoSaver.saveShareCard(appContext, bitmap, title)
             _uiState.value = when (result) {
                 is PhotoSaver.SaveResult.Success -> _uiState.value.copy(
                     saveState = ShareSaveState.Success(result.displayPath)

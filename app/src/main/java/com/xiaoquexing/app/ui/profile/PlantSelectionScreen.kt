@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.xiaoquexing.app.data.entity.PlantStage
 import com.xiaoquexing.app.data.entity.PlantType
+import com.xiaoquexing.app.di.rememberXiaoQueXingViewModelFactory
 import com.xiaoquexing.app.ui.components.PlantViewSmall
 import com.xiaoquexing.app.viewmodel.ProfileViewModel
 
@@ -49,7 +50,7 @@ import com.xiaoquexing.app.viewmodel.ProfileViewModel
 @Composable
 fun PlantSelectionScreen(
     onBack: () -> Unit,
-    viewModel: ProfileViewModel = viewModel()
+    viewModel: ProfileViewModel = viewModel(factory = rememberXiaoQueXingViewModelFactory())
 ) {
     val plants by viewModel.plants.collectAsState()
     val activePlantType by viewModel.activePlantType.collectAsState()

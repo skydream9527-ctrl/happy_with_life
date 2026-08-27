@@ -1,50 +1,39 @@
 package com.xiaoquexing.app
 
 import android.app.Application
-import com.xiaoquexing.app.data.db.AppDatabase
-import com.xiaoquexing.app.data.entity.PlantType
-import com.xiaoquexing.app.data.entity.PlantState
+import com.xiaoquexing.app.data.db.MigrationGuard
 import com.xiaoquexing.app.data.entity.Record
-import com.xiaoquexing.app.data.repository.AchievementRepository
-import com.xiaoquexing.app.data.repository.PlantRepository
-import com.xiaoquexing.app.data.repository.RecordRepository
+import com.xiaoquexing.app.di.AppContainer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class XiaoQueXingApp : Application() {
 
-    val database by lazy { AppDatabase.getInstance(this) }
-    val recordRepository by lazy { RecordRepository(database.recordDao()) }
-    val plantRepository by lazy { PlantRepository(database.plantDao()) }
-    val achievementRepository by lazy { AchievementRepository(database.achievementDao()) }
+    // 唯一依赖入口（ADR-002）；禁止再通过向下转型 Application 直接取仓库
+    lateinit var container: AppContainer
+        private set
 
     override fun onCreate() {
         super.onCreate()
-        instance = this
+        // 必须先于任何 Room 打开：v1 老用户迁移前留完整副本（room-v2-schema §8）
+        MigrationGuard.backupV1IfPresent(this, DATABASE_NAME)
+        container = AppContainer(this)
 
-        // Initialize demo data on first launch
         CoroutineScope(Dispatchers.IO).launch {
-            initializeData()
+            // 首启种子（用户/默认空间/植物目录/成就定义/标签注册表）
+            val firstInstall = container.bootstrap.ensureSeeded()
+            // Demo 记录只存在于 Debug 构建（Z1-07 / ADR D12：正式包首启零 Demo 记录）
+            if (firstInstall && BuildConfig.DEBUG) {
+                seedDemoRecords()
+            }
+            // 软删除记录的孤儿媒体清理（Z1-05）
+            runCatching { container.mediaImporter.cleanupOrphanFiles() }
         }
     }
 
-    private suspend fun initializeData() {
-        val plantDao = database.plantDao()
-        val recordDao = database.recordDao()
-        val achDao = database.achievementDao()
-
-        // Check if already initialized
-        val existingPlant = plantDao.getPlantByType(PlantType.TREE)
-        if (existingPlant != null) return
-
-        // Initialize plants
-        plantRepository.initializeDefaultPlants(0)
-
-        // Initialize achievements
-        achievementRepository.initializeDefaults()
-
-        // Insert demo records (3-5 records)
+    private suspend fun seedDemoRecords() {
         val now = System.currentTimeMillis()
         val dayMs = 24 * 60 * 60 * 1000L
         val demoRecords = listOf(
@@ -84,14 +73,15 @@ class XiaoQueXingApp : Application() {
                 createdAt = now - dayMs * 4
             )
         )
-        demoRecords.forEach { recordDao.insert(it) }
-
-        // Update first record achievement
-        achievementRepository.updateProgress("first_record", 1)
+        // 走事务种子：demo 的固定 GP 同样计入空间总分/当日额度/成就，
+        // 从源头消除 v1「记录 116 GP 与植物 0 分」的分裂（ADR K3）
+        demoRecords.forEach { container.recordRepository.seedRecordWithFixedGp(it) }
+        // 冗余校验：首启后空间总分必须等于 116
+        val total = container.recordRepository.getTotalGp().first()
+        check(total == 116) { "Demo 种子后空间总分应为 116，实际 $total" }
     }
 
     companion object {
-        lateinit var instance: XiaoQueXingApp
-            private set
+        private const val DATABASE_NAME = "xiaoquexing.db"
     }
 }

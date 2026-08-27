@@ -1,11 +1,11 @@
 package com.xiaoquexing.app.data.entity
 
-import androidx.room.Entity
-import androidx.room.PrimaryKey
-
-@Entity(tableName = "plant_states")
+/**
+ * 领域层植物状态（v1 兼容形状）。
+ * v2 起 totalGp 只对「活动植物」有意义（= 空间总分，ADR D7）；植物表不再存 GP。
+ */
 data class PlantState(
-    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val id: Long = 0,
     val plantType: PlantType,
     val totalGp: Int = 0,
     val isActive: Boolean = false,

@@ -1,18 +1,17 @@
 package com.xiaoquexing.app.viewmodel
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.xiaoquexing.app.XiaoQueXingApp
 import com.xiaoquexing.app.data.entity.Record
+import com.xiaoquexing.app.data.media.MediaImporter
 import com.xiaoquexing.app.data.model.MoodTag
 import com.xiaoquexing.app.data.model.StatusTag
-import com.xiaoquexing.app.util.AchievementTrigger
+import com.xiaoquexing.app.data.repository.RecordRepository
+import com.xiaoquexing.app.util.DateKeys
 import com.xiaoquexing.app.util.GPCalculator
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 data class RecordUiState(
@@ -31,6 +30,8 @@ data class RecordUiState(
     val locationName: String? = null,
     val locationLat: Double? = null,
     val locationLng: Double? = null,
+    /** 发生时间；0 = 现在。补记入口由 UI（M1-01）写入，365 天窗口由仓储层校验 */
+    val occurredAt: Long = 0L,
     val isRecording: Boolean = false,
     val isPublishing: Boolean = false,
     val showGpAnimation: Boolean = false,
@@ -41,12 +42,10 @@ data class RecordUiState(
     val errorMessage: String? = null
 )
 
-class RecordViewModel(application: Application) : AndroidViewModel(application) {
-    private val app = application as XiaoQueXingApp
-    private val recordRepo = app.recordRepository
-    private val plantRepo = app.plantRepository
-    private val achievementRepo = app.achievementRepository
-    private val trigger = AchievementTrigger(recordRepo, plantRepo, achievementRepo)
+class RecordViewModel(
+    private val recordRepo: RecordRepository,
+    private val mediaImporter: MediaImporter
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(RecordUiState())
     val uiState: StateFlow<RecordUiState> = _uiState.asStateFlow()
@@ -162,6 +161,22 @@ class RecordViewModel(application: Application) : AndroidViewModel(application) 
         recalculateEstimatedGp()
     }
 
+    /** 补记入口（Z1-04）：传入发生时间；窗口与未来时间由仓储层强制校验。 */
+    fun setOccurredAt(timestampMs: Long) {
+        _uiState.value = _uiState.value.copy(occurredAt = timestampMs)
+        recalculateEstimatedGp()
+    }
+
+    fun clearOccurredAt() {
+        _uiState.value = _uiState.value.copy(occurredAt = 0L)
+        recalculateEstimatedGp()
+    }
+
+    private fun estimateIsBackdated(): Boolean {
+        val occurred = _uiState.value.occurredAt
+        return occurred > 0 && DateKeys.epochDay(occurred) != DateKeys.epochDay(System.currentTimeMillis())
+    }
+
     private fun recalculateEstimatedGp() {
         val state = _uiState.value
         val breakdown = GPCalculator.calculate(
@@ -174,8 +189,8 @@ class RecordViewModel(application: Application) : AndroidViewModel(application) 
             hasMood = state.selectedMood != null,
             statusTagCount = state.selectedStatusTags.size,
             streakDays = state.currentStreak.coerceAtLeast(1),
-            isBackdated = false,
-            todayGpSoFar = state.todayGp
+            isBackdated = estimateIsBackdated(),
+            remainingQuota = (GPCalculator.DAILY_GP_LIMIT - state.todayGp).coerceAtLeast(0)
         )
         _uiState.value = _uiState.value.copy(estimatedGp = breakdown.finalGp)
     }
@@ -188,26 +203,14 @@ class RecordViewModel(application: Application) : AndroidViewModel(application) 
             _uiState.value = _uiState.value.copy(errorMessage = "请至少记录一些内容～")
             return
         }
+        if (state.selectedMood == null) {
+            // ADR-001 原则 1：心情必选一个，仓储层 publish 也会强制校验
+            _uiState.value = _uiState.value.copy(errorMessage = "请先选择一个心情～")
+            return
+        }
 
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isPublishing = true)
-
-            // 重新算一次 streak —— 可能用户在 RecordScreen 停留期间又过了零点
-            val streak = runCatching { recordRepo.calculateStreakDays() }.getOrDefault(state.currentStreak)
-
-            val breakdown = GPCalculator.calculate(
-                textLength = state.text.length,
-                photoCount = state.photoUris.size,
-                hasVoice = state.voiceUri != null,
-                hasMusic = state.musicTitle != null,
-                hasLink = state.linkUrl != null,
-                hasLocation = state.locationName != null,
-                hasMood = state.selectedMood != null,
-                statusTagCount = state.selectedStatusTags.size,
-                streakDays = streak.coerceAtLeast(1),
-                isBackdated = false,
-                todayGpSoFar = state.todayGp
-            )
 
             val record = Record(
                 text = state.text,
@@ -225,27 +228,31 @@ class RecordViewModel(application: Application) : AndroidViewModel(application) 
                 locationName = state.locationName,
                 locationLat = state.locationLat,
                 locationLng = state.locationLng,
-                gpEarned = breakdown.finalGp,
-                createdAt = System.currentTimeMillis(),
+                // 领域 Record 的 createdAt 即发生时间语义；仓储层映射为 occurredAt
+                createdAt = state.occurredAt.takeIf { it > 0 } ?: System.currentTimeMillis(),
                 isBackdated = false
             )
 
-            recordRepo.insert(record)
-
-            if (breakdown.finalGp > 0) {
-                plantRepo.addGpToActive(breakdown.finalGp)
+            // 记录、媒体、标签、当日额度、空间 GP、植物阶段、成就、Outbox 在同一事务内
+            // 原子写入（Z1-02）；GP 由事务内按数据库当前额度计算，避免过期读数
+            val result = runCatching { recordRepo.publish(record) }.getOrElse { e ->
+                _uiState.value = _uiState.value.copy(
+                    isPublishing = false,
+                    errorMessage = "保存失败，请重试（${e.message}）"
+                )
+                return@launch
             }
 
-            // 触发成就 + 植物解锁（best-effort）
-            trigger.onRecordPublished()
+            // content:// 照片复制到私有目录（K5）：事务成功后的独立步骤，失败置 MISSING 可重试
+            viewModelScope.launch {
+                runCatching { mediaImporter.importPending(result.recordId) }
+            }
 
-            // 重新拉 streak 给用户看（连续 +1 的体感）
-            val newStreak = runCatching { recordRepo.calculateStreakDays() }.getOrDefault(streak)
             _uiState.value = _uiState.value.copy(
-                currentStreak = newStreak,
+                currentStreak = result.streakDays,
                 isPublishing = false,
                 showGpAnimation = true,
-                earnedGp = breakdown.finalGp
+                earnedGp = result.earnedGp
             )
 
             kotlinx.coroutines.delay(1500)

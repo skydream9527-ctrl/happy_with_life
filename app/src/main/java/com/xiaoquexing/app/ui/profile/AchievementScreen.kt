@@ -48,13 +48,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.xiaoquexing.app.data.entity.Achievement
+import com.xiaoquexing.app.di.rememberXiaoQueXingViewModelFactory
 import com.xiaoquexing.app.viewmodel.ProfileViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AchievementScreen(
     onBack: () -> Unit,
-    viewModel: ProfileViewModel = viewModel()
+    viewModel: ProfileViewModel = viewModel(factory = rememberXiaoQueXingViewModelFactory())
 ) {
     val achievements by viewModel.achievements.collectAsState(initial = emptyList())
     val unlockedCount = achievements.count { it.isUnlocked }

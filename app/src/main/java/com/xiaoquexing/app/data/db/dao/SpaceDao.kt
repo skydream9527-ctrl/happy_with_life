@@ -1,28 +1,32 @@
 package com.xiaoquexing.app.data.db.dao
 
 import androidx.room.Dao
-import androidx.room.Delete
 import androidx.room.Insert
-import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import androidx.room.Update
-import com.xiaoquexing.app.data.entity.Space
+import com.xiaoquexing.app.data.db.entity.SpaceEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface SpaceDao {
-    @Query("SELECT * FROM spaces ORDER BY createdAt DESC")
-    fun getAllSpaces(): Flow<List<Space>>
 
-    @Query("SELECT * FROM spaces WHERE type = 'PERSONAL' LIMIT 1")
-    fun getPersonalSpace(): Flow<Space?>
+    @Insert
+    suspend fun insert(space: SpaceEntity): Long
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(space: Space): Long
+    @Query("SELECT COUNT(*) FROM spaces")
+    suspend fun countSpaces(): Int
 
-    @Update
-    suspend fun update(space: Space)
+    @Query("SELECT * FROM spaces WHERE is_default = 1 AND deleted_at IS NULL LIMIT 1")
+    suspend fun getDefaultSpace(): SpaceEntity?
 
-    @Delete
-    suspend fun delete(space: Space)
+    @Query("SELECT * FROM spaces WHERE deleted_at IS NULL")
+    suspend fun getAllSpaces(): List<SpaceEntity>
+
+    @Query("SELECT * FROM spaces WHERE is_default = 1 AND deleted_at IS NULL LIMIT 1")
+    fun observeDefaultSpace(): Flow<SpaceEntity?>
+
+    @Query("SELECT total_gp FROM spaces WHERE local_id = :spaceId")
+    suspend fun getTotalGp(spaceId: Long): Int
+
+    @Query("UPDATE spaces SET total_gp = :totalGp, updated_at = :now WHERE local_id = :spaceId")
+    suspend fun setTotalGp(spaceId: Long, totalGp: Int, now: Long)
 }

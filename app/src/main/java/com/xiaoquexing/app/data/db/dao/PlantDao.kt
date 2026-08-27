@@ -1,50 +1,67 @@
 package com.xiaoquexing.app.data.db.dao
 
 import androidx.room.Dao
-import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import androidx.room.Update
-import com.xiaoquexing.app.data.entity.PlantState
-import com.xiaoquexing.app.data.entity.PlantType
+import com.xiaoquexing.app.data.db.entity.PlantDefEntity
+import com.xiaoquexing.app.data.db.entity.PlantSnapshotEntity
+import com.xiaoquexing.app.data.db.entity.SpacePlantEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface PlantDao {
-    @Query("SELECT * FROM plant_states")
-    fun getAllPlants(): Flow<List<PlantState>>
 
-    @Query("SELECT * FROM plant_states WHERE isActive = 1 LIMIT 1")
-    fun getActivePlant(): Flow<PlantState?>
-
-    @Query("SELECT * FROM plant_states WHERE plantType = :type LIMIT 1")
-    suspend fun getPlantByType(type: PlantType): PlantState?
-
-    @Query("SELECT * FROM plant_states WHERE plantType = :type LIMIT 1")
-    fun getPlantByTypeFlow(type: PlantType): Flow<PlantState?>
-
-    @Query("SELECT COUNT(*) FROM plant_states WHERE isUnlocked = 1")
-    fun getUnlockedCount(): Flow<Int>
-
-    @Query("SELECT COALESCE(SUM(totalGp), 0) FROM plant_states")
-    fun getTotalGp(): Flow<Int>
+    // ---- 目录与解锁 ----
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(plantState: PlantState): Long
+    suspend fun upsertPlantDefs(plants: List<PlantDefEntity>)
 
-    @Update
-    suspend fun update(plantState: PlantState)
+    @Query("SELECT * FROM plants ORDER BY sort_order")
+    suspend fun getPlantDefs(): List<PlantDefEntity>
 
-    @Query("UPDATE plant_states SET isActive = 0 WHERE isActive = 1")
-    suspend fun deactivateAll()
+    @Query("SELECT * FROM plants ORDER BY sort_order")
+    fun observePlantDefs(): Flow<List<PlantDefEntity>>
 
-    @Query("UPDATE plant_states SET isActive = 1, isUnlocked = 1 WHERE plantType = :type")
-    suspend fun setActive(type: PlantType)
+    @Query("SELECT * FROM plants WHERE plant_type = :plantType LIMIT 1")
+    suspend fun getPlantDef(plantType: String): PlantDefEntity?
 
-    @Query("UPDATE plant_states SET totalGp = totalGp + :gp WHERE isActive = 1")
-    suspend fun addGpToActive(gp: Int)
+    @Query("UPDATE plants SET is_unlocked = 1, unlocked_at = COALESCE(unlocked_at, :unlockedAt), updated_at = :now WHERE plant_type = :plantType AND is_unlocked = 0")
+    suspend fun unlockPlant(plantType: String, unlockedAt: Long, now: Long): Int
 
-    @Delete
-    suspend fun delete(plantState: PlantState)
+    @Query("UPDATE plants SET is_unlocked = 0, unlocked_at = NULL, updated_at = :now WHERE plant_type = :plantType")
+    suspend fun relockPlant(plantType: String, now: Long)
+
+    @Query("SELECT COUNT(*) FROM plants WHERE is_unlocked = 1")
+    suspend fun countUnlockedPlants(): Int
+
+    @Query("SELECT COUNT(*) FROM plants WHERE is_unlocked = 1")
+    fun observeUnlockedPlantCount(): Flow<Int>
+
+    // ---- 空间植物实例 ----
+
+    @Insert
+    suspend fun insertSpacePlant(spacePlant: SpacePlantEntity): Long
+
+    @Query("SELECT * FROM space_plants WHERE space_id = :spaceId AND is_active = 1 AND deleted_at IS NULL LIMIT 1")
+    suspend fun getActiveSpacePlant(spaceId: Long): SpacePlantEntity?
+
+    @Query("SELECT COUNT(*) FROM space_plants WHERE space_id = :spaceId AND is_active = 1 AND deleted_at IS NULL")
+    suspend fun countActivePlants(spaceId: Long): Int
+
+    @Query("SELECT * FROM space_plants WHERE space_id = :spaceId AND is_active = 1 AND deleted_at IS NULL LIMIT 1")
+    fun observeActiveSpacePlant(spaceId: Long): Flow<SpacePlantEntity?>
+
+    @Query("UPDATE space_plants SET is_active = 0, ended_at = :endedAt, updated_at = :endedAt WHERE space_id = :spaceId AND is_active = 1")
+    suspend fun retireActiveSpacePlant(spaceId: Long, endedAt: Long)
+
+    // ---- 快照 ----
+
+    @Insert
+    suspend fun insertSnapshot(snapshot: PlantSnapshotEntity)
+
+    @Query("SELECT * FROM plant_snapshots WHERE space_id = :spaceId ORDER BY occurred_at DESC LIMIT 1")
+    suspend fun getLatestSnapshot(spaceId: Long): PlantSnapshotEntity?
 }

@@ -1,12 +1,13 @@
 package com.xiaoquexing.app.viewmodel
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.xiaoquexing.app.XiaoQueXingApp
 import com.xiaoquexing.app.data.entity.Achievement
 import com.xiaoquexing.app.data.entity.PlantState
 import com.xiaoquexing.app.data.entity.PlantType
+import com.xiaoquexing.app.data.repository.AchievementRepository
+import com.xiaoquexing.app.data.repository.PlantRepository
+import com.xiaoquexing.app.data.repository.RecordRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,11 +22,11 @@ data class ProfileUiState(
     val unlockedAchievementCount: Int = 0
 )
 
-class ProfileViewModel(application: Application) : AndroidViewModel(application) {
-    private val app = application as XiaoQueXingApp
-    private val recordRepo = app.recordRepository
-    private val plantRepo = app.plantRepository
-    private val achievementRepo = app.achievementRepository
+class ProfileViewModel(
+    private val recordRepo: RecordRepository,
+    private val plantRepo: PlantRepository,
+    private val achievementRepo: AchievementRepository
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ProfileUiState())
     val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()

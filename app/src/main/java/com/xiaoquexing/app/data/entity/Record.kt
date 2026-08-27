@@ -1,11 +1,11 @@
 package com.xiaoquexing.app.data.entity
 
-import androidx.room.Entity
-import androidx.room.PrimaryKey
-
-@Entity(tableName = "records")
+/**
+ * 领域层记录（v1 兼容形状）。Room 实体是 data.db.entity.RecordEntity，
+ * 仓储层负责两者互转；UI 与 ViewModel 只依赖本类，媒体/标签以扁平字符串表示。
+ */
 data class Record(
-    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val id: Long = 0,
     val text: String = "",
     val moodTag: String? = null,
     val statusTags: String = "",

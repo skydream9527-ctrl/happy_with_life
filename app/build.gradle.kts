@@ -34,6 +34,8 @@ android {
     }
     buildFeatures {
         compose = true
+        // BuildConfig.DEBUG 用于 Demo 数据守卫（Z1-07 / ADR D12）
+        buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.5"
@@ -43,6 +45,17 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+    testOptions {
+        unitTests {
+            // Robolectric 需要读取合并后的资源与 Manifest
+            isIncludeAndroidResources = true
+        }
+    }
+}
+
+ksp {
+    // Room schema 历史导出（Z0-02）：迁移测试与 schema 演进的唯一基线，schemas/ 必须提交入库
+    arg("room.schemaLocation", "$projectDir/schemas")
 }
 
 dependencies {
@@ -99,4 +112,10 @@ dependencies {
 
     implementation("androidx.compose.foundation:foundation")
     implementation("androidx.appcompat:appcompat:1.6.1")
+
+    // Unit tests（Z0-05 测试基座：JVM + Robolectric）
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
+    testImplementation("org.robolectric:robolectric:4.11.1")
+    testImplementation("androidx.test:core-ktx:1.5.0")
 }

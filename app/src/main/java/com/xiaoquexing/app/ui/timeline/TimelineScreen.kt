@@ -25,13 +25,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.xiaoquexing.app.data.entity.Record
+import com.xiaoquexing.app.di.rememberXiaoQueXingViewModelFactory
 import com.xiaoquexing.app.ui.components.RecordCard
 import com.xiaoquexing.app.viewmodel.TimelineViewModel
 
 @Composable
 fun TimelineScreen(
     onNavigateToShare: (Long) -> Unit,
-    viewModel: TimelineViewModel = viewModel()
+    viewModel: TimelineViewModel = viewModel(factory = rememberXiaoQueXingViewModelFactory())
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val listState = rememberLazyListState()

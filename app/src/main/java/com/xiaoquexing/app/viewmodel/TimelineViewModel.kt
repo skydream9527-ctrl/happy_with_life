@@ -1,10 +1,9 @@
 package com.xiaoquexing.app.viewmodel
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.xiaoquexing.app.XiaoQueXingApp
 import com.xiaoquexing.app.data.entity.Record
+import com.xiaoquexing.app.data.repository.RecordRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,9 +15,7 @@ data class TimelineUiState(
     val isRefreshing: Boolean = false
 )
 
-class TimelineViewModel(application: Application) : AndroidViewModel(application) {
-    private val app = application as XiaoQueXingApp
-    private val recordRepo = app.recordRepository
+class TimelineViewModel(private val recordRepo: RecordRepository) : ViewModel() {
 
     private val _uiState = MutableStateFlow(TimelineUiState())
     val uiState: StateFlow<TimelineUiState> = _uiState.asStateFlow()

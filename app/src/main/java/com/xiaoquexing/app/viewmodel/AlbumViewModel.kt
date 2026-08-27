@@ -1,8 +1,6 @@
 package com.xiaoquexing.app.viewmodel
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
-import com.xiaoquexing.app.XiaoQueXingApp
+import androidx.lifecycle.ViewModel
 import com.xiaoquexing.app.data.entity.Record
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,8 +19,7 @@ data class AlbumUiState(
     val showCreateDialog: Boolean = false
 )
 
-class AlbumViewModel(application: Application) : AndroidViewModel(application) {
-    private val app = application as XiaoQueXingApp
+class AlbumViewModel : ViewModel() {
 
     private val _uiState = MutableStateFlow(AlbumUiState(
         albums = listOf(

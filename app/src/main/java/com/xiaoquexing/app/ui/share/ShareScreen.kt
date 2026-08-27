@@ -57,6 +57,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.xiaoquexing.app.di.rememberXiaoQueXingViewModelFactory
 import com.xiaoquexing.app.ui.components.ShareCardCompose
 import com.xiaoquexing.app.util.ShareCardRenderer
 import java.text.SimpleDateFormat
@@ -68,7 +69,7 @@ import java.util.Locale
 fun ShareScreen(
     recordId: Long,
     onBack: () -> Unit,
-    viewModel: ShareViewModel = viewModel()
+    viewModel: ShareViewModel = viewModel(factory = rememberXiaoQueXingViewModelFactory())
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { androidx.compose.material3.SnackbarHostState() }

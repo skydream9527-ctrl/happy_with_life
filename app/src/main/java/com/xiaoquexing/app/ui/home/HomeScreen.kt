@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.xiaoquexing.app.data.entity.PlantStage
+import com.xiaoquexing.app.di.rememberXiaoQueXingViewModelFactory
 import com.xiaoquexing.app.ui.components.PlantView
 import com.xiaoquexing.app.ui.components.RecordCard
 import com.xiaoquexing.app.viewmodel.HomeViewModel
@@ -55,7 +56,7 @@ fun HomeScreen(
     onNavigateToPlantSelection: () -> Unit,
     onNavigateToPlantGuide: () -> Unit,
     onNavigateToShare: (Long) -> Unit,
-    viewModel: HomeViewModel = viewModel()
+    viewModel: HomeViewModel = viewModel(factory = rememberXiaoQueXingViewModelFactory())
 ) {
     val uiState by viewModel.uiState.collectAsState()
 

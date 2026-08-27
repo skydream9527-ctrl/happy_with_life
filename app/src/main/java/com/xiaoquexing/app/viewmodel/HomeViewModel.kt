@@ -1,21 +1,15 @@
 package com.xiaoquexing.app.viewmodel
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.xiaoquexing.app.XiaoQueXingApp
 import com.xiaoquexing.app.data.entity.PlantStage
 import com.xiaoquexing.app.data.entity.PlantState
 import com.xiaoquexing.app.data.entity.Record
-import com.xiaoquexing.app.util.GPCalculator
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import com.xiaoquexing.app.data.repository.PlantRepository
+import com.xiaoquexing.app.data.repository.RecordRepository
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.util.Calendar
 
@@ -34,10 +28,10 @@ data class HomeUiState(
     val latestRecord: Record? = null
 )
 
-class HomeViewModel(application: Application) : AndroidViewModel(application) {
-    private val app = application as XiaoQueXingApp
-    private val recordRepo = app.recordRepository
-    private val plantRepo = app.plantRepository
+class HomeViewModel(
+    private val recordRepo: RecordRepository,
+    private val plantRepo: PlantRepository
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()

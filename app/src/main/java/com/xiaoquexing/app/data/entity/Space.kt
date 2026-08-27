@@ -1,11 +1,8 @@
 package com.xiaoquexing.app.data.entity
 
-import androidx.room.Entity
-import androidx.room.PrimaryKey
-
-@Entity(tableName = "spaces")
+/** 领域层空间（v1 兼容形状）。Room 实体是 data.db.entity.SpaceEntity。 */
 data class Space(
-    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val id: Long = 0,
     val name: String,
     val description: String = "",
     val type: SpaceType = SpaceType.PERSONAL,

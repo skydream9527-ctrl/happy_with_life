@@ -64,6 +64,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.xiaoquexing.app.di.rememberXiaoQueXingViewModelFactory
 import com.xiaoquexing.app.media.rememberMediaPicker
 import com.xiaoquexing.app.ui.components.AddContentRow
 import com.xiaoquexing.app.ui.components.LinkCard
@@ -80,7 +81,7 @@ import kotlinx.coroutines.launch
 fun RecordScreen(
     onPublished: () -> Unit,
     onBack: () -> Unit = onPublished,
-    viewModel: RecordViewModel = viewModel()
+    viewModel: RecordViewModel = viewModel(factory = rememberXiaoQueXingViewModelFactory())
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
