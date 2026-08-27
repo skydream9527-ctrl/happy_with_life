@@ -89,7 +89,7 @@ class MigrationFromV1Test {
             .addMigrations(MIGRATION_1_2)
             .allowMainThreadQueries()
             .build()
-        db.query("SELECT COUNT(*) FROM sqlite_master").use { it.moveToFirst() }
+        db.openHelper.readableDatabase.query("SELECT COUNT(*) FROM sqlite_master").use { it.moveToFirst() }
 
         // ---- 3) 断言映射结果 ----
         // v1 spaces 行保留原 id；默认个人空间另建（自增 id=2）
