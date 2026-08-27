@@ -27,7 +27,7 @@ private fun SupportSQLiteDatabase.executeInsert(sql: String, bindArgs: Array<out
 }
 
 /**
- * v1 → v2 迁移（android/docs/room-v2-schema.md §5）。
+ * v1 → v2 迁移（docs/room-v2-schema.md §5）。
  *
  * 硬性规则：
  * - Room 在事务中执行本迁移，任一步抛异常整体回滚，v1 数据保持完整；

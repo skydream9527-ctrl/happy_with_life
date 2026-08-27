@@ -1,0 +1,1676 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小确幸 - 分享卡片</title>
+    <style id="theme-vars">
+/* ===== 小确幸 App - iOS Style Design System ===== */
+/* Warm, refined, plant-themed journaling app with iOS aesthetic */
+
+:root {
+  /* === Brand Primary: Soft Sage Green (iOS-refined) === */
+  --qx-primary: #5E9B6A;
+  --qx-primary-light: #7AB886;
+  --qx-primary-lighter: #A8D5B0;
+  --qx-primary-dark: #4A7D54;
+  --qx-primary-50: #F0F7F1;
+  --qx-primary-100: #DCEFDF;
+  --qx-primary-200: #B9DFBF;
+  --qx-primary-container: rgba(94, 155, 106, 0.08);
+  --qx-primary-container-strong: rgba(94, 155, 106, 0.12);
+
+  /* === Neutral Scale: Warm Gray === */
+  --qx-gray-50: #FBFBF9;
+  --qx-gray-100: #F5F4F2;
+  --qx-gray-200: #EBE9E5;
+  --qx-gray-300: #D8D6D1;
+  --qx-gray-400: #B0ADA6;
+  --qx-gray-500: #8A8780;
+  --qx-gray-600: #6B6862;
+  --qx-gray-700: #4A4844;
+  --qx-gray-800: #2D2B29;
+  --qx-gray-900: #1A1918;
+
+  /* === Semantic Backgrounds === */
+  --qx-background: #FBFBF9;
+  --qx-background-elevated: #FFFFFF;
+  --qx-background-grouped: #F2F1EE;
+  --qx-surface: #FFFFFF;
+  --qx-surface-secondary: #F7F6F4;
+  --qx-surface-tertiary: #F0EFEB;
+
+  /* === Text === */
+  --qx-foreground: #1A1918;
+  --qx-foreground-secondary: #6B6862;
+  --qx-foreground-tertiary: #8A8780;
+  --qx-foreground-quaternary: #B0ADA6;
+  --qx-foreground-inverse: #FFFFFF;
+  --qx-primary-foreground: #FFFFFF;
+
+  /* === Borders & Dividers === */
+  --qx-border-subtle: rgba(0,0,0,0.06);
+  --qx-border-strong: rgba(0,0,0,0.1);
+  --qx-separator: rgba(60,60,67,0.12);
+  --qx-separator-opaque: #E5E4E0;
+
+  /* === State Colors (iOS semantic) === */
+  --state-success: #34C759;
+  --state-warning: #FF9500;
+  --state-error: #FF3B30;
+  --state-info: #007AFF;
+
+  /* === Mood/Accent Tones (muted, iOS-style) === */
+  --mood-happy: #F5C842;
+  --mood-warm: #F4A261;
+  --mood-calm: #7EC8CE;
+  --mood-love: #F48FB1;
+  --mood-grateful: #CE93D8;
+  --mood-excited: #FF7043;
+
+  /* === Radius Scale (iOS 16+ style) === */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+  --radius-2xl: 24px;
+  --radius-full: 9999px;
+
+  /* === Shadows (iOS-style, very soft) === */
+  --shadow-xs: 0 1px 2px rgba(0,0,0,0.03);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.05), 0 1px 3px rgba(0,0,0,0.03);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.06), 0 2px 8px rgba(0,0,0,0.04);
+  --shadow-xl: 0 16px 40px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.04);
+  --shadow-float: 0 2px 8px rgba(0,0,0,0.04), 0 0 1px rgba(0,0,0,0.02);
+
+  /* === Spacing === */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 12px;
+  --spacing-base: 16px;
+  --spacing-lg: 20px;
+  --spacing-xl: 24px;
+  --spacing-2xl: 32px;
+  --spacing-3xl: 48px;
+
+  /* === Typography === */
+  --font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', 'PingFang SC', 'Noto Sans SC', sans-serif;
+  --font-size-xs: 11px;
+  --font-size-sm: 13px;
+  --font-size-base: 15px;
+  --font-size-md: 16px;
+  --font-size-lg: 17px;
+  --font-size-xl: 20px;
+  --font-size-2xl: 22px;
+  --font-size-3xl: 28px;
+  --font-size-hero: 34px;
+
+  /* === Prefixed semantic aliases === */
+  --qx-background-alias: var(--qx-background);
+  --qx-foreground-alias: var(--qx-foreground);
+  --qx-card: var(--qx-surface);
+  --qx-card-foreground: var(--qx-foreground);
+  --qx-popover: var(--qx-surface);
+  --qx-popover-foreground: var(--qx-foreground);
+  --qx-muted: var(--qx-surface-secondary);
+  --qx-muted-foreground: var(--qx-foreground-secondary);
+  --qx-border: var(--qx-separator-opaque);
+  --qx-input: var(--qx-gray-100);
+  --qx-ring: var(--qx-primary);
+  --qx-radius-sm: var(--radius-sm);
+  --qx-radius-md: var(--radius-md);
+  --qx-radius-lg: var(--radius-lg);
+  --qx-radius-small: var(--radius-sm);
+  --qx-radius-medium: var(--radius-md);
+  --qx-radius-large: var(--radius-lg);
+
+  /* === Non-prefixed semantic aliases for head-contract === */
+  --color-background: var(--qx-background);
+  --color-foreground: var(--qx-foreground);
+  --color-card: var(--qx-surface);
+  --color-card-foreground: var(--qx-foreground);
+  --color-popover: var(--qx-surface);
+  --color-popover-foreground: var(--qx-foreground);
+  --color-primary: var(--qx-primary);
+  --color-primary-foreground: var(--qx-primary-foreground);
+  --color-muted: var(--qx-surface-secondary);
+  --color-muted-foreground: var(--qx-foreground-secondary);
+  --color-border: var(--qx-separator-opaque);
+  --color-input: var(--qx-gray-100);
+  --color-ring: var(--qx-primary);
+  --background: var(--qx-background);
+  --foreground: var(--qx-foreground);
+  --radius-small: var(--radius-sm);
+  --radius-medium: var(--radius-md);
+  --radius-large: var(--radius-lg);
+}
+
+/* === Base Reset & Typography === */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  font-size: 16px;
+}
+
+body {
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  line-height: 1.47;
+  color: var(--qx-foreground);
+  background: var(--qx-background);
+  letter-spacing: -0.01em;
+}
+
+/* === iOS-style Large Title === */
+.ios-large-title {
+  font-size: var(--font-size-hero);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  color: var(--qx-foreground);
+}
+
+.ios-title-1 {
+  font-size: var(--font-size-3xl);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  line-height: 1.2;
+}
+
+.ios-title-2 {
+  font-size: var(--font-size-2xl);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+}
+
+.ios-title-3 {
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+
+.ios-headline {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.ios-body {
+  font-size: var(--font-size-base);
+  font-weight: 400;
+  line-height: 1.47;
+}
+
+.ios-callout {
+  font-size: var(--font-size-md);
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+.ios-subhead {
+  font-size: var(--font-size-sm);
+  font-weight: 400;
+  line-height: 1.4;
+  color: var(--qx-foreground-secondary);
+}
+
+.ios-footnote {
+  font-size: var(--font-size-xs);
+  font-weight: 400;
+  line-height: 1.3;
+  color: var(--qx-foreground-tertiary);
+}
+
+.ios-caption {
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--qx-foreground-tertiary);
+}
+
+/* === iOS-style Card === */
+.ios-card {
+  background: var(--qx-surface);
+  border-radius: var(--radius-xl);
+  border: 0.5px solid var(--qx-border-subtle);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.ios-card-inset {
+  background: var(--qx-surface);
+  border-radius: var(--radius-lg);
+  border: 0.5px solid var(--qx-border-subtle);
+}
+
+.ios-card-glass {
+  background: rgba(255,255,255,0.72);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-radius: var(--radius-xl);
+  border: 0.5px solid rgba(255,255,255,0.6);
+}
+
+/* === iOS-style Button === */
+.ios-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 14px 24px;
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  font-family: inherit;
+  border: none;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  letter-spacing: -0.01em;
+}
+
+.ios-btn-primary {
+  background: var(--qx-primary);
+  color: white;
+}
+
+.ios-btn-primary:active {
+  background: var(--qx-primary-dark);
+  transform: scale(0.98);
+}
+
+.ios-btn-secondary {
+  background: var(--qx-primary-container);
+  color: var(--qx-primary);
+}
+
+.ios-btn-ghost {
+  background: transparent;
+  color: var(--qx-primary);
+}
+
+.ios-btn-large {
+  width: 100%;
+  padding: 16px;
+  font-size: var(--font-size-lg);
+  border-radius: var(--radius-lg);
+}
+
+/* === iOS-style Tab Bar (floating translucent) - canonical structure === */
+nav[data-mobile-nav="global"] button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+
+nav[data-mobile-nav="global"] button svg {
+  stroke: var(--qx-gray-400);
+  transition: all 0.2s ease;
+}
+
+nav[data-mobile-nav="global"] button span {
+  color: var(--qx-gray-400);
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: all 0.2s ease;
+}
+
+nav[data-mobile-nav="global"] button.active svg {
+  stroke: var(--qx-primary);
+}
+
+nav[data-mobile-nav="global"] button.active span {
+  color: var(--qx-primary);
+  font-weight: 600;
+}
+
+/* Center record button raised above the bar */
+nav[data-mobile-nav="global"] button[data-nav-key="record"] {
+  margin-top: -18px;
+}
+
+.record-btn {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--qx-primary), var(--qx-primary-dark, #4a8256));
+  border-radius: 50%;
+  box-shadow: 0 4px 16px rgba(94,155,106,0.35), 0 2px 6px rgba(94,155,106,0.2);
+  transition: transform 0.2s ease;
+}
+
+.record-btn svg {
+  stroke: white !important;
+}
+
+.record-btn:active {
+  transform: scale(0.92);
+}
+
+/* === iOS-style Status Bar area === */
+.ios-status-bar {
+  height: env(safe-area-inset-top, 47px);
+  min-height: 47px;
+  width: 100%;
+}
+
+/* === iOS Navigation Large Title area === */
+.ios-nav-large {
+  padding: 0 20px;
+  padding-bottom: 8px;
+}
+
+.ios-nav-large .ios-large-title {
+  margin-bottom: 2px;
+}
+
+.ios-nav-subtitle {
+  font-size: var(--font-size-base);
+  color: var(--qx-foreground-secondary);
+  font-weight: 400;
+}
+
+/* === iOS-style Grouped List === */
+.ios-group {
+  margin: 0 16px;
+  margin-bottom: var(--spacing-lg);
+}
+
+.ios-group-header {
+  padding: 0 16px;
+  padding-bottom: 6px;
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--qx-foreground-tertiary);
+}
+
+.ios-group-card {
+  background: var(--qx-surface);
+  border-radius: var(--radius-xl);
+  border: 0.5px solid var(--qx-border-subtle);
+  overflow: hidden;
+}
+
+.ios-list-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  min-height: 48px;
+}
+
+.ios-list-row + .ios-list-row {
+  border-top: 0.5px solid var(--qx-separator);
+  margin-left: 52px;
+}
+
+.ios-list-row-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ios-list-row-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.ios-list-row-title {
+  font-size: var(--font-size-base);
+  font-weight: 400;
+  color: var(--qx-foreground);
+}
+
+.ios-list-row-subtitle {
+  font-size: var(--font-size-sm);
+  color: var(--qx-foreground-secondary);
+  margin-top: 1px;
+}
+
+.ios-list-row-value {
+  font-size: var(--font-size-base);
+  color: var(--qx-foreground-tertiary);
+  flex-shrink: 0;
+}
+
+.ios-list-row-chevron {
+  color: var(--qx-gray-300);
+  flex-shrink: 0;
+}
+
+/* === Tag Chips (iOS-style) === */
+.ios-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 7px 14px;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  font-family: inherit;
+  border-radius: var(--radius-full);
+  border: none;
+  background: var(--qx-gray-100);
+  color: var(--qx-foreground-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.ios-chip.selected {
+  background: var(--qx-primary);
+  color: white;
+}
+
+.ios-chip.mood-happy.selected { background: var(--mood-happy); color: #5D4A00; }
+.ios-chip.mood-warm.selected { background: var(--mood-warm); color: white; }
+.ios-chip.mood-calm.selected { background: var(--mood-calm); color: #1B5E63; }
+.ios-chip.mood-love.selected { background: var(--mood-love); color: white; }
+.ios-chip.mood-grateful.selected { background: var(--mood-grateful); color: white; }
+
+/* === Progress Bar (iOS-style) === */
+.ios-progress {
+  width: 100%;
+  height: 6px;
+  background: var(--qx-gray-200);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.ios-progress-fill {
+  height: 100%;
+  background: var(--qx-primary);
+  border-radius: var(--radius-full);
+  transition: width 0.5s ease;
+}
+
+/* === Page padding helper === */
+.page-content {
+  padding-bottom: 100px;
+}
+
+/* === Segmented Control (iOS-style) === */
+.ios-segmented {
+  display: flex;
+  padding: 2px;
+  background: var(--qx-gray-100);
+  border-radius: var(--radius-md);
+  gap: 2px;
+}
+
+.ios-segmented-item {
+  flex: 1;
+  padding: 7px 12px;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  font-family: inherit;
+  text-align: center;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--qx-foreground-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ios-segmented-item.active {
+  background: var(--qx-surface);
+  color: var(--qx-foreground);
+  font-weight: 600;
+  box-shadow: var(--shadow-xs);
+}
+
+/* === Stat Pill === */
+.ios-stat-pill {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 12px 8px;
+  flex: 1;
+}
+
+.ios-stat-value {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  color: var(--qx-foreground);
+  letter-spacing: -0.02em;
+}
+
+.ios-stat-label {
+  font-size: var(--font-size-xs);
+  color: var(--qx-foreground-tertiary);
+  font-weight: 500;
+}
+
+/* === Record Card (iOS-style) === */
+.ios-record-card {
+  background: var(--qx-surface);
+  border-radius: var(--radius-xl);
+  border: 0.5px solid var(--qx-border-subtle);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+/* === Text Field (iOS-style) === */
+.ios-input {
+  width: 100%;
+  padding: 14px 16px;
+  font-size: var(--font-size-lg);
+  font-family: inherit;
+  border: none;
+  border-radius: var(--radius-lg);
+  background: var(--qx-surface-secondary);
+  color: var(--qx-foreground);
+  outline: none;
+  transition: background 0.2s ease;
+}
+
+.ios-input::placeholder {
+  color: var(--qx-foreground-quaternary);
+}
+
+.ios-input:focus {
+  background: var(--qx-gray-100);
+}
+
+.ios-textarea {
+  width: 100%;
+  min-height: 120px;
+  padding: 14px 16px;
+  font-size: var(--font-size-lg);
+  font-family: inherit;
+  border: none;
+  border-radius: var(--radius-lg);
+  background: var(--qx-surface-secondary);
+  color: var(--qx-foreground);
+  outline: none;
+  resize: none;
+  line-height: 1.5;
+}
+
+.ios-textarea::placeholder {
+  color: var(--qx-foreground-quaternary);
+}
+
+/* === Avatar === */
+.ios-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--qx-primary-light), var(--qx-primary));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  flex-shrink: 0;
+}
+
+.ios-avatar-sm {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+/* === Divider === */
+.ios-divider {
+  height: 0.5px;
+  background: var(--qx-separator);
+  margin: 0;
+}
+
+/* === Utility === */
+.text-primary { color: var(--qx-primary); }
+.text-secondary { color: var(--qx-foreground-secondary); }
+.text-tertiary { color: var(--qx-foreground-tertiary); }
+.text-center { text-align: center; }
+.font-bold { font-weight: 700; }
+.font-semibold { font-weight: 600; }
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.items-center { align-items: center; }
+.justify-center { justify-content: center; }
+.justify-between { justify-content: space-between; }
+.gap-xs { gap: 4px; }
+.gap-sm { gap: 8px; }
+.gap-md { gap: 12px; }
+.gap-base { gap: 16px; }
+.gap-lg { gap: 20px; }
+.w-full { width: 100%; }
+
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.3.1/dist/index.global.js"></script>
+    <script src="https://unpkg.com/lucide@1.8.0/dist/umd/lucide.min.js"></script>
+    <style type="text/tailwindcss">
+  @theme inline {
+    --color-background: var(--qx-background);
+    --color-foreground: var(--qx-foreground);
+    --color-card: var(--qx-card);
+    --color-card-foreground: var(--qx-card-foreground);
+    --color-popover: var(--qx-popover);
+    --color-popover-foreground: var(--qx-popover-foreground);
+    --color-primary: var(--qx-primary);
+    --color-primary-foreground: var(--qx-primary-foreground);
+    --color-muted: var(--qx-muted);
+    --color-muted-foreground: var(--qx-muted-foreground);
+    --color-border: var(--qx-border);
+    --color-input: var(--qx-input);
+    --color-ring: var(--qx-ring);
+    --radius-sm: var(--qx-radius-sm);
+    --radius-md: var(--qx-radius-md);
+    --radius-lg: var(--qx-radius-lg);
+  }
+  @layer base {
+    body { background: var(--qx-background); color: var(--qx-foreground); }
+    td, th { @apply break-words; word-break: break-all; word-break: auto-phrase; }
+    th { @apply whitespace-nowrap; }
+  }
+    </style>
+    <style id="semantic-token-fallback">
+      .bg-background { background-color: var(--qx-background); }
+      .text-background { color: var(--qx-background); }
+      .border-background { border-color: var(--qx-background); }
+      .ring-background { --tw-ring-color: var(--qx-background); }
+      .bg-foreground { background-color: var(--qx-foreground); }
+      .text-foreground { color: var(--qx-foreground); }
+      .border-foreground { border-color: var(--qx-foreground); }
+      .ring-foreground { --tw-ring-color: var(--qx-foreground); }
+      .bg-card { background-color: var(--qx-card); }
+      .text-card { color: var(--qx-card); }
+      .border-card { border-color: var(--qx-card); }
+      .ring-card { --tw-ring-color: var(--qx-card); }
+      .bg-card-foreground { background-color: var(--qx-card-foreground); }
+      .text-card-foreground { color: var(--qx-card-foreground); }
+      .border-card-foreground { border-color: var(--qx-card-foreground); }
+      .ring-card-foreground { --tw-ring-color: var(--qx-card-foreground); }
+      .bg-popover { background-color: var(--qx-popover); }
+      .text-popover { color: var(--qx-popover); }
+      .border-popover { border-color: var(--qx-popover); }
+      .ring-popover { --tw-ring-color: var(--qx-popover); }
+      .bg-popover-foreground { background-color: var(--qx-popover-foreground); }
+      .text-popover-foreground { color: var(--qx-popover-foreground); }
+      .border-popover-foreground { border-color: var(--qx-popover-foreground); }
+      .ring-popover-foreground { --tw-ring-color: var(--qx-popover-foreground); }
+      .bg-primary { background-color: var(--qx-primary); }
+      .text-primary { color: var(--qx-primary); }
+      .border-primary { border-color: var(--qx-primary); }
+      .ring-primary { --tw-ring-color: var(--qx-primary); }
+      .bg-primary-foreground { background-color: var(--qx-primary-foreground); }
+      .text-primary-foreground { color: var(--qx-primary-foreground); }
+      .border-primary-foreground { border-color: var(--qx-primary-foreground); }
+      .ring-primary-foreground { --tw-ring-color: var(--qx-primary-foreground); }
+      .bg-muted { background-color: var(--qx-muted); }
+      .text-muted { color: var(--qx-muted); }
+      .border-muted { border-color: var(--qx-muted); }
+      .ring-muted { --tw-ring-color: var(--qx-muted); }
+      .bg-muted-foreground { background-color: var(--qx-muted-foreground); }
+      .text-muted-foreground { color: var(--qx-muted-foreground); }
+      .border-muted-foreground { border-color: var(--qx-muted-foreground); }
+      .ring-muted-foreground { --tw-ring-color: var(--qx-muted-foreground); }
+      .bg-border { background-color: var(--qx-border); }
+      .text-border { color: var(--qx-border); }
+      .border-border { border-color: var(--qx-border); }
+      .ring-border { --tw-ring-color: var(--qx-border); }
+      .bg-input { background-color: var(--qx-input); }
+      .text-input { color: var(--qx-input); }
+      .border-input { border-color: var(--qx-input); }
+      .ring-input { --tw-ring-color: var(--qx-input); }
+      .bg-ring { background-color: var(--qx-ring); }
+      .text-ring { color: var(--qx-ring); }
+      .border-ring { border-color: var(--qx-ring); }
+      .ring-ring { --tw-ring-color: var(--qx-ring); }
+    </style>
+    <style>
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      [data-icon] {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        -webkit-mask-size: contain;
+        mask-size: contain;
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-position: center;
+        mask-position: center;
+        background-color: currentColor;
+      }
+    </style>
+</head>
+<body>
+  <div class="phone-frame">
+    <!-- Status Bar (light text for dark background) -->
+    <div class="status-bar-dark">
+      <span>9:41</span>
+      <div class="status-icons">
+        <!-- Signal -->
+        <svg viewBox="0 0 18 12" fill="currentColor">
+          <rect x="0" y="8" width="3" height="4" rx="0.5"/>
+          <rect x="5" y="5" width="3" height="7" rx="0.5"/>
+          <rect x="10" y="2" width="3" height="10" rx="0.5"/>
+          <rect x="15" y="0" width="3" height="12" rx="0.5"/>
+        </svg>
+        <!-- WiFi -->
+        <svg viewBox="0 0 16 12" fill="currentColor">
+          <path d="M8 10.5a1.2 1.2 0 100-2.4 1.2 1.2 0 000 2.4zM4.2 6.8a5.4 5.4 0 017.6 0l-1.2 1.2a3.7 3.7 0 00-5.2 0L4.2 6.8zM1.4 4a9.4 9.4 0 0113.2 0l-1.2 1.2a7.7 7.7 0 00-10.8 0L1.4 4z"/>
+        </svg>
+        <!-- Battery -->
+        <svg viewBox="0 0 26 12" fill="none">
+          <rect x="0.5" y="0.5" width="22" height="11" rx="2.5" stroke="currentColor" stroke-opacity="0.5"/>
+          <rect x="2" y="2" width="18" height="8" rx="1.5" fill="currentColor"/>
+          <path d="M24 4v4a1.5 1.5 0 000-4z" fill="currentColor" fill-opacity="0.5"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Modal Navigation -->
+    <div class="modal-nav">
+      <span class="modal-nav-title">分享</span>
+      <button class="close-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="6" y1="6" x2="18" y2="18"/>
+          <line x1="6" y1="18" x2="18" y2="6"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Share Card -->
+    <div class="share-card-wrapper">
+      <div class="share-card">
+        <!-- Decorative petals -->
+        <div class="deco-petal p1">🍃</div>
+        <div class="deco-petal p2">🌸</div>
+        <div class="deco-petal p3">🍂</div>
+        <div class="deco-petal p4">✨</div>
+
+        <div class="share-card-inner">
+          <!-- Top bar -->
+          <div class="card-top-bar">
+            <div class="card-brand">
+              <span class="card-brand-icon">🌱</span>
+              <span class="card-brand-name">小确幸</span>
+            </div>
+            <span class="card-date">2026.08.26</span>
+          </div>
+
+          <!-- Mood -->
+          <div class="card-mood">
+            <span class="card-mood-emoji">😊</span>
+            <div class="card-mood-text">
+              <span class="card-mood-label">今天的心情：开心</span>
+              <div class="card-mood-accent"></div>
+            </div>
+          </div>
+
+          <!-- Photo area -->
+          <div class="card-photo">
+            <div class="card-photo-sun"></div>
+            <span class="card-photo-leaf">🍜</span>
+          </div>
+
+          <!-- Text content -->
+          <p class="card-text">今天吃到了超好吃的拉面，汤头浓郁，面条Q弹，幸福就是这么简单的一碗面！</p>
+
+          <!-- Tags -->
+          <div class="card-tags">
+            <span class="card-tag">#美食</span>
+            <span class="card-tag">#满足</span>
+          </div>
+
+          <!-- Music bar -->
+          <div class="card-music">
+            <span class="card-music-icon">🎵</span>
+            <div class="card-music-info">
+              <div class="card-music-title">Here Comes The Sun</div>
+              <div class="card-music-artist">The Beatles</div>
+            </div>
+            <div class="card-music-bars">
+              <div class="card-music-bar"></div>
+              <div class="card-music-bar"></div>
+              <div class="card-music-bar"></div>
+              <div class="card-music-bar"></div>
+            </div>
+          </div>
+
+          <!-- Bottom bar -->
+          <div class="card-bottom">
+            <span class="card-bottom-left">🌱</span>
+            <span class="card-bottom-center">用小确幸记录生活</span>
+            <div class="card-bottom-right">
+              <div class="card-qr"></div>
+              <span class="card-qr-label">扫码下载</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- iOS Share Sheet -->
+    <div class="share-sheet">
+      <div class="share-sheet-grabber"></div>
+
+      <!-- App icons -->
+      <div class="app-icon-row">
+        <!-- WeChat -->
+        <div class="app-icon-item">
+          <div class="app-icon-circle wechat">
+            <svg viewBox="0 0 28 28" fill="none">
+              <path d="M11.2 6C6.1 6 2 9.3 2 13.4c0 2.3 1.3 4.4 3.4 5.8l-.8 2.7 3.1-1.6c1 .3 2.1.5 3.2.5.4 0 .8 0 1.2-.1-.2-.6-.3-1.3-.3-2 0-3.7 3.6-6.7 8.1-6.7h.8C19.9 8.4 15.9 6 11.2 6z" fill="white"/>
+              <circle cx="8.2" cy="12" r="1.1" fill="#07C160"/>
+              <circle cx="12.2" cy="12" r="1.1" fill="#07C160"/>
+              <path d="M26 18.7c0-3.3-3.2-6-7.2-6s-7.2 2.7-7.2 6c0 3.3 3.2 6 7.2 6 .9 0 1.8-.1 2.6-.4l2.5 1.3-.7-2.1c1.7-1.2 2.8-2.9 2.8-4.8z" fill="white"/>
+              <circle cx="16.8" cy="18" r="0.9" fill="#07C160"/>
+              <circle cx="20.8" cy="18" r="0.9" fill="#07C160"/>
+            </svg>
+          </div>
+          <span class="app-icon-label">微信</span>
+        </div>
+        <!-- Moments -->
+        <div class="app-icon-item">
+          <div class="app-icon-circle moments">
+            <svg viewBox="0 0 28 28" fill="none">
+              <circle cx="14" cy="14" r="9" stroke="white" stroke-width="2" fill="none"/>
+              <circle cx="14" cy="14" r="3" fill="white"/>
+              <circle cx="19" cy="8" r="1.5" fill="white"/>
+            </svg>
+          </div>
+          <span class="app-icon-label">朋友圈</span>
+        </div>
+        <!-- Weibo -->
+        <div class="app-icon-item">
+          <div class="app-icon-circle weibo">
+            <svg viewBox="0 0 28 28" fill="none">
+              <ellipse cx="14" cy="16" rx="9" ry="7" fill="white"/>
+              <circle cx="14" cy="16" r="4.5" fill="#FF8200"/>
+              <circle cx="14" cy="16" r="2" fill="white"/>
+              <path d="M21 7c-1-1-3-1-4 0" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+              <path d="M23 5c-1.5-1.5-4-1.5-5.5 0" stroke="white" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/>
+            </svg>
+          </div>
+          <span class="app-icon-label">微博</span>
+        </div>
+        <!-- Xiaohongshu -->
+        <div class="app-icon-item">
+          <div class="app-icon-circle xiaohongshu">
+            <svg viewBox="0 0 28 28" fill="none">
+              <rect x="4" y="4" width="20" height="20" rx="5" fill="white"/>
+              <text x="14" y="19" text-anchor="middle" font-size="11" font-weight="900" fill="#FF2442" font-family="sans-serif">小</text>
+            </svg>
+          </div>
+          <span class="app-icon-label">小红书</span>
+        </div>
+        <!-- Save Image -->
+        <div class="app-icon-item">
+          <div class="app-icon-circle save">
+            <svg viewBox="0 0 28 28" fill="none">
+              <path d="M14 6v12m0 0l-5-5m5 5l5-5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M5 20v1a2 2 0 002 2h14a2 2 0 002-2v-1" stroke="white" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <span class="app-icon-label">保存图片</span>
+        </div>
+        <!-- Copy Link -->
+        <div class="app-icon-item">
+          <div class="app-icon-circle copy">
+            <svg viewBox="0 0 28 28" fill="none">
+              <path d="M12 11H9a3 3 0 000 6h3m4-6h3a3 3 0 010 6h-3M11 14h6" stroke="white" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <span class="app-icon-label">复制链接</span>
+        </div>
+      </div>
+
+      <!-- Action buttons -->
+      <div class="action-section">
+        <div class="action-row">
+          <div class="action-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="7" height="7" rx="1.5"/>
+              <rect x="14" y="3" width="7" height="7" rx="1.5"/>
+              <rect x="3" y="14" width="7" height="7" rx="1.5"/>
+              <rect x="14" y="14" width="7" height="7" rx="1.5"/>
+            </svg>
+          </div>
+          <span class="action-label">生成九宫格切图</span>
+          <div class="action-chevron">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 6 15 12 9 18"/>
+            </svg>
+          </div>
+        </div>
+        <div class="action-row">
+          <div class="action-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="12" y1="18" x2="12" y2="12"/>
+              <polyline points="9 15 12 12 15 15"/>
+            </svg>
+          </div>
+          <span class="action-label">导出为PDF</span>
+          <div class="action-chevron">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 6 15 12 9 18"/>
+            </svg>
+          </div>
+        </div>
+        <div class="action-row">
+          <div class="action-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>
+            </svg>
+          </div>
+          <span class="action-label">编辑卡片样式</span>
+          <div class="action-chevron">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 6 15 12 9 18"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cancel button -->
+      <div class="cancel-btn-wrap">
+        <button class="cancel-btn">取消</button>
+      </div>
+
+      <div class="bottom-safe"></div>
+    </div>
+  </div>
+
+    <style>
+    /* === Page: Modal overlay background === */
+    body {
+      background: #1A1918;
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Subtle blurred/scaled back effect */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 30% 20%, rgba(94,155,106,0.12) 0%, transparent 50%),
+        radial-gradient(ellipse at 70% 60%, rgba(245,200,66,0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 80%, rgba(244,162,97,0.06) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .phone-frame {
+      max-width: 420px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* === Status Bar (dark content on light bg → but this is dark modal, so light text) === */
+    .status-bar-dark {
+      height: env(safe-area-inset-top, 47px);
+      min-height: 47px;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      padding-top: env(safe-area-inset-top, 0px);
+      color: #FFFFFF;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+
+    .status-bar-dark .status-icons {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .status-bar-dark .status-icons svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* === Modal Nav === */
+    .modal-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 20px 16px;
+    }
+
+    .modal-nav-title {
+      font-size: 17px;
+      font-weight: 600;
+      color: #FFFFFF;
+      letter-spacing: -0.01em;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .close-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 0.5px solid rgba(255,255,255,0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin-left: auto;
+    }
+    .close-btn:active {
+      background: rgba(255,255,255,0.25);
+      transform: scale(0.92);
+    }
+    .close-btn svg {
+      width: 16px;
+      height: 16px;
+      stroke: #FFFFFF;
+      stroke-width: 2.2;
+    }
+
+    /* === Share Card === */
+    .share-card-wrapper {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 20px 20px;
+    }
+
+    .share-card {
+      width: 340px;
+      max-width: 100%;
+      background: #FEFDFB;
+      border-radius: 20px;
+      box-shadow:
+        0 30px 80px rgba(0,0,0,0.45),
+        0 10px 30px rgba(0,0,0,0.25),
+        0 2px 8px rgba(0,0,0,0.1);
+      overflow: hidden;
+      position: relative;
+      /* Paper texture via subtle noise */
+      background-image:
+        url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+      background-size: 200px 200px;
+    }
+
+    .share-card-inner {
+      padding: 24px 24px 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Decorative petals/leaves */
+    .deco-petal {
+      position: absolute;
+      pointer-events: none;
+      opacity: 0.12;
+      z-index: 0;
+    }
+    .deco-petal.p1 {
+      top: 60px;
+      right: -10px;
+      font-size: 36px;
+      transform: rotate(25deg);
+    }
+    .deco-petal.p2 {
+      top: 180px;
+      left: -8px;
+      font-size: 28px;
+      transform: rotate(-15deg);
+    }
+    .deco-petal.p3 {
+      bottom: 120px;
+      right: 12px;
+      font-size: 22px;
+      transform: rotate(45deg);
+    }
+    .deco-petal.p4 {
+      top: 340px;
+      left: 16px;
+      font-size: 18px;
+      transform: rotate(-30deg);
+      opacity: 0.08;
+    }
+
+    /* Card top bar */
+    .card-top-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .card-brand {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .card-brand-icon {
+      font-size: 18px;
+    }
+
+    .card-brand-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--qx-gray-800);
+      letter-spacing: -0.01em;
+    }
+
+    .card-date {
+      margin-left: auto;
+      font-size: 12px;
+      color: var(--qx-gray-400);
+      font-weight: 500;
+      letter-spacing: 0.02em;
+    }
+
+    /* Mood section */
+    .card-mood {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .card-mood-emoji {
+      font-size: 56px;
+      line-height: 1;
+      filter: drop-shadow(0 2px 6px rgba(245,200,66,0.3));
+    }
+
+    .card-mood-text {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .card-mood-label {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--qx-gray-800);
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+    }
+
+    .card-mood-accent {
+      width: 28px;
+      height: 3px;
+      background: linear-gradient(90deg, var(--mood-happy), var(--mood-warm));
+      border-radius: 2px;
+      margin-top: 4px;
+    }
+
+    /* Photo area - golden hour gradient */
+    .card-photo {
+      width: 100%;
+      height: 200px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #FFE0B2 0%, #FFCC80 20%, #FFAB91 45%, #F8BBD0 70%, #FFE0B2 100%);
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 18px;
+      box-shadow: 0 4px 16px rgba(255,171,145,0.3);
+    }
+
+    .card-photo::before {
+      content: '';
+      position: absolute;
+      top: -30px;
+      right: -20px;
+      width: 120px;
+      height: 120px;
+      background: radial-gradient(circle, rgba(255,255,255,0.6) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+
+    .card-photo::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 80px;
+      background: linear-gradient(to top, rgba(244,162,97,0.2), transparent);
+    }
+
+    .card-photo-leaf {
+      position: absolute;
+      bottom: 16px;
+      right: 20px;
+      font-size: 40px;
+      opacity: 0.5;
+      transform: rotate(-20deg);
+      z-index: 1;
+    }
+
+    .card-photo-sun {
+      position: absolute;
+      top: 24px;
+      left: 28px;
+      width: 50px;
+      height: 50px;
+      background: radial-gradient(circle, #FFF9C4 0%, #FFE082 50%, transparent 70%);
+      border-radius: 50%;
+      box-shadow: 0 0 40px rgba(255,235,59,0.5);
+    }
+
+    /* Text content */
+    .card-text {
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--qx-gray-700);
+      font-weight: 400;
+      letter-spacing: 0.01em;
+      margin-bottom: 12px;
+    }
+
+    /* Tags */
+    .card-tags {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .card-tag {
+      font-size: 13px;
+      color: var(--qx-gray-400);
+      font-weight: 500;
+    }
+
+    /* Music bar */
+    .card-music {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      background: linear-gradient(135deg, rgba(94,155,106,0.06), rgba(245,200,66,0.06));
+      border-radius: 10px;
+      margin-bottom: 18px;
+    }
+
+    .card-music-icon {
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .card-music-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .card-music-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--qx-gray-700);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.3;
+    }
+
+    .card-music-artist {
+      font-size: 11px;
+      color: var(--qx-gray-400);
+      margin-top: 1px;
+      line-height: 1.3;
+    }
+
+    .card-music-bars {
+      display: flex;
+      align-items: flex-end;
+      gap: 2px;
+      height: 16px;
+    }
+
+    .card-music-bar {
+      width: 3px;
+      background: var(--qx-primary);
+      border-radius: 2px;
+      opacity: 0.5;
+    }
+    .card-music-bar:nth-child(1) { height: 6px; animation: musicbar 0.8s ease-in-out infinite alternate; animation-delay: 0s; }
+    .card-music-bar:nth-child(2) { height: 12px; animation: musicbar 0.7s ease-in-out infinite alternate; animation-delay: 0.15s; }
+    .card-music-bar:nth-child(3) { height: 8px; animation: musicbar 0.9s ease-in-out infinite alternate; animation-delay: 0.3s; }
+    .card-music-bar:nth-child(4) { height: 14px; animation: musicbar 0.6s ease-in-out infinite alternate; animation-delay: 0.45s; }
+
+    @keyframes musicbar {
+      0% { transform: scaleY(0.4); }
+      100% { transform: scaleY(1); }
+    }
+
+    /* Bottom bar */
+    .card-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 14px;
+      border-top: 0.5px solid var(--qx-border-subtle);
+    }
+
+    .card-bottom-left {
+      font-size: 20px;
+    }
+
+    .card-bottom-center {
+      flex: 1;
+      text-align: center;
+      font-size: 12px;
+      color: var(--qx-gray-400);
+      font-weight: 500;
+      letter-spacing: 0.03em;
+    }
+
+    .card-bottom-right {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .card-qr {
+      width: 48px;
+      height: 48px;
+      background:
+        repeating-conic-gradient(var(--qx-gray-800) 0% 25%, white 0% 50%) 0 0 / 8px 8px,
+        white;
+      border-radius: 6px;
+      border: 1.5px solid var(--qx-gray-200);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card-qr-label {
+      font-size: 9px;
+      color: var(--qx-gray-400);
+      font-weight: 500;
+      letter-spacing: 0.02em;
+    }
+
+    /* === iOS Share Sheet === */
+    .share-sheet {
+      background: rgba(40, 40, 40, 0.82);
+      backdrop-filter: blur(30px) saturate(180%);
+      -webkit-backdrop-filter: blur(30px) saturate(180%);
+      border-radius: 16px 16px 0 0;
+      padding: 12px 0 0;
+      padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+      margin: 0 8px;
+      margin-bottom: 8px;
+      position: relative;
+      /* Sheet entrance */
+      animation: slideUp 0.4s cubic-bezier(0.32, 0.72, 0, 1) both;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(100%); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .share-sheet-grabber {
+      width: 36px;
+      height: 5px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 3px;
+      margin: 0 auto 16px;
+    }
+
+    /* App icon row */
+    .app-icon-row {
+      display: flex;
+      gap: 4px;
+      padding: 0 8px 18px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .app-icon-row::-webkit-scrollbar { display: none; }
+
+    .app-icon-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      min-width: 72px;
+      flex-shrink: 0;
+      cursor: pointer;
+      transition: transform 0.15s ease;
+    }
+    .app-icon-item:active {
+      transform: scale(0.92);
+    }
+
+    .app-icon-circle {
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+
+    .app-icon-circle svg {
+      width: 28px;
+      height: 28px;
+    }
+
+    .app-icon-circle.wechat {
+      background: linear-gradient(135deg, #07C160, #06AD56);
+    }
+    .app-icon-circle.moments {
+      background: linear-gradient(135deg, #07C160, #06AD56);
+    }
+    .app-icon-circle.weibo {
+      background: linear-gradient(135deg, #FF8200, #E65100);
+    }
+    .app-icon-circle.xiaohongshu {
+      background: linear-gradient(135deg, #FF2442, #E01E37);
+    }
+    .app-icon-circle.save {
+      background: rgba(255,255,255,0.12);
+    }
+    .app-icon-circle.copy {
+      background: rgba(255,255,255,0.12);
+    }
+
+    .app-icon-label {
+      font-size: 11px;
+      color: rgba(255,255,255,0.85);
+      font-weight: 400;
+      text-align: center;
+      line-height: 1.2;
+    }
+
+    /* Action buttons */
+    .action-section {
+      margin: 0 12px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+
+    .action-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 13px 16px;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+    .action-row:active {
+      background: rgba(255,255,255,0.08);
+    }
+    .action-row + .action-row {
+      border-top: 0.5px solid rgba(255,255,255,0.08);
+    }
+
+    .action-icon {
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .action-icon svg {
+      width: 20px;
+      height: 20px;
+      stroke: rgba(255,255,255,0.6);
+    }
+
+    .action-label {
+      flex: 1;
+      font-size: 17px;
+      color: #FFFFFF;
+      font-weight: 400;
+      letter-spacing: -0.01em;
+    }
+
+    .action-chevron {
+      color: rgba(255,255,255,0.3);
+      flex-shrink: 0;
+    }
+    .action-chevron svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* Cancel button */
+    .cancel-btn-wrap {
+      margin: 4px 12px 0;
+    }
+
+    .cancel-btn {
+      width: 100%;
+      padding: 16px;
+      font-size: 17px;
+      font-weight: 600;
+      font-family: inherit;
+      color: #FFFFFF;
+      background: rgba(255,255,255,0.12);
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      letter-spacing: -0.01em;
+    }
+    .cancel-btn:active {
+      background: rgba(255,255,255,0.2);
+      transform: scale(0.98);
+    }
+
+    /* Bottom safe spacing */
+    .bottom-safe {
+      height: env(safe-area-inset-bottom, 0px);
+    }
+
+    /* === WeChat Icon (simplified) === */
+    .wechat-icon {
+      position: relative;
+    }
+    .wechat-icon::before {
+      content: '';
+      position: absolute;
+      width: 22px;
+      height: 16px;
+      background: white;
+      border-radius: 10px 10px 10px 4px;
+      top: 2px;
+      left: 3px;
+    }
+    .wechat-icon::after {
+      content: '';
+      position: absolute;
+      width: 16px;
+      height: 12px;
+      background: white;
+      border-radius: 8px 8px 4px 8px;
+      bottom: 0;
+      right: 3px;
+    }
+    .wechat-dot1 {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: #07C160;
+      border-radius: 50%;
+      top: 6px;
+      left: 9px;
+      z-index: 1;
+    }
+    .wechat-dot2 {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: #07C160;
+      border-radius: 50%;
+      top: 6px;
+      left: 18px;
+      z-index: 1;
+    }
+    .wechat-dot3 {
+      position: absolute;
+      width: 3px;
+      height: 3px;
+      background: #07C160;
+      border-radius: 50%;
+      bottom: 4px;
+      right: 8px;
+      z-index: 1;
+    }
+    .wechat-dot4 {
+      position: absolute;
+      width: 3px;
+      height: 3px;
+      background: #07C160;
+      border-radius: 50%;
+      bottom: 4px;
+      right: 15px;
+      z-index: 1;
+    }
+  </style>
+</body>
+</html>

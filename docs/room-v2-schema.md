@@ -2,7 +2,7 @@
 
 - **状态**：设计已评审基线（本轮只交付设计与测试计划，不含实现；实现归 Z1-01）
 - **日期**：2026-08-27
-- **前置**：规则以 `android/docs/adr/ADR-001-domain-rules.md` 为准（下文引用 D1–D12）
+- **前置**：规则以 `docs/adr/ADR-001-domain-rules.md` 为准（下文引用 D1–D12）
 - **现实现基线**：`AppDatabase.kt` version=1、`exportSchema=false`、`fallbackToDestructiveMigration()`（`AppDatabase.kt:34-58`）
 - **构建验证约定**：本文档涉及的 migration 测试与 schema 导出仅在 GitHub Actions 上验证；本地不执行 Gradle。
 
@@ -573,10 +573,10 @@ ADR 附 B 的 Q1–Q12 全部继续有效（默认值已在本文档与 ADR 中�
 
 ## 12. 实现交接清单（Z1-01 输入）
 
-> **2026-08-27 进度**：第 1–5 项已随 Z1-01/Z1-02/Z1-03 落地（17 张表实体、DAO、`MIGRATION_1_2`、`DataBootstrap`、publish/softDelete 事务用例与 `AchievementEvaluator`）。**Z1-04/Z1-05/Z1-07 轮追加**：`editRecord` 事务（§6 三用例齐备）+ 365 天/未来时间窗口校验（D4.1）；`MediaImporter`（content:// 落盘、MISSING、孤儿清理，K5）+ `MigrationGuard` v1 迁移前备份（§8 前半）；Demo 记录已由 `BuildConfig.DEBUG` 守卫（ADR D12）；`RecomputeService.assertInvariants`（T18）已接入事务/编辑/删除测试。测试矩阵新增覆盖：T13（补记额度口径）、T18、T20（编辑也产生 UPSERT）；§7 的失败页与重试上限仍待与 M1-02 详情页一起交付。待 CI 首跑后：提交生成的 `app/schemas/.../2.json` 基线；T14（DST 注入）、T17（查询计划）随后补齐。
+> **2026-08-27 进度**：第 1–5 项已随 Z1-01/Z1-02/Z1-03 落地（17 张表实体、DAO、`MIGRATION_1_2`、`DataBootstrap`、publish/softDelete 事务用例与 `AchievementEvaluator`）。**Z1-04/Z1-05/Z1-07 轮追加**：`editRecord` 事务（§6 三用例齐备）+ 365 天/未来时间窗口校验（D4.1）；`MediaImporter`（content:// 落盘、MISSING、孤儿清理，K5）+ `MigrationGuard` v1 迁移前备份（§8 前半）；Demo 记录已由 `BuildConfig.DEBUG` 守卫（ADR D12）；`RecomputeService.assertInvariants`（T18）已接入事务/编辑/删除测试。测试矩阵新增覆盖：T13（补记额度口径）、T18、T20（编辑也产生 UPSERT）。GitHub Actions [#33067314367](https://github.com/skydream9527-ctrl/happy_with_life/actions/runs/33067314367) 已全绿，生成的 `app/schemas/com.xiaoquexing.app.data.db.AppDatabase/2.json`（identity hash `c9602be0c18eae4c53b42177dfdfd5a7`）已核对并提交；T14（DST 注入）、T17（查询计划）与 §7 失败页仍待后续补齐。
 
 1. ~~按 §2 建 17 张表的 Entity/DAO~~（已完成，`data/db/entity/` + `data/db/dao/`）。
-2. ~~手写 v1 DDL fixture -> 产出 schemas 基准~~（fixture 就绪；2.json 由 CI 生成后提交）。
+2. ~~手写 v1 DDL fixture -> 产出 schemas 基准~~（已提交 CI 生成并核对的 `2.json`）。
 3. ~~实现 `MIGRATION_1_2`（§5）~~（已完成，`data/db/Migrations.kt`；备份与失败页归 §7/§8 的 App 层工作，随 Z1-04 落地）。
 4. ~~实现 §6 三个事务用例~~（publish/softDelete 已实现；editRecord 随 Z1-04 编辑功能落地）。
 5. ~~建 T1–T20 测试（§9）~~（部分完成，见上方进度注）。

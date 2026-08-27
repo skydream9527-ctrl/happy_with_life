@@ -1,7 +1,7 @@
 # HTML×Compose 1:1 设计对照表（M0-05 任务，2026-08-27）
 
-> 范围：把 [`../xiaoquexing-ios-redesign/pages/`](../xiaoquexing-ios-redesign/pages/) 下 8 个 HTML 高保真
-> 页面与 `android/app/src/main/java/com/xiaoquexing/app/ui/**` 下 Compose Screen **逐页 1:1**
+> 范围：把 [`../design-reference/pages/`](../design-reference/pages/) 下 8 个 HTML 高保真
+> 页面与 `app/src/main/java/com/xiaoquexing/app/ui/**` 下 Compose Screen **逐页 1:1**
 > 对照，作为下一轮 M0-04 / M1 改源码时的真值表。
 >
 > 本文件**只产文档**，不触碰任何源码。

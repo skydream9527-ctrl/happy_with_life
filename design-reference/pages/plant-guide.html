@@ -1,0 +1,1469 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>植物图鉴 - 小确幸</title>
+    <style id="theme-vars">
+/* ===== 小确幸 App - iOS Style Design System ===== */
+/* Warm, refined, plant-themed journaling app with iOS aesthetic */
+
+:root {
+  /* === Brand Primary: Soft Sage Green (iOS-refined) === */
+  --qx-primary: #5E9B6A;
+  --qx-primary-light: #7AB886;
+  --qx-primary-lighter: #A8D5B0;
+  --qx-primary-dark: #4A7D54;
+  --qx-primary-50: #F0F7F1;
+  --qx-primary-100: #DCEFDF;
+  --qx-primary-200: #B9DFBF;
+  --qx-primary-container: rgba(94, 155, 106, 0.08);
+  --qx-primary-container-strong: rgba(94, 155, 106, 0.12);
+
+  /* === Neutral Scale: Warm Gray === */
+  --qx-gray-50: #FBFBF9;
+  --qx-gray-100: #F5F4F2;
+  --qx-gray-200: #EBE9E5;
+  --qx-gray-300: #D8D6D1;
+  --qx-gray-400: #B0ADA6;
+  --qx-gray-500: #8A8780;
+  --qx-gray-600: #6B6862;
+  --qx-gray-700: #4A4844;
+  --qx-gray-800: #2D2B29;
+  --qx-gray-900: #1A1918;
+
+  /* === Semantic Backgrounds === */
+  --qx-background: #FBFBF9;
+  --qx-background-elevated: #FFFFFF;
+  --qx-background-grouped: #F2F1EE;
+  --qx-surface: #FFFFFF;
+  --qx-surface-secondary: #F7F6F4;
+  --qx-surface-tertiary: #F0EFEB;
+
+  /* === Text === */
+  --qx-foreground: #1A1918;
+  --qx-foreground-secondary: #6B6862;
+  --qx-foreground-tertiary: #8A8780;
+  --qx-foreground-quaternary: #B0ADA6;
+  --qx-foreground-inverse: #FFFFFF;
+  --qx-primary-foreground: #FFFFFF;
+
+  /* === Borders & Dividers === */
+  --qx-border-subtle: rgba(0,0,0,0.06);
+  --qx-border-strong: rgba(0,0,0,0.1);
+  --qx-separator: rgba(60,60,67,0.12);
+  --qx-separator-opaque: #E5E4E0;
+
+  /* === State Colors (iOS semantic) === */
+  --state-success: #34C759;
+  --state-warning: #FF9500;
+  --state-error: #FF3B30;
+  --state-info: #007AFF;
+
+  /* === Mood/Accent Tones (muted, iOS-style) === */
+  --mood-happy: #F5C842;
+  --mood-warm: #F4A261;
+  --mood-calm: #7EC8CE;
+  --mood-love: #F48FB1;
+  --mood-grateful: #CE93D8;
+  --mood-excited: #FF7043;
+
+  /* === Radius Scale (iOS 16+ style) === */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+  --radius-2xl: 24px;
+  --radius-full: 9999px;
+
+  /* === Shadows (iOS-style, very soft) === */
+  --shadow-xs: 0 1px 2px rgba(0,0,0,0.03);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.05), 0 1px 3px rgba(0,0,0,0.03);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.06), 0 2px 8px rgba(0,0,0,0.04);
+  --shadow-xl: 0 16px 40px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.04);
+  --shadow-float: 0 2px 8px rgba(0,0,0,0.04), 0 0 1px rgba(0,0,0,0.02);
+
+  /* === Spacing === */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 12px;
+  --spacing-base: 16px;
+  --spacing-lg: 20px;
+  --spacing-xl: 24px;
+  --spacing-2xl: 32px;
+  --spacing-3xl: 48px;
+
+  /* === Typography === */
+  --font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', 'PingFang SC', 'Noto Sans SC', sans-serif;
+  --font-size-xs: 11px;
+  --font-size-sm: 13px;
+  --font-size-base: 15px;
+  --font-size-md: 16px;
+  --font-size-lg: 17px;
+  --font-size-xl: 20px;
+  --font-size-2xl: 22px;
+  --font-size-3xl: 28px;
+  --font-size-hero: 34px;
+
+  /* === Prefixed semantic aliases === */
+  --qx-background-alias: var(--qx-background);
+  --qx-foreground-alias: var(--qx-foreground);
+  --qx-card: var(--qx-surface);
+  --qx-card-foreground: var(--qx-foreground);
+  --qx-popover: var(--qx-surface);
+  --qx-popover-foreground: var(--qx-foreground);
+  --qx-muted: var(--qx-surface-secondary);
+  --qx-muted-foreground: var(--qx-foreground-secondary);
+  --qx-border: var(--qx-separator-opaque);
+  --qx-input: var(--qx-gray-100);
+  --qx-ring: var(--qx-primary);
+  --qx-radius-sm: var(--radius-sm);
+  --qx-radius-md: var(--radius-md);
+  --qx-radius-lg: var(--radius-lg);
+  --qx-radius-small: var(--radius-sm);
+  --qx-radius-medium: var(--radius-md);
+  --qx-radius-large: var(--radius-lg);
+
+  /* === Non-prefixed semantic aliases for head-contract === */
+  --color-background: var(--qx-background);
+  --color-foreground: var(--qx-foreground);
+  --color-card: var(--qx-surface);
+  --color-card-foreground: var(--qx-foreground);
+  --color-popover: var(--qx-surface);
+  --color-popover-foreground: var(--qx-foreground);
+  --color-primary: var(--qx-primary);
+  --color-primary-foreground: var(--qx-primary-foreground);
+  --color-muted: var(--qx-surface-secondary);
+  --color-muted-foreground: var(--qx-foreground-secondary);
+  --color-border: var(--qx-separator-opaque);
+  --color-input: var(--qx-gray-100);
+  --color-ring: var(--qx-primary);
+  --background: var(--qx-background);
+  --foreground: var(--qx-foreground);
+  --radius-small: var(--radius-sm);
+  --radius-medium: var(--radius-md);
+  --radius-large: var(--radius-lg);
+}
+
+/* === Base Reset & Typography === */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  font-size: 16px;
+}
+
+body {
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  line-height: 1.47;
+  color: var(--qx-foreground);
+  background: var(--qx-background);
+  letter-spacing: -0.01em;
+}
+
+/* === iOS-style Large Title === */
+.ios-large-title {
+  font-size: var(--font-size-hero);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  color: var(--qx-foreground);
+}
+
+.ios-title-1 {
+  font-size: var(--font-size-3xl);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  line-height: 1.2;
+}
+
+.ios-title-2 {
+  font-size: var(--font-size-2xl);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+}
+
+.ios-title-3 {
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+
+.ios-headline {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.ios-body {
+  font-size: var(--font-size-base);
+  font-weight: 400;
+  line-height: 1.47;
+}
+
+.ios-callout {
+  font-size: var(--font-size-md);
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+.ios-subhead {
+  font-size: var(--font-size-sm);
+  font-weight: 400;
+  line-height: 1.4;
+  color: var(--qx-foreground-secondary);
+}
+
+.ios-footnote {
+  font-size: var(--font-size-xs);
+  font-weight: 400;
+  line-height: 1.3;
+  color: var(--qx-foreground-tertiary);
+}
+
+.ios-caption {
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--qx-foreground-tertiary);
+}
+
+/* === iOS-style Card === */
+.ios-card {
+  background: var(--qx-surface);
+  border-radius: var(--radius-xl);
+  border: 0.5px solid var(--qx-border-subtle);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.ios-card-inset {
+  background: var(--qx-surface);
+  border-radius: var(--radius-lg);
+  border: 0.5px solid var(--qx-border-subtle);
+}
+
+.ios-card-glass {
+  background: rgba(255,255,255,0.72);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-radius: var(--radius-xl);
+  border: 0.5px solid rgba(255,255,255,0.6);
+}
+
+/* === iOS-style Button === */
+.ios-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 14px 24px;
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  font-family: inherit;
+  border: none;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  letter-spacing: -0.01em;
+}
+
+.ios-btn-primary {
+  background: var(--qx-primary);
+  color: white;
+}
+
+.ios-btn-primary:active {
+  background: var(--qx-primary-dark);
+  transform: scale(0.98);
+}
+
+.ios-btn-secondary {
+  background: var(--qx-primary-container);
+  color: var(--qx-primary);
+}
+
+.ios-btn-ghost {
+  background: transparent;
+  color: var(--qx-primary);
+}
+
+.ios-btn-large {
+  width: 100%;
+  padding: 16px;
+  font-size: var(--font-size-lg);
+  border-radius: var(--radius-lg);
+}
+
+/* === iOS-style Tab Bar (floating translucent) - canonical structure === */
+nav[data-mobile-nav="global"] button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+
+nav[data-mobile-nav="global"] button svg {
+  stroke: var(--qx-gray-400);
+  transition: all 0.2s ease;
+}
+
+nav[data-mobile-nav="global"] button span {
+  color: var(--qx-gray-400);
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: all 0.2s ease;
+}
+
+nav[data-mobile-nav="global"] button.active svg {
+  stroke: var(--qx-primary);
+}
+
+nav[data-mobile-nav="global"] button.active span {
+  color: var(--qx-primary);
+  font-weight: 600;
+}
+
+/* Center record button raised above the bar */
+nav[data-mobile-nav="global"] button[data-nav-key="record"] {
+  margin-top: -18px;
+}
+
+.record-btn {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--qx-primary), var(--qx-primary-dark, #4a8256));
+  border-radius: 50%;
+  box-shadow: 0 4px 16px rgba(94,155,106,0.35), 0 2px 6px rgba(94,155,106,0.2);
+  transition: transform 0.2s ease;
+}
+
+.record-btn svg {
+  stroke: white !important;
+}
+
+.record-btn:active {
+  transform: scale(0.92);
+}
+
+/* === iOS-style Status Bar area === */
+.ios-status-bar {
+  height: env(safe-area-inset-top, 47px);
+  min-height: 47px;
+  width: 100%;
+}
+
+/* === iOS Navigation Large Title area === */
+.ios-nav-large {
+  padding: 0 20px;
+  padding-bottom: 8px;
+}
+
+.ios-nav-large .ios-large-title {
+  margin-bottom: 2px;
+}
+
+.ios-nav-subtitle {
+  font-size: var(--font-size-base);
+  color: var(--qx-foreground-secondary);
+  font-weight: 400;
+}
+
+/* === iOS-style Grouped List === */
+.ios-group {
+  margin: 0 16px;
+  margin-bottom: var(--spacing-lg);
+}
+
+.ios-group-header {
+  padding: 0 16px;
+  padding-bottom: 6px;
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--qx-foreground-tertiary);
+}
+
+.ios-group-card {
+  background: var(--qx-surface);
+  border-radius: var(--radius-xl);
+  border: 0.5px solid var(--qx-border-subtle);
+  overflow: hidden;
+}
+
+.ios-list-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  min-height: 48px;
+}
+
+.ios-list-row + .ios-list-row {
+  border-top: 0.5px solid var(--qx-separator);
+  margin-left: 52px;
+}
+
+.ios-list-row-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ios-list-row-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.ios-list-row-title {
+  font-size: var(--font-size-base);
+  font-weight: 400;
+  color: var(--qx-foreground);
+}
+
+.ios-list-row-subtitle {
+  font-size: var(--font-size-sm);
+  color: var(--qx-foreground-secondary);
+  margin-top: 1px;
+}
+
+.ios-list-row-value {
+  font-size: var(--font-size-base);
+  color: var(--qx-foreground-tertiary);
+  flex-shrink: 0;
+}
+
+.ios-list-row-chevron {
+  color: var(--qx-gray-300);
+  flex-shrink: 0;
+}
+
+/* === Tag Chips (iOS-style) === */
+.ios-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 7px 14px;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  font-family: inherit;
+  border-radius: var(--radius-full);
+  border: none;
+  background: var(--qx-gray-100);
+  color: var(--qx-foreground-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.ios-chip.selected {
+  background: var(--qx-primary);
+  color: white;
+}
+
+.ios-chip.mood-happy.selected { background: var(--mood-happy); color: #5D4A00; }
+.ios-chip.mood-warm.selected { background: var(--mood-warm); color: white; }
+.ios-chip.mood-calm.selected { background: var(--mood-calm); color: #1B5E63; }
+.ios-chip.mood-love.selected { background: var(--mood-love); color: white; }
+.ios-chip.mood-grateful.selected { background: var(--mood-grateful); color: white; }
+
+/* === Progress Bar (iOS-style) === */
+.ios-progress {
+  width: 100%;
+  height: 6px;
+  background: var(--qx-gray-200);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.ios-progress-fill {
+  height: 100%;
+  background: var(--qx-primary);
+  border-radius: var(--radius-full);
+  transition: width 0.5s ease;
+}
+
+/* === Page padding helper === */
+.page-content {
+  padding-bottom: 100px;
+}
+
+/* === Segmented Control (iOS-style) === */
+.ios-segmented {
+  display: flex;
+  padding: 2px;
+  background: var(--qx-gray-100);
+  border-radius: var(--radius-md);
+  gap: 2px;
+}
+
+.ios-segmented-item {
+  flex: 1;
+  padding: 7px 12px;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  font-family: inherit;
+  text-align: center;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--qx-foreground-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ios-segmented-item.active {
+  background: var(--qx-surface);
+  color: var(--qx-foreground);
+  font-weight: 600;
+  box-shadow: var(--shadow-xs);
+}
+
+/* === Stat Pill === */
+.ios-stat-pill {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 12px 8px;
+  flex: 1;
+}
+
+.ios-stat-value {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  color: var(--qx-foreground);
+  letter-spacing: -0.02em;
+}
+
+.ios-stat-label {
+  font-size: var(--font-size-xs);
+  color: var(--qx-foreground-tertiary);
+  font-weight: 500;
+}
+
+/* === Record Card (iOS-style) === */
+.ios-record-card {
+  background: var(--qx-surface);
+  border-radius: var(--radius-xl);
+  border: 0.5px solid var(--qx-border-subtle);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+/* === Text Field (iOS-style) === */
+.ios-input {
+  width: 100%;
+  padding: 14px 16px;
+  font-size: var(--font-size-lg);
+  font-family: inherit;
+  border: none;
+  border-radius: var(--radius-lg);
+  background: var(--qx-surface-secondary);
+  color: var(--qx-foreground);
+  outline: none;
+  transition: background 0.2s ease;
+}
+
+.ios-input::placeholder {
+  color: var(--qx-foreground-quaternary);
+}
+
+.ios-input:focus {
+  background: var(--qx-gray-100);
+}
+
+.ios-textarea {
+  width: 100%;
+  min-height: 120px;
+  padding: 14px 16px;
+  font-size: var(--font-size-lg);
+  font-family: inherit;
+  border: none;
+  border-radius: var(--radius-lg);
+  background: var(--qx-surface-secondary);
+  color: var(--qx-foreground);
+  outline: none;
+  resize: none;
+  line-height: 1.5;
+}
+
+.ios-textarea::placeholder {
+  color: var(--qx-foreground-quaternary);
+}
+
+/* === Avatar === */
+.ios-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--qx-primary-light), var(--qx-primary));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  flex-shrink: 0;
+}
+
+.ios-avatar-sm {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+/* === Divider === */
+.ios-divider {
+  height: 0.5px;
+  background: var(--qx-separator);
+  margin: 0;
+}
+
+/* === Utility === */
+.text-primary { color: var(--qx-primary); }
+.text-secondary { color: var(--qx-foreground-secondary); }
+.text-tertiary { color: var(--qx-foreground-tertiary); }
+.text-center { text-align: center; }
+.font-bold { font-weight: 700; }
+.font-semibold { font-weight: 600; }
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.items-center { align-items: center; }
+.justify-center { justify-content: center; }
+.justify-between { justify-content: space-between; }
+.gap-xs { gap: 4px; }
+.gap-sm { gap: 8px; }
+.gap-md { gap: 12px; }
+.gap-base { gap: 16px; }
+.gap-lg { gap: 20px; }
+.w-full { width: 100%; }
+
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.3.1/dist/index.global.js"></script>
+    <script src="https://unpkg.com/lucide@1.8.0/dist/umd/lucide.min.js"></script>
+    <style type="text/tailwindcss">
+  @theme inline {
+    --color-background: var(--qx-background);
+    --color-foreground: var(--qx-foreground);
+    --color-card: var(--qx-card);
+    --color-card-foreground: var(--qx-card-foreground);
+    --color-popover: var(--qx-popover);
+    --color-popover-foreground: var(--qx-popover-foreground);
+    --color-primary: var(--qx-primary);
+    --color-primary-foreground: var(--qx-primary-foreground);
+    --color-muted: var(--qx-muted);
+    --color-muted-foreground: var(--qx-muted-foreground);
+    --color-border: var(--qx-border);
+    --color-input: var(--qx-input);
+    --color-ring: var(--qx-ring);
+    --radius-sm: var(--qx-radius-sm);
+    --radius-md: var(--qx-radius-md);
+    --radius-lg: var(--qx-radius-lg);
+  }
+  @layer base {
+    body { background: var(--qx-background); color: var(--qx-foreground); }
+    td, th { @apply break-words; word-break: break-all; word-break: auto-phrase; }
+    th { @apply whitespace-nowrap; }
+  }
+    </style>
+    <style id="semantic-token-fallback">
+      .bg-background { background-color: var(--qx-background); }
+      .text-background { color: var(--qx-background); }
+      .border-background { border-color: var(--qx-background); }
+      .ring-background { --tw-ring-color: var(--qx-background); }
+      .bg-foreground { background-color: var(--qx-foreground); }
+      .text-foreground { color: var(--qx-foreground); }
+      .border-foreground { border-color: var(--qx-foreground); }
+      .ring-foreground { --tw-ring-color: var(--qx-foreground); }
+      .bg-card { background-color: var(--qx-card); }
+      .text-card { color: var(--qx-card); }
+      .border-card { border-color: var(--qx-card); }
+      .ring-card { --tw-ring-color: var(--qx-card); }
+      .bg-card-foreground { background-color: var(--qx-card-foreground); }
+      .text-card-foreground { color: var(--qx-card-foreground); }
+      .border-card-foreground { border-color: var(--qx-card-foreground); }
+      .ring-card-foreground { --tw-ring-color: var(--qx-card-foreground); }
+      .bg-popover { background-color: var(--qx-popover); }
+      .text-popover { color: var(--qx-popover); }
+      .border-popover { border-color: var(--qx-popover); }
+      .ring-popover { --tw-ring-color: var(--qx-popover); }
+      .bg-popover-foreground { background-color: var(--qx-popover-foreground); }
+      .text-popover-foreground { color: var(--qx-popover-foreground); }
+      .border-popover-foreground { border-color: var(--qx-popover-foreground); }
+      .ring-popover-foreground { --tw-ring-color: var(--qx-popover-foreground); }
+      .bg-primary { background-color: var(--qx-primary); }
+      .text-primary { color: var(--qx-primary); }
+      .border-primary { border-color: var(--qx-primary); }
+      .ring-primary { --tw-ring-color: var(--qx-primary); }
+      .bg-primary-foreground { background-color: var(--qx-primary-foreground); }
+      .text-primary-foreground { color: var(--qx-primary-foreground); }
+      .border-primary-foreground { border-color: var(--qx-primary-foreground); }
+      .ring-primary-foreground { --tw-ring-color: var(--qx-primary-foreground); }
+      .bg-muted { background-color: var(--qx-muted); }
+      .text-muted { color: var(--qx-muted); }
+      .border-muted { border-color: var(--qx-muted); }
+      .ring-muted { --tw-ring-color: var(--qx-muted); }
+      .bg-muted-foreground { background-color: var(--qx-muted-foreground); }
+      .text-muted-foreground { color: var(--qx-muted-foreground); }
+      .border-muted-foreground { border-color: var(--qx-muted-foreground); }
+      .ring-muted-foreground { --tw-ring-color: var(--qx-muted-foreground); }
+      .bg-border { background-color: var(--qx-border); }
+      .text-border { color: var(--qx-border); }
+      .border-border { border-color: var(--qx-border); }
+      .ring-border { --tw-ring-color: var(--qx-border); }
+      .bg-input { background-color: var(--qx-input); }
+      .text-input { color: var(--qx-input); }
+      .border-input { border-color: var(--qx-input); }
+      .ring-input { --tw-ring-color: var(--qx-input); }
+      .bg-ring { background-color: var(--qx-ring); }
+      .text-ring { color: var(--qx-ring); }
+      .border-ring { border-color: var(--qx-ring); }
+      .ring-ring { --tw-ring-color: var(--qx-ring); }
+    </style>
+    <style>
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      [data-icon] {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        -webkit-mask-size: contain;
+        mask-size: contain;
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-position: center;
+        mask-position: center;
+        background-color: currentColor;
+      }
+    </style>
+</head>
+<body>
+  <div class="plant-page">
+    <!-- Status Bar Spacer -->
+    <div class="ios-status-bar"></div>
+
+    <!-- Inline Navigation Bar -->
+    <nav class="plant-nav-bar">
+      <button class="plant-nav-back" onclick="history.back()">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+        <span>我的</span>
+      </button>
+      <div class="plant-nav-title">植物图鉴</div>
+      <div class="plant-nav-right"></div>
+    </nav>
+
+    <div class="page-content">
+      <!-- Guide Header Card -->
+      <div class="guide-header-card">
+        <div class="guide-emoji">🌿</div>
+        <div class="guide-title">植物图鉴</div>
+        <div class="guide-subtitle">已收集 3/9 种植物</div>
+        <div class="guide-desc">每种植物都有独特的成长故事，解锁更多植物吧！</div>
+        <div class="guide-progress-wrap">
+          <div class="guide-progress-bar">
+            <div class="guide-progress-fill"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Plant Collection: Unlocked -->
+      <div class="plant-collection">
+
+        <!-- Plant 1: 小确幸之树 (Featured, Unlocked) -->
+        <div class="plant-card plant-card-featured">
+          <div class="plant-illust plant-illust-green">
+            <div class="plant-featured-badge">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+              </svg>
+              主植物
+            </div>
+            <div class="plant-illust-emoji">🌳</div>
+          </div>
+          <div class="plant-info">
+            <div class="plant-name-row">
+              <span class="plant-name">🌳 小确幸之树</span>
+              <span class="plant-tag plant-tag-green">默认解锁</span>
+            </div>
+            <div class="plant-stats">
+              <div class="plant-stat">
+                <span class="plant-stat-value">成长期</span>
+                <span class="plant-stat-label">阶段</span>
+              </div>
+              <div class="plant-stat-divider"></div>
+              <div class="plant-stat">
+                <span class="plant-stat-value">86条</span>
+                <span class="plant-stat-label">记录</span>
+              </div>
+              <div class="plant-stat-divider"></div>
+              <div class="plant-stat">
+                <span class="plant-stat-value">118天</span>
+                <span class="plant-stat-label">陪伴</span>
+              </div>
+            </div>
+            <p class="plant-desc">翠绿的叶片承载着每一天的小确幸，是你最忠实的幸福伙伴。</p>
+          </div>
+        </div>
+
+        <!-- Plant 2: 向日葵 (Unlocked) -->
+        <div class="plant-card">
+          <div class="plant-illust plant-illust-yellow">
+            <div class="plant-illust-emoji">🌻</div>
+          </div>
+          <div class="plant-info">
+            <div class="plant-name-row">
+              <span class="plant-name">🌻 向日葵</span>
+              <span class="plant-tag plant-tag-green">默认解锁</span>
+            </div>
+            <div class="plant-stats">
+              <div class="plant-stat">
+                <span class="plant-stat-value">幼苗期</span>
+                <span class="plant-stat-label">阶段</span>
+              </div>
+              <div class="plant-stat-divider"></div>
+              <div class="plant-stat">
+                <span class="plant-stat-value">12条</span>
+                <span class="plant-stat-label">记录</span>
+              </div>
+              <div class="plant-stat-divider"></div>
+              <div class="plant-stat">
+                <span class="plant-stat-value">15天</span>
+                <span class="plant-stat-label">陪伴</span>
+              </div>
+            </div>
+            <p class="plant-desc">永远面向阳光，记录每一个温暖时刻。</p>
+          </div>
+        </div>
+
+        <!-- Plant 3: 多肉 (Unlocked) -->
+        <div class="plant-card">
+          <div class="plant-illust plant-illust-pink">
+            <div class="plant-illust-emoji">🪴</div>
+          </div>
+          <div class="plant-info">
+            <div class="plant-name-row">
+              <span class="plant-name">🪴 多肉</span>
+              <span class="plant-tag plant-tag-pink">累计记录100条解锁</span>
+            </div>
+            <div class="plant-stats">
+              <div class="plant-stat">
+                <span class="plant-stat-value">种子期</span>
+                <span class="plant-stat-label">阶段</span>
+              </div>
+              <div class="plant-stat-divider"></div>
+              <div class="plant-stat">
+                <span class="plant-stat-value">3条</span>
+                <span class="plant-stat-label">记录</span>
+              </div>
+              <div class="plant-stat-divider"></div>
+              <div class="plant-stat">
+                <span class="plant-stat-value">2天</span>
+                <span class="plant-stat-label">陪伴</span>
+              </div>
+            </div>
+            <p class="plant-desc">Q弹可爱的多肉，需要满满的爱来浇灌。</p>
+          </div>
+        </div>
+
+        <!-- Locked section divider -->
+        <div class="locked-section-header">
+          <div class="locked-section-line"></div>
+          <span class="locked-section-label">待解锁</span>
+          <div class="locked-section-line"></div>
+        </div>
+
+        <!-- Plant 4: 樱花树 (Locked) -->
+        <div class="plant-card-locked">
+          <div class="plant-locked-illust">
+            <span class="plant-locked-emoji">🌸</span>
+            <div class="plant-lock-icon">🔒</div>
+          </div>
+          <div class="plant-locked-info">
+            <div class="plant-locked-name">🌸 樱花树</div>
+            <div class="plant-locked-condition">连续记录30天解锁</div>
+          </div>
+          <svg class="plant-locked-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </div>
+
+        <!-- Plant 5: 仙人掌 (Locked) -->
+        <div class="plant-card-locked">
+          <div class="plant-locked-illust">
+            <span class="plant-locked-emoji">🌵</span>
+            <div class="plant-lock-icon">🔒</div>
+          </div>
+          <div class="plant-locked-info">
+            <div class="plant-locked-name">🌵 仙人掌</div>
+            <div class="plant-locked-condition">在50个地点记录解锁</div>
+          </div>
+          <svg class="plant-locked-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </div>
+
+        <!-- Plant 6: 藤蔓 (Locked) -->
+        <div class="plant-card-locked">
+          <div class="plant-locked-illust">
+            <span class="plant-locked-emoji">🌿</span>
+            <div class="plant-lock-icon">🔒</div>
+          </div>
+          <div class="plant-locked-info">
+            <div class="plant-locked-name">🌿 藤蔓</div>
+            <div class="plant-locked-condition">邀请1位好友合种解锁</div>
+          </div>
+          <svg class="plant-locked-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </div>
+
+        <!-- Plant 7: 玫瑰花丛 (Locked) -->
+        <div class="plant-card-locked">
+          <div class="plant-locked-illust">
+            <span class="plant-locked-emoji">🌹</span>
+            <div class="plant-lock-icon">🔒</div>
+          </div>
+          <div class="plant-locked-info">
+            <div class="plant-locked-name">🌹 玫瑰花丛</div>
+            <div class="plant-locked-condition">情侣空间专属</div>
+          </div>
+          <svg class="plant-locked-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </div>
+
+        <!-- Plant 8: 竹林 (Locked) -->
+        <div class="plant-card-locked">
+          <div class="plant-locked-illust">
+            <span class="plant-locked-emoji">🎋</span>
+            <div class="plant-lock-icon">🔒</div>
+          </div>
+          <div class="plant-locked-info">
+            <div class="plant-locked-name">🎋 竹林</div>
+            <div class="plant-locked-condition">累计记录365天解锁</div>
+          </div>
+          <svg class="plant-locked-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </div>
+
+        <!-- Plant 9: 蘑菇 (Locked) -->
+        <div class="plant-card-locked">
+          <div class="plant-locked-illust">
+            <span class="plant-locked-emoji">🍄</span>
+            <div class="plant-lock-icon">🔒</div>
+          </div>
+          <div class="plant-locked-info">
+            <div class="plant-locked-name">🍄 蘑菇</div>
+            <div class="plant-locked-condition">隐藏成就解锁</div>
+          </div>
+          <svg class="plant-locked-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </div>
+
+      </div>
+      <!-- end plant-collection -->
+
+    </div>
+    <!-- end page-content -->
+  </div>
+
+    <style>
+    /* === Plant Guide Page Specific Styles === */
+
+    .plant-page {
+      max-width: 420px;
+      margin: 0 auto;
+      min-height: 100vh;
+      background: var(--qx-background);
+      position: relative;
+    }
+
+    /* === Inline Navigation Bar (pushed detail page) === */
+    .plant-nav-bar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 8px;
+      height: 44px;
+      background: rgba(251, 251, 249, 0.82);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border-bottom: 0.5px solid var(--qx-border-subtle);
+    }
+
+    .plant-nav-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      padding: 8px 8px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: var(--font-size-lg);
+      color: var(--qx-primary);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .plant-nav-back:active {
+      opacity: 0.5;
+    }
+
+    .plant-nav-back svg {
+      width: 20px;
+      height: 20px;
+      stroke: var(--qx-primary);
+    }
+
+    .plant-nav-back span {
+      font-size: var(--font-size-lg);
+      font-weight: 400;
+      letter-spacing: -0.01em;
+    }
+
+    .plant-nav-title {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: var(--font-size-lg);
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: var(--qx-foreground);
+      pointer-events: none;
+    }
+
+    .plant-nav-right {
+      width: 80px;
+      display: flex;
+      justify-content: flex-end;
+      padding-right: 8px;
+    }
+
+    /* === Guide Header Card === */
+    .guide-header-card {
+      margin: 16px;
+      border-radius: var(--radius-xl);
+      background: linear-gradient(135deg, #DCEFDF 0%, #C8E6CA 30%, #B8DCC0 60%, #A8D5B0 100%);
+      padding: 24px 20px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 16px rgba(94,155,106,0.10), 0 1px 4px rgba(0,0,0,0.03);
+      text-align: center;
+    }
+
+    .guide-header-card::before {
+      content: '';
+      position: absolute;
+      top: -40px;
+      right: -30px;
+      width: 140px;
+      height: 140px;
+      background: radial-gradient(circle, rgba(255,255,255,0.35) 0%, transparent 65%);
+      border-radius: 50%;
+    }
+
+    .guide-header-card::after {
+      content: '';
+      position: absolute;
+      bottom: -30px;
+      left: -20px;
+      width: 120px;
+      height: 120px;
+      background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 65%);
+      border-radius: 50%;
+    }
+
+    .guide-emoji {
+      font-size: 48px;
+      line-height: 1;
+      margin-bottom: 8px;
+      position: relative;
+      z-index: 1;
+      animation: gentle-sway 4s ease-in-out infinite;
+      transform-origin: bottom center;
+      display: inline-block;
+    }
+
+    @keyframes gentle-sway {
+      0%, 100% { transform: rotate(-3deg); }
+      50% { transform: rotate(3deg); }
+    }
+
+    .guide-title {
+      font-size: var(--font-size-2xl);
+      font-weight: 700;
+      color: #2D4A33;
+      letter-spacing: -0.015em;
+      margin-bottom: 4px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .guide-subtitle {
+      font-size: var(--font-size-base);
+      font-weight: 500;
+      color: #4A7D54;
+      margin-bottom: 8px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .guide-desc {
+      font-size: var(--font-size-sm);
+      color: rgba(45,74,51,0.65);
+      line-height: 1.5;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Progress bar inside header */
+    .guide-progress-wrap {
+      margin-top: 14px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .guide-progress-bar {
+      width: 100%;
+      height: 6px;
+      background: rgba(255,255,255,0.5);
+      border-radius: var(--radius-full);
+      overflow: hidden;
+    }
+
+    .guide-progress-fill {
+      height: 100%;
+      width: 33.33%;
+      background: linear-gradient(90deg, var(--qx-primary-light), var(--qx-primary));
+      border-radius: var(--radius-full);
+      transition: width 0.6s ease;
+    }
+
+    /* === Plant Collection Grid === */
+    .plant-collection {
+      padding: 0 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* === Plant Card (Unlocked) === */
+    .plant-card {
+      background: var(--qx-surface);
+      border-radius: 18px;
+      border: 0.5px solid var(--qx-border-subtle);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      cursor: pointer;
+    }
+
+    .plant-card:active {
+      transform: scale(0.98);
+    }
+
+    /* Plant illustration top section */
+    .plant-illust {
+      height: 140px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .plant-illust-emoji {
+      font-size: 56px;
+      line-height: 1;
+      position: relative;
+      z-index: 1;
+      animation: gentle-sway 5s ease-in-out infinite;
+      transform-origin: bottom center;
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.08));
+    }
+
+    /* Decorative circles on illust */
+    .plant-illust::before {
+      content: '';
+      position: absolute;
+      top: -20px;
+      right: -20px;
+      width: 100px;
+      height: 100px;
+      background: radial-gradient(circle, rgba(255,255,255,0.35) 0%, transparent 65%);
+      border-radius: 50%;
+    }
+
+    .plant-illust::after {
+      content: '';
+      position: absolute;
+      bottom: -25px;
+      left: -15px;
+      width: 90px;
+      height: 90px;
+      background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 65%);
+      border-radius: 50%;
+    }
+
+    /* Gradient variants for unlocked plants */
+    .plant-illust-green {
+      background: linear-gradient(150deg, #C8E6C9 0%, #A5D6A7 35%, #81C784 70%, #66BB6A 100%);
+    }
+
+    .plant-illust-yellow {
+      background: linear-gradient(150deg, #FFF9C4 0%, #FFE082 30%, #FFD54F 60%, #FFC107 100%);
+    }
+
+    .plant-illust-pink {
+      background: linear-gradient(150deg, #FCE4EC 0%, #F8BBD0 30%, #F48FB1 60%, #F06292 100%);
+    }
+
+    /* Plant info bottom section */
+    .plant-info {
+      padding: 14px 16px 16px;
+      background: var(--qx-surface);
+    }
+
+    .plant-name-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+      flex-wrap: wrap;
+    }
+
+    .plant-name {
+      font-size: var(--font-size-lg);
+      font-weight: 700;
+      color: var(--qx-foreground);
+      letter-spacing: -0.01em;
+    }
+
+    .plant-tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 10px;
+      font-size: 11px;
+      font-weight: 600;
+      border-radius: var(--radius-full);
+      line-height: 1.3;
+    }
+
+    .plant-tag-green {
+      background: var(--qx-primary-100);
+      color: var(--qx-primary-dark);
+    }
+
+    .plant-tag-pink {
+      background: rgba(240,98,146,0.12);
+      color: #C2185B;
+    }
+
+    /* Stats row */
+    .plant-stats {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      margin-bottom: 8px;
+      padding: 8px 0;
+      border-top: 0.5px solid var(--qx-separator);
+      border-bottom: 0.5px solid var(--qx-separator);
+    }
+
+    .plant-stat {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .plant-stat-value {
+      font-size: var(--font-size-sm);
+      font-weight: 600;
+      color: var(--qx-foreground);
+      letter-spacing: -0.01em;
+    }
+
+    .plant-stat-label {
+      font-size: 10px;
+      color: var(--qx-foreground-tertiary);
+      font-weight: 500;
+    }
+
+    .plant-stat-divider {
+      width: 0.5px;
+      height: 24px;
+      background: var(--qx-separator);
+    }
+
+    .plant-desc {
+      font-size: var(--font-size-sm);
+      color: var(--qx-foreground-secondary);
+      line-height: 1.5;
+      letter-spacing: -0.005em;
+    }
+
+    /* === Locked Plant Card === */
+    .plant-card-locked {
+      background: var(--qx-surface);
+      border-radius: 18px;
+      border: 0.5px solid var(--qx-border-subtle);
+      overflow: hidden;
+      box-shadow: var(--shadow-xs);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+
+    .plant-card-locked:active {
+      transform: scale(0.98);
+    }
+
+    .plant-locked-illust {
+      width: 72px;
+      height: 72px;
+      border-radius: var(--radius-lg);
+      background: var(--qx-gray-100);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    .plant-locked-emoji {
+      font-size: 36px;
+      line-height: 1;
+      filter: grayscale(1) opacity(0.4);
+    }
+
+    .plant-lock-icon {
+      position: absolute;
+      bottom: 4px;
+      right: 4px;
+      width: 20px;
+      height: 20px;
+      background: var(--qx-gray-400);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+    }
+
+    .plant-locked-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .plant-locked-name {
+      font-size: var(--font-size-base);
+      font-weight: 600;
+      color: var(--qx-foreground-tertiary);
+      letter-spacing: -0.01em;
+      margin-bottom: 3px;
+    }
+
+    .plant-locked-condition {
+      font-size: var(--font-size-sm);
+      color: var(--qx-foreground-quaternary);
+      line-height: 1.4;
+    }
+
+    .plant-locked-chevron {
+      color: var(--qx-gray-300);
+      flex-shrink: 0;
+    }
+
+    /* Featured card glow */
+    .plant-card-featured {
+      box-shadow: 0 6px 20px rgba(94,155,106,0.15), 0 2px 6px rgba(0,0,0,0.04);
+    }
+
+    .plant-featured-badge {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      z-index: 2;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      padding: 4px 10px;
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border-radius: var(--radius-full);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--qx-primary-dark);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+
+    /* Section header for locked plants */
+    .locked-section-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 4px 4px;
+      margin-top: 8px;
+    }
+
+    .locked-section-line {
+      flex: 1;
+      height: 0.5px;
+      background: var(--qx-separator);
+    }
+
+    .locked-section-label {
+      font-size: var(--font-size-xs);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--qx-foreground-quaternary);
+      padding: 0 4px;
+    }
+
+    body {
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+      background: var(--qx-background);
+    }
+  </style>
+</body>
+</html>

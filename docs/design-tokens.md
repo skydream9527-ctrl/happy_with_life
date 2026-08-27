@@ -1,6 +1,6 @@
 # Android 设计 Token（M0-02 任务，2026-08-27）
 
-> 范围：把 [`../xiaoquexing-ios-redesign/colors_and_type.css`](../xiaoquexing-ios-redesign/colors_and_type.css)
+> 范围：把 [`../design-reference/colors_and_type.css`](../design-reference/colors_and_type.css)
 > 与 8 个 HTML 高保真页面映射为 Android Compose 设计 Token 清单。
 >
 > 本轮**只输出设计规范**，不重构 `ui/theme/*` 与 `ui/components/*` 的代码。
@@ -28,7 +28,7 @@
 
 ### 1.1 一级来源（CSS Token）
 
-- [`../xiaoquexing-ios-redesign/colors_and_type.css`](../xiaoquexing-ios-redesign/colors_and_type.css)
+- [`../design-reference/colors_and_type.css`](../design-reference/colors_and_type.css)
   完整定义 9 个分类共 80+ 个 token。
 - 8 个 HTML 高保真页面（`home/record/timeline/album/share/plant-guide/achievements/profile`）
   全部内联同一份 CSS 变量，**未发现任何页面覆写**。本文件视其为同一来源。
@@ -402,7 +402,7 @@ object QxSpacing {
    `GreenPrimary` / `BackgroundLight` 等当前命名。
 5. **必须**通过 `MaterialTheme.typography` 访问字号/字重/行高/字距。
 6. 任何 `Text`/`Button` 等必须为浅色 + 深色各跑一次人工 smoke 截图（见 smoke-checklist.md）。
-7. 任何新增 token 必须在 `android/docs/design-tokens.md` 同步登记，并标注对应 CSS 来源。
+7. 任何新增 token 必须在 `docs/design-tokens.md` 同步登记，并标注对应 CSS 来源。
 8. 任何被本文件 §7 列为硬编码的位置，**禁止**在 M1 之后新增类似硬编码。
 
 ### 8.3 Review checklist
@@ -460,7 +460,7 @@ object QxSpacing {
 
 ### 11.1 原任务单的"禁止修改"清单
 
-引用 [`第一轮Agent任务单.md`](../../../第一轮Agent任务单.md) 第 80–85 行：
+引用 [第一轮归档任务单](../agent-prompts/first-round-archive.md) 第 80–85 行：
 
 > 禁止修改：
 > - AppDatabase、Entity、DAO、Repository、ViewModel
@@ -495,7 +495,7 @@ object QxSpacing {
    `PlantRenderer.kt`。
 4. **不**改 `app/build.gradle.kts`、`build.gradle.kts`、`settings.gradle.kts`、
    `gradle.properties`、`AndroidManifest.xml`、`res/xml/file_paths.xml`、
-   `android/.github/workflows/build.yml`、`proguard-rules.pro`。
+   `.github/workflows/build.yml`、`proguard-rules.pro`。
 5. **不**把 `Color(0xFF...)` 字面量与 `RoundedCornerShape(N.dp)` 字面量**新增**到任何 Composable
    内（见 §8）。允许的"硬编码"只剩**已有 PR 引入的硬编码**——它们的处理方式见 §15 compatibility。
 6. **不**在没有真实 GitHub Actions run 链接的情况下声称"CI 绿"。
@@ -504,7 +504,7 @@ object QxSpacing {
 
 ## 12. 建议的 PR 拆分（按风险从低到高）
 
-> 每条 PR 都**必须**走 `迭代开发计划-v1.0.md` §7 任务卡格式，PR 描述引用本节。
+> 每条 PR 都**必须**走 `docs/plans/iteration-plan-v1.0.md` §7 任务卡格式，PR 描述引用本节。
 > PR 之间**顺序合并**，不允许并行（避免冲突）。
 
 ### 12.1 PR-1：Qx 命名基础设施（**仅新增**文件，**不改**任何现有 Composable）
@@ -817,7 +817,7 @@ Material 3 API）。只改字段**值**的来源。
 
 ## 16. 接手检查表（每个 PR 必跑）
 
-- [ ] PR 标题遵守 `迭代开发计划-v1.0.md` §7 任务卡格式。
+- [ ] PR 标题遵守 `docs/plans/iteration-plan-v1.0.md` §7 任务卡格式。
 - [ ] PR 描述显式引用本附录相关小节编号（§11–§15）。
 - [ ] `git grep "Color(0xFF"` 数量在 PR 前后**只能持平或减少**。
 - [ ] `git grep "RoundedCornerShape([0-9]"` 数量同上。
@@ -832,7 +832,7 @@ Material 3 API）。只改字段**值**的来源。
 
 ## 17. 验证步骤（只走 GitHub Actions）
 
-按 [`迭代开发计划-v1.0.md` §6](../../../../迭代开发计划-v1.0.md)：
+按 [`iteration-plan-v1.0.md` §6](./plans/iteration-plan-v1.0.md)：
 
 1. PR 推上 main / PR。
 2. 等 `build.yml` 三个 job 全部绿。

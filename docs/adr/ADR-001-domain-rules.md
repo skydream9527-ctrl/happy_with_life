@@ -3,8 +3,8 @@
 - **状态**：已接受（Accepted，作为 I1 起所有实现的基准；产品方对「待确认问题」给出答复后以修订版推翻）
 - **日期**：2026-08-27
 - **决策人**：Z code（本轮任务 Z0-01）
-- **输入**：`迭代开发计划-v1.0.md`（第 2.5、3、I0 节）、`PRD-v0.3.md`、`架构方案-v0.1.md`（5.2 GP 计算流程）、现有 Kotlin 实现（`GPCalculator.kt`、`StreakCalculator.kt`、`AchievementTrigger.kt`、`RecordViewModel.kt`、`XiaoQueXingApp.kt`）
-- **配套文档**：`android/docs/room-v2-schema.md`（Room v2 数据模型与迁移）
+- **输入**：`docs/plans/iteration-plan-v1.0.md`（第 2.5、3、I0 节）、`docs/product/PRD-v0.3.md`、`docs/product/architecture-v0.1.md`（5.2 GP 计算流程）、现有 Kotlin 实现（`GPCalculator.kt`、`StreakCalculator.kt`、`AchievementTrigger.kt`、`RecordViewModel.kt`、`XiaoQueXingApp.kt`）
+- **配套文档**：`docs/room-v2-schema.md`（Room v2 数据模型与迁移）
 - **适用范围**：Android 客户端 v1（单机离线）起生效；服务端（M4）实现时以本 ADR 为协议基线，差异必须回写本 ADR。
 
 ---

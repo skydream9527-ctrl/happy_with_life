@@ -4,7 +4,7 @@ package com.xiaoquexing.app.fixtures
  * Room v1（当前线上 schema）的手写 DDL 基线。
  *
  * 用途：v1 从未导出过 schema JSON（exportSchema 原为 false），v1→v2 迁移测试
- * （android/docs/room-v2-schema.md §10）需要一份可以在 JVM 上重建 v1 库的 DDL。
+ * （docs/room-v2-schema.md §10）需要一份可以在 JVM 上重建 v1 库的 DDL。
  *
  * 权威顺序：CI 生成的 app/schemas/com.xiaoquexing.app.data.db.AppDatabase/1.json
  * 入库后即为唯一权威；若两者不一致，以 1.json 为准修订本文件。

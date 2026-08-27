@@ -1,0 +1,194 @@
+{
+  "data": [
+    {
+      "id": "page-home",
+      "title": "首页·花园",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1756252800000,
+      "canvasData": {
+        "x": 0,
+        "y": 0,
+        "group": 0,
+        "layoutSnapshot": {
+          "version": 1,
+          "contentHeight": 1153,
+          "viewportWidth": 375,
+          "sourceHash": "fnv1a-e7eda2cc",
+          "measuredAt": 1787800704245
+        }
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/home.html",
+        "interactions": []
+      }
+    },
+    {
+      "id": "page-record",
+      "title": "记录小确幸",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1756252800000,
+      "canvasData": {
+        "x": 169,
+        "y": 0,
+        "group": 0,
+        "layoutSnapshot": {
+          "version": 1,
+          "contentHeight": 1352,
+          "viewportWidth": 375,
+          "sourceHash": "fnv1a-d2c0533e",
+          "measuredAt": 1787800704245
+        }
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/record.html",
+        "interactions": []
+      }
+    },
+    {
+      "id": "page-timeline",
+      "title": "时间线",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1756252800000,
+      "canvasData": {
+        "x": 338,
+        "y": 0,
+        "group": 0,
+        "layoutSnapshot": {
+          "version": 1,
+          "contentHeight": 2146,
+          "viewportWidth": 375,
+          "sourceHash": "fnv1a-d73ef676",
+          "measuredAt": 1787800704245
+        }
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/timeline.html",
+        "interactions": []
+      }
+    },
+    {
+      "id": "page-album",
+      "title": "电子画册",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1756252800000,
+      "canvasData": {
+        "x": 507,
+        "y": 0,
+        "group": 0,
+        "layoutSnapshot": {
+          "version": 1,
+          "contentHeight": 1274,
+          "viewportWidth": 375,
+          "sourceHash": "fnv1a-a9273926",
+          "measuredAt": 1787800704245
+        }
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/album.html",
+        "interactions": []
+      }
+    },
+    {
+      "id": "page-profile",
+      "title": "我的",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1756252800000,
+      "canvasData": {
+        "x": 676,
+        "y": 0,
+        "group": 0,
+        "layoutSnapshot": {
+          "version": 1,
+          "contentHeight": 1413,
+          "viewportWidth": 375,
+          "sourceHash": "fnv1a-0c7a1ecc",
+          "measuredAt": 1787800704245
+        }
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/profile.html",
+        "interactions": []
+      }
+    },
+    {
+      "id": "page-achievements",
+      "title": "成就墙",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1756252800000,
+      "canvasData": {
+        "x": 845,
+        "y": 0,
+        "group": 0,
+        "layoutSnapshot": {
+          "version": 1,
+          "contentHeight": 1173,
+          "viewportWidth": 375,
+          "sourceHash": "fnv1a-9e6ee49d",
+          "measuredAt": 1787800704245
+        }
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/achievements.html",
+        "interactions": []
+      }
+    },
+    {
+      "id": "page-plant-guide",
+      "title": "植物图鉴",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1756252800000,
+      "canvasData": {
+        "x": 1014,
+        "y": 0,
+        "group": 0,
+        "layoutSnapshot": {
+          "version": 1,
+          "contentHeight": 2074,
+          "viewportWidth": 375,
+          "sourceHash": "fnv1a-b6017e22",
+          "measuredAt": 1787800704245
+        }
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/plant-guide.html",
+        "interactions": []
+      }
+    },
+    {
+      "id": "page-share",
+      "title": "分享卡片",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1756252800000,
+      "canvasData": {
+        "x": 1183,
+        "y": 0,
+        "group": 0,
+        "layoutSnapshot": {
+          "version": 1,
+          "contentHeight": 1120,
+          "viewportWidth": 375,
+          "sourceHash": "fnv1a-b655b39e",
+          "measuredAt": 1787800704245
+        }
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/share.html",
+        "interactions": []
+      }
+    }
+  ],
+  "config": {
+    "autoLayout": true,
+    "deviceType": "mobile",
+    "projectName": "小确幸 iOS 重设计",
+    "designLibrary": null
+  }
+}

@@ -3,7 +3,7 @@
 - **状态**：已接受（Accepted）
 - **日期**：2026-08-27
 - **决策人**：Z code（任务 Z0-03）
-- **关联**：`架构方案-v0.1.md` §1.2（长期选型 Hilt）、`迭代开发计划-v1.0.md` I0/Z0-03
+- **关联**：`docs/product/architecture-v0.1.md` §1.2（长期选型 Hilt）、`docs/plans/iteration-plan-v1.0.md` I0/Z0-03
 
 ## 背景
 

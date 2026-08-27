@@ -34,7 +34,7 @@ import com.xiaoquexing.app.data.db.entity.TagEntity
 import com.xiaoquexing.app.data.db.entity.UserEntity
 
 /**
- * 小确幸本地库 v2（android/docs/room-v2-schema.md）。
+ * 小确幸本地库 v2（docs/room-v2-schema.md）。
  *
  * - 版本升级必须提供显式 Migration（禁止 fallbackToDestructiveMigration，ADR-001 K4）；
  * - schema JSON 导出基线：app/schemas/（必须提交入库）；

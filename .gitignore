@@ -51,6 +51,7 @@ bin/
 gen/
 out/
 release/
+design-reference/.preflight/
 
 # Gradle
 .gradle/

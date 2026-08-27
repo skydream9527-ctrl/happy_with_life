@@ -1,9 +1,9 @@
-# 交给 Gork 的服务端首轮开发提示词
+# 给 Gork 的服务端首轮开发提示词
 
 以下内容可直接复制给 Gork：
 
 ```text
-你负责从零创建“小确幸”服务端项目，并在阿里云开发环境中完成首轮可运行交付。
+你负责在项目负责人已经准备好的“小确幸”独立服务端仓库中开发，并在阿里云开发环境中完成首轮可运行交付。
 
 项目名称：小确幸服务端
 GitHub 仓库名：xiaoquexing-server
@@ -12,9 +12,9 @@ API 进程名：xqx-api
 Worker 进程名：xqx-worker
 
 现有 Android 仓库：
-https://github.com/skydream9527-ctrl/xiaoquexing-android
+https://github.com/skydream9527-ctrl/happy_with_life
 
-你必须先阅读 Android 仓库中的：
+你必须先通过上述 GitHub 地址只读查看 Android 仓库中的：
 
 1. docs/server/README.md
 2. docs/server/architecture-alibaba-cloud.md
@@ -25,29 +25,38 @@ https://github.com/skydream9527-ctrl/xiaoquexing-android
 
 本轮只完成 S0“服务端脚手架”和 S1“数据库/认证基座”。不要一次实现共享空间、完整同步、画册或 AI。
 
-一、创建项目结构
+工作边界（优先级最高）：
 
-- cmd/api/main.go
-- cmd/worker/main.go
-- cmd/migrate/main.go
-- internal/auth
-- internal/user
-- internal/space
-- internal/record
-- internal/media
-- internal/growth
-- internal/achievement
-- internal/sync
-- internal/platform/postgres
-- internal/platform/redis
-- internal/platform/aliyun
-- internal/transport/http
-- migrations
-- openapi
-- deploy/docker
-- deploy/compose
-- deploy/scripts
-- tests
+- 只能在项目负责人提供的 xiaoquexing-server 仓库根目录内写文件或执行命令，禁止本地访问或修改 Android 仓库、父目录和相邻目录；上面列出的 Android GitHub 文档是唯一允许的外部只读输入。
+- 禁止创建任何新目录。下列目录必须由项目负责人预先创建；若有任一目录不存在，停止开发并只返回缺失目录清单。
+- 只能在预建目录内创建任务所需文件；不得移动、重命名或删除范围外文件。
+- 构建、测试和镜像验证只通过服务端仓库的 GitHub Actions，不在 Android 工作目录执行任何命令。
+
+一、必须预先存在的项目结构
+
+- .github/workflows/
+- cmd/api/
+- cmd/worker/
+- cmd/migrate/
+- internal/auth/
+- internal/user/
+- internal/space/
+- internal/record/
+- internal/media/
+- internal/growth/
+- internal/achievement/
+- internal/sync/
+- internal/platform/postgres/
+- internal/platform/redis/
+- internal/platform/aliyun/
+- internal/transport/http/
+- migrations/
+- openapi/
+- deploy/docker/
+- deploy/compose/
+- deploy/scripts/
+- docs/
+- tests/
 
 技术要求：
 

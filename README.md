@@ -1,128 +1,82 @@
-# 小确幸 (XiaoQueXing) - Android App
+# 小确幸（Happy With Life）Android
 
-🌱 一款治愈系生活记录App。记录生活中的每个小确幸，看着植物随你的记录慢慢生长。
+小确幸是一款以“轻量记录 → GP 成长 → 植物变化 → 回顾/画册 → 私密共建”为核心闭环的治愈系生活记录 App。
 
-> **本文件状态（M0-01 统一于 2026-08-27）**
->
-> - 本仓库为 **Android 原生单机 Demo**，不是 v1.0。
-> - "功能特性"中的多项是**产品愿景/规划**或**仅 Demo**，**真正完成**的项请看
->   [PROGRESS.md](./PROGRESS.md) 第"核心功能完成度"区块。
-> - "构建 APK"只走 GitHub Actions，**本 README 不再给出本地 `./gradlew` 命令**；
->   编译是否通过以 [`.github/workflows/build.yml`](./.github/workflows/build.yml)
->   最近一次 main / PR run 为准，本仓库暂无公开 run 链接。
-> - 文档与代码的"已知冲突"清单见本文末尾"已知文档冲突"。
+> 当前阶段：Android 原生单机 Demo 已进入 M1 数据可靠性基线，尚不是 v1.0。账号、云同步、共享空间和真实电子画册仍未完成。
 
-## 1. 技术栈
+## 当前可信基线
 
-- 语言：Kotlin
-- UI 框架：Jetpack Compose + Material 3
-- 导航：Navigation Compose
-- 数据库：Room（SQLite）
-- 异步：Kotlin Coroutines + Flow
-- 图片加载：Coil
-- 音视频：ExoPlayer / Media3
-- 相机：CameraX
-- 动画：Lottie（当前未实际接入，路径仅为占位）
-- 分页：Accompanist Pager（当前未实际接入）
-- minSdk = 26（Android 8.0）
-- targetSdk = 34（Android 14）
+- 唯一仓库：<https://github.com/skydream9527-ctrl/happy_with_life>
+- 主分支：`main`
+- 构建方式：只通过 GitHub Actions；禁止在本地执行 Gradle 或打包。
+- 已验证运行：[Android CI #33067314367](https://github.com/skydream9527-ctrl/happy_with_life/actions/runs/33067314367) 的 Unit tests、Android Lint、Assemble Debug APK 全部通过。
+- Room v2 schema 已从上述 CI Artifact 核对后提交到 `app/schemas/`。
+
+## 技术栈
+
+- Kotlin、Jetpack Compose、Material 3、Navigation Compose
+- Room（SQLite）、Coroutines/Flow、DataStore
+- Coil、Media3、CameraX、Lottie
+- minSdk 26、targetSdk 34、JDK 17
 - 包名：`com.xiaoquexing.app`
 
-## 2. 项目结构
+## 目录
 
-```
-app/src/main/java/com/xiaoquexing/app/
-├── MainActivity.kt              # 入口Activity
-├── XiaoQueXingApp.kt            # Application（首次启动插入 5 条 Demo 记录 + 默认植物）
-├── navigation/AppNavigation.kt  # 底部 Tab 导航 + 4 个二级页面路由
-├── ui/
-│   ├── theme/                   # 主题/颜色/字体（部分硬编码见 [design-tokens.md](./docs/design-tokens.md)）
-│   ├── components/              # 通用组件（植物/卡片/按钮等；存在多处硬编码颜色）
-│   ├── home/                    # 首页（含硬编码渐变与阴影 alpha）
-│   ├── record/                  # 记录页（含 Color.White/Color.Black 硬编码）
-│   ├── timeline/                # 时间线（点击直接进分享，无记录详情）
-│   ├── album/                   # 电子画册（**当前为 2024 硬编码 Demo**）
-│   ├── profile/                 # 我的/植物选择/图鉴/成就
-│   └── share/                   # 分享面板（渠道按钮 action 未实现）
-├── data/
-│   ├── db/                      # Room 数据库 + DAO（包含 `Space` 表与 `SpaceDao`，**未启用**）
-│   ├── entity/                  # 数据实体（Record/Plant/Achievement/Space 等）
-│   ├── model/                   # UI 模型（MoodTag/GPBreakdown/ShareCardData 等）
-│   └── repository/              # 数据仓库
-├── viewmodel/                   # ViewModel 层
-├── media/                       # Photo Picker / 相机 / MediaRecorder 封装
-└── util/                        # 工具类（GP 计算 / 植物 Canvas 渲染 / 分享卡片渲染）
+```text
+.
+├── .github/workflows/       # GitHub CI 与 APK 打包
+├── agent-prompts/           # Z code、MiniMax Code、Gork 的独立提示词
+├── app/                     # Android 应用、测试与 Room schema
+├── design-reference/        # HTML/CSS 高保真设计参考
+├── docs/
+│   ├── adr/                 # 已冻结的领域与依赖注入决策
+│   ├── plans/               # 完整迭代计划
+│   ├── product/             # PRD 与总体架构
+│   ├── reviews/             # 已完成工作审计
+│   └── server/              # 前后端分离、阿里云与 API/同步规格
+├── AGENTS.md                # 所有 Agent 的仓库边界和目录约束
+├── PROGRESS.md              # 当前真实进度
+└── README.md
 ```
 
-## 3. 真正完成（与代码直接对应）
+## 已完成
 
-- 9 种植物 × 7 阶段 Canvas 绘制（`util/PlantRenderer.kt`，1100+ 行）。
-- 9 种心情枚举 + 12 种状态标签枚举（`data/model/MoodTag.kt`、`StatusTag.kt`）。
-- Room 数据库与基础 DAO/Repository（`data/db/*`、`data/repository/*`）。
-- 首页 / 记录 / 时间线 / 画册 / 我的 / 植物选择 / 植物图鉴 / 成就墙 / 分享页 Compose 骨架。
-- Photo Picker + 系统相机 + `MediaRecorder` 接入（`media/MediaPicker.kt`）。
-- 分享卡 Compose 渲染 + Bitmap 保存到 MediaStore（`util/PhotoSaver.kt`）。
-- GitHub Actions 在 main / PR / 手动触发时执行 `assembleDebug` 并上传 APK Artifact。
-- 单测基座：`util/GPCalculatorTest.kt`、`util/StreakCalculatorTest.kt`、
-  `data/db/V1SchemaFixtureTest.kt`、`data/repository/RecordRepositoryTransactionTest.kt`。
-  （其余模块仍**没有单测**，也不存在 `androidTest`。）
+- 9 种植物 × 7 阶段 Canvas 绘制，9 种心情与 12 种状态标签。
+- 首页、记录、时间线、画册、我的、植物图鉴、成就墙和分享页 Compose 骨架。
+- Room v2 的 17 张表、显式 `MIGRATION_1_2`、迁移前备份和 schema 基线。
+- 记录发布、编辑、软删除事务，以及 GP、streak、植物阶段、成就和 Outbox 的一致性重算。
+- `AppContainer + ViewModelFactory` 可测试依赖注入。
+- `MediaImporter` 私有目录落盘、失败状态和孤儿文件清理基座。
+- Debug Demo 数据隔离、JVM/Robolectric 测试基座、Lint 和 GitHub APK Artifact。
 
-## 4. 部分完成（有 UI / 有数据，但存在已知缺口）
+## 部分完成
 
-| 模块 | 真实状态 | 主要缺口 |
-|---|---|---|
-| 记录发布 | UI 完整，写入 Room | 60 秒录音上限未执行；AudioRecord 生命周期未完整；Photo Picker URI 长期权限未处理；压缩、EXIF、孤儿文件清理缺失；无编辑/删除/补记 |
-| 时间线 | 按日期分组 | 卡片点击直接进分享页；无记录详情、搜索、筛选、分页 |
-| 音乐/链接/地点 | UI 卡片存在 | **手动输入文字**，无 URL 解析、无音乐元数据、无真实定位或 POI |
-| 录音 | 系统 API 接入 | 无真正播放状态、60s 上限、生命周期处理、损坏文件处理 |
-| 分享 | Compose 渲染 + 保存图片可用 | 微信/朋友圈/小红书/微博 渠道按钮**无 action**；QR 占位；真实照片未走卡片渲染 |
-| GP/连击/植物/成就 | 实现存在 | **与 PRD §3.2.1 公式不一致**（详见 [../PRD-v0.3.md](../PRD-v0.3.md) §8.1）；无端到端单测覆盖 |
-| 深色模式 | Theme 完整 | 多数页面**硬编码浅色**（`HomeScreen`/`MusicCard`/`ProfileScreen`/`AlbumViewerScreen` 等） |
-| 电子画册 | 翻页框架 + 9 类页面布局 | **内容为 2024 年硬编码 Demo**；不查数据库，不支持聚合、长图/PDF 导出 |
+- 媒体：Activity Result 生命周期、60 秒录音、损坏文件处理和真实播放状态仍需闭环。
+- 记录：数据层支持编辑/软删除，详情、编辑和补记 UI 尚未完整接线。
+- 时间线：已有分组展示，缺少详情、搜索、筛选和分页。
+- 分享：卡片渲染与保存可用，渠道 action、真实照片接线和 QR 仍不完整。
+- 画册：现有页面为硬编码 Demo，尚未按真实记录聚合或导出。
+- 视觉：深色模式、无障碍、大字体和部分设计 Token 仍未系统收口。
 
-## 5. 规划 / Demo / 未实现
+## 尚未实现
 
-- 共享空间：只有 `Space` 实体与 `SpaceDao`，**记录无 `spaceId`、无成员/邀请/权限/UI**。
-- 登录、注册、验证码、Token、登出可撤销：**0%**。
-- 后端 API（Go + PostgreSQL）、OSS、推送：**0%**。
-- 离线同步、Outbox、冲突合并、tombstone：**0%**。
-- 地图视图、月度/年度回顾、通知/提醒、Widget、生物识别解锁：**0%**。
-- AI 回顾、会员/订阅、画册主题包：**0%**。
-- iOS 版本：未开工程。
+- 登录/注册、Token、云同步、OSS 上传与服务端 API。
+- 共享空间邀请、成员、权限、共同 GP 与冲突同步。
+- 真实地图、月/年回顾、通知、Widget、订阅和 AI 回顾。
 
-## 6. 构建与验收约定
+## 文档入口
 
-- 任何"编译通过"以 GitHub Actions run 为准。
-- 当前 workflow 包含 3 个 job：`unit-test`（`testDebugUnitTest`）、`lint`（`lintDebug`）、
-  `assemble`（`assembleDebug`，依赖前两者）。在所有 job 都绿、Artifact 可下载之前，
-  不允许声称 CI 通过。
-- **不要求本地执行 Gradle**；本 README 不再提供本地构建命令。
-- 仓库根目录历史性 `apk/app-debug.apk` 仅为历史产物，是否对应最新代码以
-  GitHub Actions Artifact 为准。
+- [当前进度](./PROGRESS.md)
+- [PRD v0.3](./docs/product/PRD-v0.3.md)
+- [总体技术架构](./docs/product/architecture-v0.1.md)
+- [完整迭代计划](./docs/plans/iteration-plan-v1.0.md)
+- [服务端与阿里云开发文档](./docs/server/README.md)
+- [已完成工作审计](./docs/reviews/completed-work-audit-2026-08-27.md)
+- [设计 Token](./docs/design-tokens.md)
+- [HTML 与 Compose 差异](./docs/html-compose-diff.md)
+- [人工 Smoke Checklist](./docs/smoke-checklist.md)
+- [Agent 提示词索引](./agent-prompts/README.md)
 
-## 7. 文档
+## 开发规则
 
-- 上级 PRD：[`../PRD-v0.3.md`](../PRD-v0.3.md)（已对齐标题版本号为 v0.3）。
-- 上级架构方案：[`../架构方案-v0.1.md`](../架构方案-v0.1.md)。
-- 迭代计划：[`../迭代开发计划-v1.0.md`](../迭代开发计划-v1.0.md)。
-- 实时进度：[`./PROGRESS.md`](./PROGRESS.md)。
-- 设计 Token：[`./docs/design-tokens.md`](./docs/design-tokens.md)。
-- 人工 smoke checklist：[`./docs/smoke-checklist.md`](./docs/smoke-checklist.md)。
-- Room v2 方案（Z code 产出）：[`./docs/room-v2-schema.md`](./docs/room-v2-schema.md)。
-- ADR：[`./docs/adr/`](./docs/adr/)。
-
-## 8. 已知文档冲突（M0-01 任务修复后仍存在的项）
-
-1. `android/PROGRESS.md` "核心功能完成度" 中**真实拍照/录音 ✅ 85%** 与同表内
-   **"音乐/链接/地点 90%"** 与本文档 §4 "录音 / 音乐 / 链接 / 地点" 描述**仍有歧义**：
-   PROGRESS.md 把系统 API 接入视为 85%，但 [../迭代开发计划-v1.0.md](../迭代开发计划-v1.0.md)
-   与本 README 视为"部分完成"。本仓库内两者并存，已在本 README §4 明确口径；
-   下次重写 PROGRESS.md 时应统一。
-2. `android/PROGRESS.md` 同时出现"相机/录音为占位实现"和"新增 MediaPicker 不再占位"
-   两条相反叙述。M0-01 任务已尽量把后者（更接近当前代码）作为基准，前者保留为
-   "Demo 早期"的历史快照，**但文档未做删除**。
-3. 仓库根目录 `README.md` 与 `PRD-v0.3.md` 第六章"v1.0 MVP 全部勾选"之间存在
-   视觉冲突；M0-01 任务已在两处补加"状态说明"段，**核心勾选内容未删**，留给后续
-   文档轮次在 ADR 冻结后统一重写。
-4. `android/README.md` 的"在 Android Studio 中运行"小节在 M0-01 之前版本存在，
-   本版本已删除，不在 GitHub Actions 唯一通道上做本地兜底说明。
+所有 Agent 必须先阅读 [AGENTS.md](./AGENTS.md)：只能在本仓库内工作，不得创建新目录；如缺少目录必须停止并报告。构建、测试、Lint 和 APK 打包一律交给 GitHub Actions。
