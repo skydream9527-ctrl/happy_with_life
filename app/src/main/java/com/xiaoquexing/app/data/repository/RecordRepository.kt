@@ -356,12 +356,17 @@ class RecordRepository(private val db: AppDatabase) {
     }
 
     private suspend fun recomputeDailyStat(spaceId: Long, dateKey: Int) {
+        val recordCount = recordDao.countOnDate(spaceId, dateKey)
+        if (recordCount == 0) {
+            dailyStatDao.clearDay(spaceId, dateKey)
+            return
+        }
         dailyStatDao.upsert(
             com.xiaoquexing.app.data.db.entity.DailySpaceStatEntity(
                 spaceId = spaceId,
                 dateKey = dateKey,
                 gpTotal = recordDao.sumGpOnDate(spaceId, dateKey),
-                recordCount = recordDao.countOnDate(spaceId, dateKey),
+                recordCount = recordCount,
                 distinctAuthorCount = recordDao.countAuthorsOnDate(spaceId, dateKey)
             )
         )

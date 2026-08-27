@@ -30,10 +30,12 @@ class MigrationGuardTest {
         val v1 = context.openOrCreateDatabase(dbName, Context.MODE_PRIVATE, null)
         v1.execSQL("CREATE TABLE t (id INTEGER PRIMARY KEY)")
         v1.execSQL("INSERT INTO t (id) VALUES (1)")
-        File(v1.path + "-wal").writeBytes("wal-bytes".toByteArray())
         v1.version = 1
-        val originalBytes = File(v1.path).readBytes()
+        val dbPath = v1.path
         v1.close()
+        val originalBytes = File(dbPath).readBytes()
+        // SQLite 关闭句柄可能检查点并删除侧车文件；关闭后再放入未检查点样本。
+        File(dbPath + "-wal").writeBytes("wal-bytes".toByteArray())
 
         val backup = MigrationGuard.backupV1IfPresent(context, dbName)
 

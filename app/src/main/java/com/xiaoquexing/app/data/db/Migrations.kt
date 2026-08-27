@@ -51,8 +51,9 @@ val MIGRATION_1_2: Migration = object : Migration(1, 2) {
         // ---- 步骤 3：种子（产品内容，非 Demo；ADR D12） ----
         seedUsers(db, now)
         db.execSQL(
-            "INSERT INTO `spaces` (`local_id`, `name`, `space_type`, `is_default`, `total_gp`, `created_at`, `updated_at`) " +
-                "SELECT `id`, `name`, CASE `type` WHEN 'SHARED' THEN 'FRIEND' ELSE `type` END, 0, 0, `createdAt`, ? FROM `spaces_v1`",
+            "INSERT INTO `spaces` (`local_id`, `name`, `space_type`, `is_default`, `total_gp`, `created_at`, `updated_at`, " +
+                "`sync_state`, `version`) SELECT `id`, `name`, CASE `type` WHEN 'SHARED' THEN 'FRIEND' ELSE `type` END, " +
+                "0, 0, `createdAt`, ?, 0, 0 FROM `spaces_v1`",
             arrayOf<Any>(now)
         )
         seedPlants(db, now)
@@ -61,16 +62,16 @@ val MIGRATION_1_2: Migration = object : Migration(1, 2) {
 
         // v1 spaces 保留原 id 迁入后，再创建默认个人空间（自增 id = max+1，无冲突）
         db.execSQL(
-            "INSERT INTO `spaces` (`name`, `space_type`, `is_default`, `total_gp`, `created_at`, `updated_at`) " +
-                "VALUES (?, 'PERSONAL', 1, 0, ?, ?)",
+            "INSERT INTO `spaces` (`name`, `space_type`, `is_default`, `total_gp`, `created_at`, `updated_at`, " +
+                "`sync_state`, `version`) VALUES (?, 'PERSONAL', 1, 0, ?, ?, 0, 0)",
             arrayOf(SeedData.DEFAULT_SPACE_NAME, now, now)
         )
         val defaultSpaceId = db.query(
             "SELECT `local_id` FROM `spaces` WHERE `is_default` = 1"
         ).use { c -> if (c.moveToFirst()) c.getLong(0) else error("默认空间创建失败") }
         db.execSQL(
-            "INSERT INTO `space_members` (`space_id`, `user_id`, `role`, `joined_at`, `created_at`, `updated_at`) " +
-                "VALUES (?, 1, 'OWNER', ?, ?, ?)",
+            "INSERT INTO `space_members` (`space_id`, `user_id`, `role`, `joined_at`, `contributed_gp`, `created_at`, " +
+                "`updated_at`, `sync_state`, `version`) VALUES (?, 1, 'OWNER', ?, 0, ?, ?, 0, 0)",
             arrayOf(defaultSpaceId, now, now, now)
         )
 
@@ -101,7 +102,7 @@ val MIGRATION_1_2: Migration = object : Migration(1, 2) {
         // 迁移基线快照（画册时间轴起点）
         db.execSQL(
             "INSERT INTO `plant_snapshots` (`space_id`, `plant_type`, `event_type`, `stage`, `gp_at_event`, " +
-                "`occurred_at`, `occurred_date_key`, `created_at`, `updated_at`, `sync_state`, `version`) " +
+                "`occurred_at`, `occurred_date_key`, `server_id`, `created_at`, `updated_at`, `sync_state`, `version`) " +
                 "SELECT s.`local_id`, COALESCE(sp.`plant_type`, 'TREE'), 'MIGRATED_BASELINE', " +
                 "CASE WHEN s.`total_gp` < 50 THEN 0 WHEN s.`total_gp` < 200 THEN 1 WHEN s.`total_gp` < 500 THEN 2 " +
                 "WHEN s.`total_gp` < 1500 THEN 3 WHEN s.`total_gp` < 4000 THEN 4 WHEN s.`total_gp` < 10000 THEN 5 " +
@@ -281,7 +282,8 @@ val MIGRATION_1_2: Migration = object : Migration(1, 2) {
 
     private fun seedUsers(db: SupportSQLiteDatabase, now: Long) {
         db.execSQL(
-            "INSERT INTO `users` (`display_name`, `created_at`, `updated_at`) VALUES (?, ?, ?)",
+            "INSERT INTO `users` (`display_name`, `created_at`, `updated_at`, `sync_state`, `version`) " +
+                "VALUES (?, ?, ?, 0, 0)",
             arrayOf(SeedData.LOCAL_USER_NAME, now, now)
         )
     }
@@ -318,8 +320,8 @@ val MIGRATION_1_2: Migration = object : Migration(1, 2) {
     }
 
     private fun seedTags(db: SupportSQLiteDatabase, now: Long) {
-        val insert = "INSERT INTO `tags` (`scope`, `space_id`, `kind`, `name`, `emoji`, `created_at`, `updated_at`) " +
-            "VALUES (?, 0, ?, ?, ?, ?, ?)"
+        val insert = "INSERT INTO `tags` (`scope`, `space_id`, `kind`, `name`, `emoji`, `use_count`, `created_at`, " +
+            "`updated_at`, `sync_state`, `version`) VALUES (?, 0, ?, ?, ?, 0, ?, ?, 0, 0)"
         SeedData.tags(now).forEach { t ->
             db.execSQL(insert, arrayOf(t.scope, t.kind, t.name, t.emoji, t.createdAt, t.updatedAt))
         }
@@ -343,8 +345,8 @@ val MIGRATION_1_2: Migration = object : Migration(1, 2) {
 
         val newId = db.executeInsert(
             "INSERT INTO `records` (`local_id`, `space_id`, `author_id`, `content_text`, `mood_tag`, `occurred_at`, " +
-                "`occurred_date_key`, `is_backdated`, `gp_final`, `gp_breakdown_json`, `is_capped`, `created_at`, `updated_at`) " +
-                "VALUES (?, ?, 1, ?, ?, ?, ?, 0, ?, NULL, 0, ?, ?)",
+                "`occurred_date_key`, `is_backdated`, `gp_final`, `gp_breakdown_json`, `is_capped`, `created_at`, `updated_at`, " +
+                "`sync_state`, `version`) VALUES (?, ?, 1, ?, ?, ?, ?, 0, ?, NULL, 0, ?, ?, 0, 0)",
             arrayOf(v1Id, defaultSpaceId, string("text"), mood, createdAt, dateKey, long("gpEarned"), createdAt, now)
         )
         check(newId == v1Id) { "记录 $v1Id 迁移后主键漂移：$newId" }
@@ -356,21 +358,24 @@ val MIGRATION_1_2: Migration = object : Migration(1, 2) {
                 val isFile = uri.startsWith("file:") || uri.startsWith("/")
                 db.execSQL(
                     "INSERT INTO `record_media` (`record_id`, `type`, `sort_order`, `local_path`, `source_uri`, " +
-                        "`media_status`, `created_at`, `updated_at`) VALUES (?, 'PHOTO', ?, ?, ?, ?, ?, ?)",
+                        "`media_status`, `created_at`, `updated_at`, `sync_state`, `version`) " +
+                        "VALUES (?, 'PHOTO', ?, ?, ?, ?, ?, ?, 0, 0)",
                     arrayOf(v1Id, index, if (isFile) uri else null, uri, if (isFile) "READY" else "PENDING_COPY", ts, now)
                 )
             }
         string("voiceUri")?.let { voice ->
             db.execSQL(
                 "INSERT INTO `record_media` (`record_id`, `type`, `sort_order`, `local_path`, `media_status`, " +
-                    "`duration_ms`, `created_at`, `updated_at`) VALUES (?, 'VOICE', 0, ?, 'READY', ?, ?, ?)",
+                    "`duration_ms`, `created_at`, `updated_at`, `sync_state`, `version`) " +
+                    "VALUES (?, 'VOICE', 0, ?, 'READY', ?, ?, ?, 0, 0)",
                 arrayOf(v1Id, voice, long("voiceDuration"), ts, now)
             )
         }
         string("musicTitle")?.let { title ->
             db.execSQL(
                 "INSERT INTO `record_media` (`record_id`, `type`, `sort_order`, `title`, `subtitle`, `extra_json`, " +
-                    "`media_status`, `created_at`, `updated_at`) VALUES (?, 'MUSIC', 0, ?, ?, ?, 'READY', ?, ?)",
+                    "`media_status`, `created_at`, `updated_at`, `sync_state`, `version`) " +
+                    "VALUES (?, 'MUSIC', 0, ?, ?, ?, 'READY', ?, ?, 0, 0)",
                 arrayOf(v1Id, title, string("musicArtist"), string("musicUri"), ts, now)
             )
         }
@@ -379,7 +384,8 @@ val MIGRATION_1_2: Migration = object : Migration(1, 2) {
             val extra = if (summary != null) "{\"summary\":${jsonEscape(summary)}}" else null
             db.execSQL(
                 "INSERT INTO `record_media` (`record_id`, `type`, `sort_order`, `source_uri`, `title`, `extra_json`, " +
-                    "`media_status`, `created_at`, `updated_at`) VALUES (?, 'LINK', 0, ?, ?, ?, 'READY', ?, ?)",
+                    "`media_status`, `created_at`, `updated_at`, `sync_state`, `version`) " +
+                    "VALUES (?, 'LINK', 0, ?, ?, ?, 'READY', ?, ?, 0, 0)",
                 arrayOf(v1Id, url, string("linkTitle"), extra, ts, now)
             )
         }
@@ -394,7 +400,8 @@ val MIGRATION_1_2: Migration = object : Migration(1, 2) {
             }
             db.execSQL(
                 "INSERT INTO `record_media` (`record_id`, `type`, `sort_order`, `title`, `extra_json`, `media_status`, " +
-                    "`created_at`, `updated_at`) VALUES (?, 'LOCATION', 0, ?, ?, 'READY', ?, ?)",
+                    "`created_at`, `updated_at`, `sync_state`, `version`) " +
+                    "VALUES (?, 'LOCATION', 0, ?, ?, 'READY', ?, ?, 0, 0)",
                 arrayOf(v1Id, name, extra, ts, now)
             )
         }
@@ -412,8 +419,8 @@ val MIGRATION_1_2: Migration = object : Migration(1, 2) {
                         existing
                     } else {
                         db.executeInsert(
-                            "INSERT INTO `tags` (`scope`, `space_id`, `kind`, `name`, `created_at`, `updated_at`) " +
-                                "VALUES ('USER', 0, 'CUSTOM', ?, ?, ?)",
+                            "INSERT INTO `tags` (`scope`, `space_id`, `kind`, `name`, `emoji`, `use_count`, `created_at`, " +
+                                "`updated_at`, `sync_state`, `version`) VALUES ('USER', 0, 'CUSTOM', ?, '', 0, ?, ?, 0, 0)",
                             arrayOf(name, now, now)
                         )
                     }
@@ -444,8 +451,8 @@ val MIGRATION_1_2: Migration = object : Migration(1, 2) {
                 if (isActive) {
                     hasActive = true
                     db.execSQL(
-                        "INSERT INTO `space_plants` (`space_id`, `plant_type`, `is_active`, `started_at`, `created_at`, `updated_at`) " +
-                            "VALUES (?, ?, 1, ?, ?, ?)",
+                        "INSERT INTO `space_plants` (`space_id`, `plant_type`, `is_active`, `started_at`, `created_at`, " +
+                            "`updated_at`, `sync_state`, `version`) VALUES (?, ?, 1, ?, ?, ?, 0, 0)",
                         arrayOf(defaultSpaceId, type, plantedAt, now, now)
                     )
                 }
@@ -453,8 +460,8 @@ val MIGRATION_1_2: Migration = object : Migration(1, 2) {
         }
         if (!hasActive) {
             db.execSQL(
-                "INSERT INTO `space_plants` (`space_id`, `plant_type`, `is_active`, `started_at`, `created_at`, `updated_at`) " +
-                    "VALUES (?, 'TREE', 1, ?, ?, ?)",
+                "INSERT INTO `space_plants` (`space_id`, `plant_type`, `is_active`, `started_at`, `created_at`, " +
+                    "`updated_at`, `sync_state`, `version`) VALUES (?, 'TREE', 1, ?, ?, ?, 0, 0)",
                 arrayOf(defaultSpaceId, now, now, now)
             )
         }
@@ -463,15 +470,15 @@ val MIGRATION_1_2: Migration = object : Migration(1, 2) {
     private fun migrateAchievements(db: SupportSQLiteDatabase, now: Long) {
         db.execSQL(
             "INSERT INTO `achievement_progress` (`definition_code`, `scope_key`, `progress`, `is_unlocked`, `unlocked_at`, " +
-                "`last_evaluated_at`, `created_at`, `updated_at`) " +
-                "SELECT a.`code`, 'u:1', a.`progress`, a.`isUnlocked`, a.`unlockedAt`, ?, COALESCE(a.`unlockedAt`, ?), ? " +
+                "`last_evaluated_at`, `created_at`, `updated_at`, `sync_state`, `version`) " +
+                "SELECT a.`code`, 'u:1', a.`progress`, a.`isUnlocked`, a.`unlockedAt`, ?, COALESCE(a.`unlockedAt`, ?), ?, 0, 0 " +
                 "FROM `achievements_v1` a WHERE a.`code` IN (SELECT `code` FROM `achievement_definitions`)",
             arrayOf<Any>(now, now, now)
         )
         db.execSQL(
             "INSERT INTO `achievement_events` (`definition_code`, `scope_key`, `event_type`, `progress_before`, `progress_after`, " +
-                "`occurred_at`, `reason_json`, `created_at`, `updated_at`) " +
-                "SELECT a.`code`, 'u:1', 'UNLOCKED', 0, a.`progress`, COALESCE(a.`unlockedAt`, ?), 'migrated_from_v1', ?, ? " +
+                "`occurred_at`, `reason_json`, `created_at`, `updated_at`, `sync_state`, `version`) " +
+                "SELECT a.`code`, 'u:1', 'UNLOCKED', 0, a.`progress`, COALESCE(a.`unlockedAt`, ?), 'migrated_from_v1', ?, ?, 0, 0 " +
                 "FROM `achievements_v1` a WHERE a.`isUnlocked` = 1 AND a.`code` IN (SELECT `code` FROM `achievement_definitions`)",
             arrayOf<Any>(now, now, now)
         )
