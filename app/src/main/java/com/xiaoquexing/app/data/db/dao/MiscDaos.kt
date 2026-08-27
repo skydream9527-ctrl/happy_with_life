@@ -62,7 +62,7 @@ interface DailyStatDao {
             "SELECT space_id, occurred_date_key, SUM(gp_final), COUNT(*), COUNT(DISTINCT author_id) " +
             "FROM records WHERE deleted_at IS NULL GROUP BY space_id, occurred_date_key"
     )
-    suspend fun rebuildAll(): Int
+    suspend fun rebuildAll()
 }
 
 @Dao
