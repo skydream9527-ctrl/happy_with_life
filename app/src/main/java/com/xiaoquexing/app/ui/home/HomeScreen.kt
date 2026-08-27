@@ -26,7 +26,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.outlined.MenuBook
-import androidx.compose.material.icons.outlined.Psychiatry
+import androidx.compose.material.icons.outlined.Spa
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -105,7 +105,7 @@ fun HomeScreen(
                     }
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         NavIconButton(
-                            icon = Icons.Outlined.Psychiatry,
+                            icon = Icons.Outlined.Spa,
                             contentDescription = "植物选择",
                             onClick = onNavigateToPlantSelection
                         )
@@ -312,7 +312,7 @@ private fun PlantHeroCard(uiState: com.xiaoquexing.app.viewmodel.HomeUiState) {
 }
 
 @Composable
-private fun StatsRow(uiState: com.xiaoquexing.app.viewmodel.HomeViewModel.HomeUiState) {
+private fun StatsRow(uiState: com.xiaoquexing.app.viewmodel.HomeUiState) {
     Row(
         modifier = Modifier
             .fillMaxWidth()

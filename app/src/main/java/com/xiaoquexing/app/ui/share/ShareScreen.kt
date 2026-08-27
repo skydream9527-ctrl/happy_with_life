@@ -127,7 +127,7 @@ fun ShareScreen(
 
             // 分享卡片预览
             ShareCardCompose(
-                data = demoData,
+                data = demoData ?: com.xiaoquexing.app.data.model.ShareCardData(),
                 modifier = Modifier
                     .fillMaxWidth(0.75f)
                     .aspectRatio(1080f / 1920f)
