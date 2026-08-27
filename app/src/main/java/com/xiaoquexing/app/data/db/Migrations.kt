@@ -5,6 +5,27 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import com.xiaoquexing.app.data.SeedData
 import com.xiaoquexing.app.util.DateKeys
 
+private fun SupportSQLiteDatabase.executeInsert(sql: String, bindArgs: Array<out Any?>): Long {
+    val statement = compileStatement(sql)
+    return try {
+        bindArgs.forEachIndexed { index, value ->
+            val parameterIndex = index + 1
+            when (value) {
+                null -> statement.bindNull(parameterIndex)
+                is ByteArray -> statement.bindBlob(parameterIndex, value)
+                is Float -> statement.bindDouble(parameterIndex, value.toDouble())
+                is Double -> statement.bindDouble(parameterIndex, value)
+                is Number -> statement.bindLong(parameterIndex, value.toLong())
+                is Boolean -> statement.bindLong(parameterIndex, if (value) 1L else 0L)
+                else -> statement.bindString(parameterIndex, value.toString())
+            }
+        }
+        statement.executeInsert()
+    } finally {
+        statement.close()
+    }
+}
+
 /**
  * v1 → v2 迁移（android/docs/room-v2-schema.md §5）。
  *
