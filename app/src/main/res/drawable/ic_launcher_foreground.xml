@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Sprout/leaf shape -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,30 C54,30 40,45 40,58 C40,66 46,72 54,72 C62,72 68,66 68,58 C68,45 54,30 54,30Z"/>
+    <path
+        android:fillColor="#E8F5E9"
+        android:pathData="M54,35 C54,35 45,47 45,57 C45,63 49,67 54,67 C59,67 63,63 63,57 C63,47 54,35 54,35Z"/>
+    <!-- Small heart -->
+    <path
+        android:fillColor="#F48FB1"
+        android:pathData="M54,52 C54,52 50,47 47,48 C44,49 43,52 45,55 C47,57 54,62 54,62 C54,62 61,57 63,55 C65,52 64,49 61,48 C58,47 54,52 54,52Z"/>
+</vector>
