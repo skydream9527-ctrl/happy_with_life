@@ -1,0 +1,58 @@
+# ECS 生产：API 连已有 RDS / Tair。镜像必须用 Git SHA。
+# IMAGE_TAG=<sha> docker compose -f deploy/compose/docker-compose.ecs.yml up -d
+services:
+  migrate:
+    image: xiaoquexing/xqx-api:${IMAGE_TAG:?IMAGE_TAG is required}
+    restart: "no"
+    user: "65532:65532"
+    environment:
+      POSTGRES_DSN: ${POSTGRES_DSN}
+      MIGRATIONS_PATH: file:///app/migrations
+    entrypoint: ["/usr/local/bin/xqx-migrate", "up"]
+
+  api:
+    image: xiaoquexing/xqx-api:${IMAGE_TAG:?IMAGE_TAG is required}
+    restart: unless-stopped
+    user: "65532:65532"
+    read_only: true
+    tmpfs:
+      - /tmp
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    environment:
+      APP_ENV: ${APP_ENV:-prod}
+      HTTP_ADDR: :8080
+      POSTGRES_DSN: ${POSTGRES_DSN}
+      REDIS_ADDR: ${REDIS_ADDR}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      REDIS_KEY_PREFIX: ${REDIS_KEY_PREFIX:-xqx:prod:}
+      JWT_SIGNING_KEY: ${JWT_SIGNING_KEY}
+      PHONE_ENCRYPTION_KEY: ${PHONE_ENCRYPTION_KEY}
+      PHONE_HASH_PEPPER: ${PHONE_HASH_PEPPER}
+      SMS_PROVIDER: ${SMS_PROVIDER:-aliyun}
+      ALIYUN_SMS_SIGN_NAME: ${ALIYUN_SMS_SIGN_NAME:-}
+      ALIYUN_SMS_TEMPLATE_CODE: ${ALIYUN_SMS_TEMPLATE_CODE:-}
+      MIGRATIONS_PATH: file:///app/migrations
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/xqx-health"]
+      interval: 10s
+      timeout: 3s
+      retries: 6
+    stop_grace_period: 15s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  worker:
+    image: xiaoquexing/xqx-api:${IMAGE_TAG:?IMAGE_TAG is required}
+    restart: unless-stopped
+    user: "65532:65532"
+    command: ["/usr/local/bin/xqx-worker"]
+    environment:
+      APP_ENV: ${APP_ENV:-prod}
+    stop_grace_period: 15s

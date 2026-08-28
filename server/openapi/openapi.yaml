@@ -1,0 +1,311 @@
+openapi: 3.1.0
+info:
+  title: 小确幸服务端 API
+  version: 0.1.0
+  description: |
+    S0–S2 surface: health, auth, personal space, records, sync push/pull.
+    Field names are lowerCamelCase. Timestamps are UTC RFC3339.
+    Server IDs are UUIDv7 strings.
+servers:
+  - url: /
+paths:
+  /health/live:
+    get:
+      operationId: healthLive
+      summary: Liveness. Process is up; no dependency checks.
+      responses:
+        "200":
+          description: Alive
+          headers:
+            X-Request-ID:
+              schema: { type: string }
+  /health/ready:
+    get:
+      operationId: healthReady
+      summary: Readiness. Checks PostgreSQL and Redis when configured.
+      responses:
+        "200":
+          description: Ready
+        "503":
+          description: A dependency is down
+  /api/v1/meta:
+    get:
+      operationId: getMeta
+      summary: Build and domain-rules metadata
+      responses:
+        "200":
+          description: Meta
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+  /api/v1/auth/sms/send:
+    post:
+      operationId: smsSend
+      summary: Send a login SMS. Response does not reveal whether the phone is registered.
+      parameters:
+        - $ref: "#/components/parameters/RequestID"
+        - $ref: "#/components/parameters/DeviceID"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [phone]
+              properties:
+                phone: { type: string, examples: ["13812345678"] }
+                deviceId: { type: string }
+      responses:
+        "200":
+          description: Accepted (always, to avoid account enumeration)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+        "400":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/Error"
+        "503":
+          $ref: "#/components/responses/Error"
+  /api/v1/auth/sms/verify:
+    post:
+      operationId: smsVerify
+      summary: Verify SMS code and issue access/refresh tokens. Creates the user on first success.
+      parameters:
+        - $ref: "#/components/parameters/RequestID"
+        - $ref: "#/components/parameters/DeviceID"
+        - $ref: "#/components/parameters/Platform"
+        - $ref: "#/components/parameters/AppVersion"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [phone, code]
+              properties:
+                phone: { type: string }
+                code: { type: string }
+                deviceId: { type: string }
+                platform: { type: string }
+                appVersion: { type: string }
+      responses:
+        "200":
+          description: Tokens
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+        "401":
+          $ref: "#/components/responses/Error"
+  /api/v1/auth/token/refresh:
+    post:
+      operationId: tokenRefresh
+      summary: Rotate refresh token. Reuse of a consumed token revokes the family.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refreshToken]
+              properties:
+                refreshToken: { type: string }
+                deviceId: { type: string }
+      responses:
+        "200":
+          description: New pair
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+        "401":
+          $ref: "#/components/responses/Error"
+  /api/v1/auth/logout:
+    post:
+      operationId: logout
+      summary: Revoke the refresh-token family
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refreshToken: { type: string }
+      responses:
+        "200":
+          description: Logged out
+  /api/v1/account:
+    delete:
+      operationId: deleteAccount
+      summary: Mark the account PENDING_DELETE and revoke sessions
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Pending delete
+        "401":
+          $ref: "#/components/responses/Error"
+  /api/v1/me:
+    get:
+      operationId: getMe
+      security: [{ bearerAuth: [] }]
+      summary: Current account. Phone is masked.
+      responses:
+        "200": { description: Profile }
+    patch:
+      operationId: patchMe
+      security: [{ bearerAuth: [] }]
+      summary: Update display name (1-20 chars)
+      responses:
+        "200": { description: Profile }
+  /api/v1/stats/calendar:
+    get:
+      operationId: moodCalendar
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: spaceId, in: query, required: true, schema: { type: string } }
+        - { name: from, in: query, schema: { type: string } }
+        - { name: to, in: query, schema: { type: string } }
+      responses:
+        "200": { description: Daily mood and GP }
+  /api/v1/spaces:
+    get:
+      operationId: listSpaces
+      security: [{ bearerAuth: [] }]
+      summary: List spaces the current user can access
+      responses:
+        "200":
+          description: Spaces
+  /api/v1/spaces/{id}:
+    get:
+      operationId: getSpace
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200": { description: Space }
+        "403": { $ref: "#/components/responses/Error" }
+  /api/v1/spaces/{id}/plant:
+    get:
+      operationId: getPlant
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200": { description: Plant derived from space GP }
+  /api/v1/records:
+    get:
+      operationId: listRecords
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: spaceId, in: query, required: true, schema: { type: string } }
+        - { name: cursor, in: query, schema: { type: string } }
+        - { name: limit, in: query, schema: { type: integer } }
+      responses:
+        "200": { description: Records }
+    post:
+      operationId: createRecord
+      security: [{ bearerAuth: [] }]
+      summary: Online create; same GP path as sync push
+      responses:
+        "200": { description: Applied mutation }
+        "400": { $ref: "#/components/responses/Error" }
+  /api/v1/records/{id}:
+    get:
+      operationId: getRecord
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200": { description: Record }
+    patch:
+      operationId: patchRecord
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200": { description: Applied }
+        "409": { $ref: "#/components/responses/Error" }
+    delete:
+      operationId: deleteRecord
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200": { description: Tombstone }
+  /api/v1/sync/push:
+    post:
+      operationId: syncPush
+      security: [{ bearerAuth: [] }]
+      summary: Offline mutation batch. Per-item transactions.
+      responses:
+        "200": { description: Per-mutation results }
+  /api/v1/sync/pull:
+    get:
+      operationId: syncPull
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: cursor, in: query, schema: { type: string } }
+        - { name: limit, in: query, schema: { type: integer } }
+      responses:
+        "200": { description: Incremental changes including tombstones }
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    RequestID:
+      name: X-Request-ID
+      in: header
+      schema: { type: string }
+    DeviceID:
+      name: X-Device-ID
+      in: header
+      schema: { type: string }
+    Platform:
+      name: X-Platform
+      in: header
+      schema: { type: string, examples: ["android"] }
+    AppVersion:
+      name: X-App-Version
+      in: header
+      schema: { type: string }
+  schemas:
+    Meta:
+      type: object
+      properties:
+        requestId: { type: string }
+        serverTime: { type: string, format: date-time }
+    Success:
+      type: object
+      required: [data, meta]
+      properties:
+        data: {}
+        meta: { $ref: "#/components/schemas/Meta" }
+    Error:
+      type: object
+      required: [error, meta]
+      properties:
+        error:
+          type: object
+          required: [code, message, retryable]
+          properties:
+            code: { type: string }
+            message: { type: string }
+            details: {}
+            retryable: { type: boolean }
+        meta: { $ref: "#/components/schemas/Meta" }
+  responses:
+    Error:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"

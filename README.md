@@ -2,7 +2,7 @@
 
 小确幸是一款以“轻量记录 → GP 成长 → 植物变化 → 回顾/画册 → 私密共建”为核心闭环的治愈系生活记录 App。
 
-> 当前阶段：Android 原生单机 Demo 已进入 M1 数据可靠性基线，尚不是 v1.0。账号、云同步、共享空间和真实电子画册仍未完成。
+> 当前阶段：Android 原生单机 Demo 已进入 M1 数据可靠性基线。服务端 S0–S2（登录、账号、心情记录、同步）在 `server/`，尚未接上正式阿里云短信与 OSS。
 
 ## 当前可信基线
 
@@ -28,6 +28,7 @@
 ├── agent-prompts/           # Z code、MiniMax Code、Gork 的独立提示词
 ├── app/                     # Android 应用、测试与 Room schema
 ├── design-reference/        # HTML/CSS 高保真设计参考
+├── server/                  # Go 服务端（短信登录、账号、心情记录、同步）
 ├── docs/
 │   ├── adr/                 # 已冻结的领域与依赖注入决策
 │   ├── plans/               # 完整迭代计划
@@ -60,9 +61,13 @@
 
 ## 尚未实现
 
-- 登录/注册、Token、云同步、OSS 上传与服务端 API。
-- 共享空间邀请、成员、权限、共同 GP 与冲突同步。
+- Android 侧登录/注册、Token 存储和 Retrofit 接线（服务端已在 `server/`：短信登录、账号、心情记录、push/pull）。
+- 正式阿里云短信、OSS 上传、共享空间邀请。
 - 真实地图、月/年回顾、通知、Widget、订阅和 AI 回顾。
+
+## 服务端
+
+Go 实现在 [`server/`](./server/README.md)。安卓接入拷贝 [`server/clients/android`](./server/clients/android/README.md)。一台 ECS 起步见 [`server/docs/android-and-aliyun.md`](./server/docs/android-and-aliyun.md)。
 
 ## 文档入口
 

@@ -1,0 +1,57 @@
+package com.xiaoquexing.app.data.remote
+
+import retrofit2.http.Body
+import retrofit2.http.GET
+import retrofit2.http.Header
+import retrofit2.http.PATCH
+import retrofit2.http.POST
+import retrofit2.http.Path
+import retrofit2.http.Query
+
+interface ApiService {
+    @POST("/api/v1/auth/sms/send")
+    suspend fun smsSend(@Body body: SmsSendReq): Envelope<Map<String, Boolean>>
+
+    @POST("/api/v1/auth/sms/verify")
+    suspend fun smsVerify(@Body body: SmsVerifyReq): Envelope<TokenPair>
+
+    @POST("/api/v1/auth/token/refresh")
+    suspend fun refresh(@Body body: RefreshReq): Envelope<TokenPair>
+
+    @POST("/api/v1/auth/logout")
+    suspend fun logout(@Body body: RefreshReq): Envelope<Map<String, Boolean>>
+
+    @GET("/api/v1/me")
+    suspend fun me(): Envelope<Profile>
+
+    @PATCH("/api/v1/me")
+    suspend fun patchMe(@Body body: Map<String, String>): Envelope<Profile>
+
+    @GET("/api/v1/spaces")
+    suspend fun spaces(): Envelope<SpaceList>
+
+    @GET("/api/v1/spaces/{id}/plant")
+    suspend fun plant(@Path("id") id: String): Envelope<Map<String, String>>
+
+    @GET("/api/v1/stats/calendar")
+    suspend fun calendar(
+        @Query("spaceId") spaceId: String,
+        @Query("from") from: String? = null,
+        @Query("to") to: String? = null,
+    ): Envelope<CalendarDto>
+
+    @GET("/api/v1/records")
+    suspend fun records(
+        @Query("spaceId") spaceId: String,
+        @Query("from") from: String? = null,
+        @Query("to") to: String? = null,
+        @Query("mood") mood: String? = null,
+        @Query("cursor") cursor: String? = null,
+    ): Envelope<RecordList>
+
+    @POST("/api/v1/records")
+    suspend fun createRecord(
+        @Header("Idempotency-Key") mutationId: String,
+        @Body body: RecordWrite,
+    ): Envelope<MutationResult>
+}

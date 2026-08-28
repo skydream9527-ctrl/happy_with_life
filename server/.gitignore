@@ -1,0 +1,17 @@
+.bin/
+/bin/
+/dist/
+/tmp/
+*.exe
+*.test
+*.out
+coverage.out
+vendor/
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+.idea/
+.vscode/
+.DS_Store
