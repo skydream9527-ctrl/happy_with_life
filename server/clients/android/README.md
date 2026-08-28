@@ -26,3 +26,5 @@ android:usesCleartextTraffic="true"
 ```
 
 上线必须 HTTPS。短信登录走 `/api/v1/auth/sms/*`，记心情走 `/api/v1/records`，日历走 `/api/v1/stats/calendar`。
+
+照片：`mediaSts` → OkHttp **PUT** 到返回的 `uploadUrl`（带 `Content-Type`）→ `mediaComplete` → `createRecord(..., media=[MediaRef(id)])`。每用户 200MB，单张 ≤5MB，一条最多 9 张。

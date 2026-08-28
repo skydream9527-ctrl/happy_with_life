@@ -26,7 +26,18 @@ var (
 
 type Service struct {
 	Store Store
+	Media MediaHook
 	Now   func() time.Time
+}
+
+// MediaHook is implemented by internal/media.Service. Nil is allowed in tests
+// that never attach photos.
+type MediaHook interface {
+	Resolve(userID, recordID string, types []struct {
+		MediaID string
+		Type    string
+	}) (photoCount int, hasVoice bool, ids []string, err error)
+	Bind(recordID string, ids []string) error
 }
 
 func NewService(st Store) *Service {
@@ -296,6 +307,27 @@ func (s *Service) applyUpsert(tx Tx, userID string, m Mutation, now time.Time) (
 	}
 
 	photos, voice, music, link, locn := countMedia(m.Payload.Media)
+	var mediaIDs []string
+	if s.Media != nil {
+		in := make([]struct {
+			MediaID string
+			Type    string
+		}, 0, len(m.Payload.Media))
+		for _, mi := range m.Payload.Media {
+			in = append(in, struct {
+				MediaID string
+				Type    string
+			}{MediaID: mi.MediaID, Type: mi.Type})
+		}
+		pc, hv, ids, err := s.Media.Resolve(userID, recID, in)
+		if err != nil {
+			return reject(m, "RECORD_INVALID", "照片必须先上传完成再发布", false), nil
+		}
+		photos, voice, mediaIDs = pc, hv, ids
+	}
+	if photos > 9 {
+		return reject(m, "RECORD_INVALID", "单条最多 9 张照片", false), nil
+	}
 	tags := m.Payload.StatusTags
 	if len(tags) > 3 {
 		tags = tags[:3]
@@ -335,6 +367,11 @@ func (s *Service) applyUpsert(tx Tx, userID string, m Mutation, now time.Time) (
 	}
 	if err := tx.UpsertRecord(rec); err != nil {
 		return MutationResult{}, err
+	}
+	if s.Media != nil {
+		if err := s.Media.Bind(rec.ID, mediaIDs); err != nil {
+			return MutationResult{}, err
+		}
 	}
 	auth, err := s.recompute(tx, spaceID, now)
 	if err != nil {

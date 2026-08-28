@@ -16,6 +16,7 @@ import (
 	"github.com/skydream9527-ctrl/xiaoquexing-server/internal/auth"
 	"github.com/skydream9527-ctrl/xiaoquexing-server/internal/config"
 	"github.com/skydream9527-ctrl/xiaoquexing-server/internal/ledger"
+	xmedia "github.com/skydream9527-ctrl/xiaoquexing-server/internal/media"
 	"github.com/skydream9527-ctrl/xiaoquexing-server/internal/platform/aliyun"
 	redisx "github.com/skydream9527-ctrl/xiaoquexing-server/internal/platform/redis"
 	httpx "github.com/skydream9527-ctrl/xiaoquexing-server/internal/transport/http"
@@ -40,12 +41,17 @@ func testServer(t *testing.T) (*httptest.Server, *auth.Service) {
 	}
 	store := auth.NewMemoryStore()
 	led := ledger.NewService(ledger.NewMemory())
+	mediaStore := xmedia.NewMemoryStore()
+	blob := xmedia.NewMemoryBlob()
+	mediaSvc := xmedia.NewService(mediaStore, blob, cfg.JWTSigningKey, xmedia.DefaultQuotaBytes, xmedia.DefaultMaxPhotoBytes)
+	led.Media = mediaSvc
 	svc := auth.NewService(cfg, store, rdb, aliyun.MockSMS{Log: slog.Default()}, slog.Default())
 	svc.Bootstrap = led
 	engine := httpx.NewRouter(cfg, slog.Default(), httpx.Deps{
 		StoreMode:  "memory",
 		Auth:       svc,
 		Ledger:     led,
+		Media:      mediaSvc,
 		ReadyRedis: func(ctx context.Context) error { return rdb.Ping(ctx) },
 	})
 	ts := httptest.NewServer(engine)

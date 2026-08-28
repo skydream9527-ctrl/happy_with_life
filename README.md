@@ -61,8 +61,8 @@
 
 ## 尚未实现
 
-- Android 侧登录/注册、Token 存储和 Retrofit 接线（服务端已在 `server/`：短信登录、账号、心情记录、push/pull）。
-- 正式阿里云短信、OSS 上传、共享空间邀请。
+- Android 侧登录/注册、Token 存储和 Retrofit 接线（服务端已支持短信登录、账号、心情、照片 STS、合种邀请链接）。
+- 正式阿里云短信签名、OSS Bucket、画册云生成。
 - 真实地图、月/年回顾、通知、Widget、订阅和 AI 回顾。
 
 ## 服务端

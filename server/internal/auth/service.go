@@ -325,6 +325,13 @@ func (s *Service) DeleteAccount(userID string) error {
 	return s.store.RevokeUserTokens(userID, now)
 }
 
+func (s *Service) AccountDeleteGrace() time.Duration {
+	if s.cfg.AccountDeleteGrace <= 0 {
+		return 24 * time.Hour
+	}
+	return s.cfg.AccountDeleteGrace
+}
+
 func (s *Service) ParseAccess(token string) (*AccessClaims, error) {
 	claims, err := ParseAccessToken(s.cfg.JWTSigningKey, token)
 	if err != nil {

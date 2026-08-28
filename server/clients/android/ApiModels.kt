@@ -58,6 +58,35 @@ data class SpaceDto(
 )
 
 @Serializable
+data class MemberList(val items: List<MemberDto> = emptyList())
+
+@Serializable
+data class MemberDto(
+    val userId: String,
+    val role: String,
+    val status: String,
+    val contributedGp: Long = 0,
+)
+
+@Serializable
+data class InviteDto(
+    val inviteId: String,
+    val token: String,
+    val link: String,
+    val expiresAt: String = "",
+    val maxUses: Int = 10,
+)
+
+@Serializable
+data class InvitePeek(
+    val spaceId: String,
+    val spaceName: String,
+    val spaceType: String,
+    val plantType: String = "",
+    val seatsLeft: Int = 0,
+)
+
+@Serializable
 data class RecordWrite(
     val spaceId: String,
     val moodTag: String,
@@ -66,8 +95,49 @@ data class RecordWrite(
     val occurredAt: String? = null,
     val occurredDate: String? = null,
     val statusTags: List<String> = emptyList(),
+    val media: List<MediaRef> = emptyList(),
     val baseVersion: Long = 0,
 )
+
+@Serializable
+data class MediaRef(val mediaId: String, val type: String = "PHOTO")
+
+@Serializable
+data class MediaStsReq(
+    val type: String = "PHOTO",
+    val mimeType: String,
+    val sizeBytes: Long,
+    val width: Int = 0,
+    val height: Int = 0,
+)
+
+@Serializable
+data class MediaSts(
+    val mediaId: String,
+    val objectKey: String = "",
+    val method: String = "PUT",
+    val uploadUrl: String,
+    val headers: Map<String, String> = emptyMap(),
+    val expiresAt: String = "",
+    val provider: String = "mock",
+    val quotaUsed: Long = 0,
+    val quotaMax: Long = 209715200,
+)
+
+@Serializable
+data class MediaObject(
+    val id: String,
+    val uploadStatus: String,
+    val sizeBytes: Long = 0,
+    val mimeType: String = "",
+    val type: String = "PHOTO",
+)
+
+@Serializable
+data class MediaQuota(val usedBytes: Long = 0, val maxBytes: Long = 209715200)
+
+@Serializable
+data class MediaDownload(val url: String, val expiresAt: String = "")
 
 @Serializable
 data class MutationResult(

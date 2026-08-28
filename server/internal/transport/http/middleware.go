@@ -44,7 +44,7 @@ func Recovery(log *slog.Logger) gin.HandlerFunc {
 
 func Timeout(d time.Duration) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if d <= 0 {
+		if d <= 0 || skipLargeBody(c) {
 			c.Next()
 			return
 		}
@@ -57,6 +57,10 @@ func Timeout(d time.Duration) gin.HandlerFunc {
 
 func BodyLimit(n int64) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		if skipLargeBody(c) {
+			c.Next()
+			return
+		}
 		if n > 0 && c.Request.Body != nil {
 			c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, n)
 		}
@@ -94,7 +98,7 @@ func CORS(origins []string) gin.HandlerFunc {
 			c.Header("Access-Control-Allow-Origin", origin)
 			c.Header("Vary", "Origin")
 			c.Header("Access-Control-Allow-Headers", "Authorization, Content-Type, X-Request-ID, X-Device-ID, Idempotency-Key, X-App-Version, X-Platform")
-			c.Header("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE, OPTIONS")
+			c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
 			c.Header("Access-Control-Max-Age", "600")
 		}
 		if c.Request.Method == http.MethodOptions {

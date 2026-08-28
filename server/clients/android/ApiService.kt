@@ -30,6 +30,21 @@ interface ApiService {
     @GET("/api/v1/spaces")
     suspend fun spaces(): Envelope<SpaceList>
 
+    @POST("/api/v1/spaces")
+    suspend fun createSpace(@Body body: Map<String, String>): Envelope<SpaceDto>
+
+    @GET("/api/v1/spaces/{id}/members")
+    suspend fun members(@Path("id") id: String): Envelope<MemberList>
+
+    @POST("/api/v1/spaces/{id}/invites")
+    suspend fun createInvite(@Path("id") id: String): Envelope<InviteDto>
+
+    @POST("/api/v1/invites/accept")
+    suspend fun acceptInvite(@Body body: Map<String, String>): Envelope<SpaceDto>
+
+    @GET("/api/v1/invites/{token}")
+    suspend fun peekInvite(@Path("token") token: String): Envelope<InvitePeek>
+
     @GET("/api/v1/spaces/{id}/plant")
     suspend fun plant(@Path("id") id: String): Envelope<Map<String, String>>
 
@@ -54,4 +69,19 @@ interface ApiService {
         @Header("Idempotency-Key") mutationId: String,
         @Body body: RecordWrite,
     ): Envelope<MutationResult>
+
+    @POST("/api/v1/media/sts")
+    suspend fun mediaSts(@Body body: MediaStsReq): Envelope<MediaSts>
+
+    @POST("/api/v1/media/complete")
+    suspend fun mediaComplete(@Body body: Map<String, String>): Envelope<MediaObject>
+
+    @GET("/api/v1/media/quota")
+    suspend fun mediaQuota(): Envelope<MediaQuota>
+
+    @GET("/api/v1/media/{id}/download-url")
+    suspend fun mediaDownloadUrl(@Path("id") id: String): Envelope<MediaDownload>
+
+    @retrofit2.http.DELETE("/api/v1/media/{id}")
+    suspend fun mediaDelete(@Path("id") id: String): Envelope<Map<String, Boolean>>
 }

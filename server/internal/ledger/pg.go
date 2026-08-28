@@ -326,6 +326,143 @@ func (t *pgTx) SaveMutation(m AppliedMutation) error {
 	return err
 }
 
+func (p *PG) CreateSpace(sp Space, owner Member) error {
+	ctx, cancel := p.ctx()
+	defer cancel()
+	tx, err := p.pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+	_, err = tx.Exec(ctx, `insert into spaces (id, name, space_type, owner_id, total_gp, active_plant_type, timezone, version, created_at, updated_at)
+		values ($1,$2,$3,$4,0,$5,$6,1,$7,$7)`,
+		sp.ID, sp.Name, sp.SpaceType, sp.OwnerID, sp.ActivePlantType, sp.Timezone, sp.CreatedAt)
+	if err != nil {
+		return err
+	}
+	_, err = tx.Exec(ctx, `insert into space_members (space_id, user_id, role, status, joined_at, created_at, updated_at)
+		values ($1,$2,$3,'ACTIVE',$4,$4,$4)`, sp.ID, owner.UserID, owner.Role, sp.CreatedAt)
+	if err != nil {
+		return err
+	}
+	return tx.Commit(ctx)
+}
+
+func (p *PG) UpdateSpace(sp Space) error {
+	ctx, cancel := p.ctx()
+	defer cancel()
+	_, err := p.pool.Exec(ctx, `update spaces set name=$2, active_plant_type=$3, timezone=$4, version=version+1, updated_at=now() where id=$1`,
+		sp.ID, sp.Name, sp.ActivePlantType, sp.Timezone)
+	return err
+}
+
+func (p *PG) ListMembers(spaceID string) ([]Member, error) {
+	ctx, cancel := p.ctx()
+	defer cancel()
+	rows, err := p.pool.Query(ctx, `select space_id, user_id, role, status, contributed_gp from space_members where space_id=$1`, spaceID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	out := []Member{}
+	for rows.Next() {
+		var m Member
+		if err := rows.Scan(&m.SpaceID, &m.UserID, &m.Role, &m.Status, &m.ContributedGP); err != nil {
+			return nil, err
+		}
+		out = append(out, m)
+	}
+	return out, rows.Err()
+}
+
+func (p *PG) SaveMember(m Member) error {
+	ctx, cancel := p.ctx()
+	defer cancel()
+	_, err := p.pool.Exec(ctx, `insert into space_members (space_id, user_id, role, status, contributed_gp, joined_at, created_at, updated_at)
+		values ($1,$2,$3,$4,$5,now(),now(),now())
+		on conflict (space_id, user_id) do update set role=excluded.role, status=excluded.status, contributed_gp=excluded.contributed_gp, left_at=case when excluded.status='ACTIVE' then null else now() end, updated_at=now()`,
+		m.SpaceID, m.UserID, m.Role, m.Status, m.ContributedGP)
+	return err
+}
+
+func (p *PG) CountActiveMembers(spaceID string) (int, error) {
+	ctx, cancel := p.ctx()
+	defer cancel()
+	var n int
+	err := p.pool.QueryRow(ctx, `select count(*) from space_members where space_id=$1 and status='ACTIVE'`, spaceID).Scan(&n)
+	return n, err
+}
+
+func (p *PG) InsertInvite(inv Invite) error {
+	ctx, cancel := p.ctx()
+	defer cancel()
+	_, err := p.pool.Exec(ctx, `insert into space_invites (id, space_id, inviter_id, token_hash, expires_at, max_uses, used_count, created_at, updated_at)
+		values ($1,$2,$3,$4,$5,$6,$7,$8,$8)`,
+		inv.ID, inv.SpaceID, inv.InviterID, inv.TokenHash, inv.ExpiresAt, inv.MaxUses, inv.UsedCount, inv.CreatedAt)
+	return err
+}
+
+func (p *PG) GetInviteByHash(hash string) (*Invite, error) {
+	ctx, cancel := p.ctx()
+	defer cancel()
+	inv, err := scanInvite(p.pool.QueryRow(ctx, inviteSelect+" where token_hash=$1", hash))
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &inv, nil
+}
+
+func (p *PG) GetInvite(id string) (*Invite, error) {
+	ctx, cancel := p.ctx()
+	defer cancel()
+	inv, err := scanInvite(p.pool.QueryRow(ctx, inviteSelect+" where id=$1", id))
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &inv, nil
+}
+
+func (p *PG) UpdateInvite(inv Invite) error {
+	ctx, cancel := p.ctx()
+	defer cancel()
+	_, err := p.pool.Exec(ctx, `update space_invites set used_count=$2, revoked_at=$3, updated_at=now() where id=$1`,
+		inv.ID, inv.UsedCount, inv.RevokedAt)
+	return err
+}
+
+func (p *PG) ListInvites(spaceID string) ([]Invite, error) {
+	ctx, cancel := p.ctx()
+	defer cancel()
+	rows, err := p.pool.Query(ctx, inviteSelect+" where space_id=$1 order by created_at desc", spaceID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	out := []Invite{}
+	for rows.Next() {
+		inv, err := scanInvite(rows)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, inv)
+	}
+	return out, rows.Err()
+}
+
+const inviteSelect = `select id, space_id, inviter_id, token_hash, expires_at, max_uses, used_count, revoked_at, created_at from space_invites`
+
+func scanInvite(row rowScanner) (Invite, error) {
+	var inv Invite
+	err := row.Scan(&inv.ID, &inv.SpaceID, &inv.InviterID, &inv.TokenHash, &inv.ExpiresAt, &inv.MaxUses, &inv.UsedCount, &inv.RevokedAt, &inv.CreatedAt)
+	return inv, err
+}
+
 const recordSelect = `select id, client_local_id, space_id, author_id, coalesce(content_text,''), mood_tag, occurred_at, occurred_date::text, occurred_timezone,
 	is_backdated, gp_final, gp_capped, gp_breakdown, version, deleted_at, created_at, updated_at, coalesce(status_tags,'[]'::jsonb), coalesce(media_flags,'{}'::jsonb)
 	from records`

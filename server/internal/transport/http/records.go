@@ -12,10 +12,13 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/skydream9527-ctrl/xiaoquexing-server/internal/id"
 	"github.com/skydream9527-ctrl/xiaoquexing-server/internal/ledger"
+	"github.com/skydream9527-ctrl/xiaoquexing-server/internal/media"
 )
 
 type ledgerHandlers struct {
-	svc *ledger.Service
+	svc    *ledger.Service
+	media  *media.Service
+	public string
 }
 
 func (h ledgerHandlers) spaces(c *gin.Context) {
@@ -145,7 +148,7 @@ func (h ledgerHandlers) listRecords(c *gin.Context) {
 	items := make([]ledger.RecordDTO, 0, len(rows))
 	next := ""
 	for _, r := range rows {
-		items = append(items, r.DTO())
+		items = append(items, decorateRecord(h, r))
 		next = r.OccurredAt.UTC().Format(time.RFC3339Nano) + "|" + r.ID
 	}
 	WriteOK(c, gin.H{"items": items, "nextCursor": next, "hasMore": hasMore})
@@ -167,7 +170,7 @@ func (h ledgerHandlers) getRecord(c *gin.Context) {
 		WriteError(c, http.StatusGone, "RECORD_DELETED", "记录已删除", false, nil)
 		return
 	}
-	WriteOK(c, rec.DTO())
+	WriteOK(c, decorateRecord(h, *rec))
 }
 
 type recordWrite struct {

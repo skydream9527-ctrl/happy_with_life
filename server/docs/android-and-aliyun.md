@@ -29,7 +29,7 @@ chmod +x deploy/scripts/first-boot.sh
 
 - `smsSend(phone)` → `smsVerify(phone, code, deviceId)` 得到 Token
 - `me()` 得到账号、脱敏手机号、个人空间 ID
-- `createRecord(moodTag=开心, contentText=...)` 记下当天心情
+- 照片：`mediaSts` → PUT `uploadUrl` → `mediaComplete` → `createRecord`（带 `mediaId`）
 - `calendar(spaceId)` 拉一个月的心情格子
 - Token 过期用 `refresh`；不要把 refresh 写进日志
 

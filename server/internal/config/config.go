@@ -36,6 +36,16 @@ type Config struct {
 	AliyunSMSSignName  string
 	AliyunSMSTemplate  string
 	AliyunSMSEndpoint  string
+	OSSProvider        string
+	OSSBucket          string
+	OSSEndpoint        string
+	OSSAccessKeyID     string
+	OSSAccessKeySecret string
+	MediaDataDir       string
+	PublicBaseURL      string
+	MediaQuotaBytes    int64
+	MaxPhotoBytes      int64
+	AccountDeleteGrace time.Duration
 }
 
 func Load() (Config, error) {
@@ -71,6 +81,16 @@ func Load() (Config, error) {
 		AliyunSMSSignName:  os.Getenv("ALIYUN_SMS_SIGN_NAME"),
 		AliyunSMSTemplate:  os.Getenv("ALIYUN_SMS_TEMPLATE_CODE"),
 		AliyunSMSEndpoint:  getenv("ALIYUN_SMS_ENDPOINT", "dysmsapi.aliyuncs.com"),
+		OSSProvider:        strings.ToLower(getenv("OSS_PROVIDER", "mock")),
+		OSSBucket:          os.Getenv("OSS_BUCKET"),
+		OSSEndpoint:        getenv("OSS_ENDPOINT", "oss-cn-hangzhou.aliyuncs.com"),
+		OSSAccessKeyID:     os.Getenv("OSS_ACCESS_KEY_ID"),
+		OSSAccessKeySecret: os.Getenv("OSS_ACCESS_KEY_SECRET"),
+		MediaDataDir:       getenv("MEDIA_DATA_DIR", "data/media"),
+		PublicBaseURL:      strings.TrimRight(os.Getenv("PUBLIC_BASE_URL"), "/"),
+		MediaQuotaBytes:    int64(getenvInt("MEDIA_QUOTA_BYTES", 200*1024*1024)),
+		MaxPhotoBytes:      int64(getenvInt("MEDIA_MAX_PHOTO_BYTES", 5*1024*1024)),
+		AccountDeleteGrace: getenvDuration("ACCOUNT_DELETE_GRACE", 24*time.Hour),
 	}
 	if err := cfg.Validate(); err != nil {
 		return Config{}, err
@@ -94,6 +114,12 @@ func (c Config) Validate() error {
 	if c.SMSProvider != "mock" && c.SMSProvider != "aliyun" {
 		return fmt.Errorf("SMS_PROVIDER must be mock or aliyun")
 	}
+	if c.OSSProvider != "mock" && c.OSSProvider != "aliyun" {
+		return fmt.Errorf("OSS_PROVIDER must be mock or aliyun")
+	}
+	if c.MediaQuotaBytes <= 0 {
+		return fmt.Errorf("MEDIA_QUOTA_BYTES must be positive")
+	}
 	if c.SMSDevCode == "" || len(c.SMSDevCode) < 4 {
 		return fmt.Errorf("SMS_DEV_CODE is required for mock/dev verification")
 	}
@@ -110,6 +136,9 @@ func (c Config) Validate() error {
 		}
 		if c.IsProd() && c.SMSProvider == "mock" {
 			return fmt.Errorf("SMS_PROVIDER=mock is forbidden in prod")
+		}
+		if c.OSSProvider == "aliyun" && (c.OSSBucket == "" || c.OSSAccessKeyID == "" || c.OSSAccessKeySecret == "") {
+			return fmt.Errorf("OSS_BUCKET and OSS_ACCESS_KEY_* are required when OSS_PROVIDER=aliyun")
 		}
 	}
 	return nil

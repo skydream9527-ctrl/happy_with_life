@@ -19,6 +19,7 @@ type Memory struct {
 	mutations map[string]AppliedMutation
 	changes   []Change
 	seq       int64
+	invites   map[string]Invite
 }
 
 func NewMemory() *Memory {
@@ -29,6 +30,7 @@ func NewMemory() *Memory {
 		records:   map[string]Record{},
 		stats:     map[string]DailyStats{},
 		mutations: map[string]AppliedMutation{},
+		invites:   map[string]Invite{},
 	}
 }
 
@@ -156,6 +158,108 @@ func (m *Memory) ListChanges(userID string, afterSeq int64, limit int) ([]Change
 		out = append(out, c)
 		if limit > 0 && len(out) >= limit {
 			break
+		}
+	}
+	return out, nil
+}
+
+func (m *Memory) CreateSpace(sp Space, owner Member) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.spaces[sp.ID] = sp
+	m.members[memberKey(sp.ID, owner.UserID)] = owner
+	return nil
+}
+
+func (m *Memory) UpdateSpace(sp Space) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	cur, ok := m.spaces[sp.ID]
+	if !ok {
+		return ErrNotFound
+	}
+	sp.TotalGP = cur.TotalGP
+	sp.PlantStage = cur.PlantStage
+	sp.Version = cur.Version + 1
+	m.spaces[sp.ID] = sp
+	return nil
+}
+
+func (m *Memory) ListMembers(spaceID string) ([]Member, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	out := []Member{}
+	for _, mem := range m.members {
+		if mem.SpaceID == spaceID {
+			out = append(out, mem)
+		}
+	}
+	return out, nil
+}
+
+func (m *Memory) SaveMember(mem Member) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.members[memberKey(mem.SpaceID, mem.UserID)] = mem
+	return nil
+}
+
+func (m *Memory) CountActiveMembers(spaceID string) (int, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	n := 0
+	for _, mem := range m.members {
+		if mem.SpaceID == spaceID && mem.Status == "ACTIVE" {
+			n++
+		}
+	}
+	return n, nil
+}
+
+func (m *Memory) InsertInvite(inv Invite) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.invites[inv.ID] = inv
+	return nil
+}
+
+func (m *Memory) GetInviteByHash(hash string) (*Invite, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	for _, inv := range m.invites {
+		if inv.TokenHash == hash {
+			cp := inv
+			return &cp, nil
+		}
+	}
+	return nil, nil
+}
+
+func (m *Memory) GetInvite(id string) (*Invite, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	inv, ok := m.invites[id]
+	if !ok {
+		return nil, nil
+	}
+	cp := inv
+	return &cp, nil
+}
+
+func (m *Memory) UpdateInvite(inv Invite) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.invites[inv.ID] = inv
+	return nil
+}
+
+func (m *Memory) ListInvites(spaceID string) ([]Invite, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	out := []Invite{}
+	for _, inv := range m.invites {
+		if inv.SpaceID == spaceID {
+			out = append(out, inv)
 		}
 	}
 	return out, nil

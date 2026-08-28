@@ -16,6 +16,7 @@ import (
 	"github.com/skydream9527-ctrl/xiaoquexing-server/internal/config"
 	"github.com/skydream9527-ctrl/xiaoquexing-server/internal/dbmigrate"
 	"github.com/skydream9527-ctrl/xiaoquexing-server/internal/ledger"
+	"github.com/skydream9527-ctrl/xiaoquexing-server/internal/media"
 	"github.com/skydream9527-ctrl/xiaoquexing-server/internal/obs"
 	"github.com/skydream9527-ctrl/xiaoquexing-server/internal/platform/aliyun"
 	"github.com/skydream9527-ctrl/xiaoquexing-server/internal/platform/postgres"
@@ -43,6 +44,8 @@ func run(cfg config.Config, log *slog.Logger) error {
 	storeMode := "postgres"
 	var store auth.Store
 	var ledStore ledger.Store
+	var mediaStore media.Store
+	var blob media.Blob
 	var pgReady func(context.Context) error
 	var closer func()
 
@@ -53,6 +56,13 @@ func run(cfg config.Config, log *slog.Logger) error {
 		}
 		store = auth.NewPGStore(pool)
 		ledStore = ledger.NewPG(pool)
+		mediaStore = media.NewPGStore(pool)
+		disk, err := media.NewDiskBlob(cfg.MediaDataDir)
+		if err != nil {
+			pool.Close()
+			return err
+		}
+		blob = disk
 		pgReady = func(c context.Context) error { return pool.Ping(c) }
 		closer = pool.Close
 		if cfg.RunMigrations {
@@ -70,6 +80,8 @@ func run(cfg config.Config, log *slog.Logger) error {
 	} else if cfg.AllowInMemory {
 		store = auth.NewMemoryStore()
 		ledStore = ledger.NewMemory()
+		mediaStore = media.NewMemoryStore()
+		blob = media.NewMemoryBlob()
 		storeMode = "memory"
 		log.Warn("DEV_INMEMORY enabled; data is not durable and must not be used in staging/prod")
 	} else {
@@ -126,8 +138,18 @@ func run(cfg config.Config, log *slog.Logger) error {
 		sms = aliyun.MockSMS{Log: log}
 	}
 
+	if cfg.OSSProvider == "aliyun" {
+		blob = aliyun.OSS{
+			Bucket: cfg.OSSBucket, Endpoint: cfg.OSSEndpoint,
+			AccessKeyID: cfg.OSSAccessKeyID, AccessKeySecret: cfg.OSSAccessKeySecret,
+		}
+		log.Info("oss provider aliyun", "bucket", cfg.OSSBucket)
+	}
+
 	svc := auth.NewService(cfg, store, rdb, sms, log)
 	ledSvc := ledger.NewService(ledStore)
+	mediaSvc := media.NewService(mediaStore, blob, cfg.JWTSigningKey, cfg.MediaQuotaBytes, cfg.MaxPhotoBytes)
+	ledSvc.Media = mediaSvc
 	svc.Bootstrap = ledSvc
 	engine := httpx.NewRouter(cfg, log, httpx.Deps{
 		ReadyPostgres: pgReady,
@@ -135,14 +157,16 @@ func run(cfg config.Config, log *slog.Logger) error {
 		StoreMode:     storeMode,
 		Auth:          svc,
 		Ledger:        ledSvc,
+		Media:         mediaSvc,
+		PublicBaseURL: cfg.PublicBaseURL,
 	})
 
 	srv := &http.Server{
 		Addr:              cfg.HTTPAddr,
 		Handler:           engine,
 		ReadHeaderTimeout: 5 * time.Second,
-		ReadTimeout:       cfg.HTTPTimeout + 5*time.Second,
-		WriteTimeout:      cfg.HTTPTimeout + 5*time.Second,
+		ReadTimeout:       65 * time.Second,
+		WriteTimeout:      65 * time.Second,
 		IdleTimeout:       60 * time.Second,
 	}
 

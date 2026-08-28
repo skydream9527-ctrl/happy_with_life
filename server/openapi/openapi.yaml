@@ -3,9 +3,11 @@ info:
   title: 小确幸服务端 API
   version: 0.1.0
   description: |
-    S0–S2 surface: health, auth, personal space, records, sync push/pull.
+    S0–S3 surface: health, auth, personal space, records, sync, photo STS upload.
     Field names are lowerCamelCase. Timestamps are UTC RFC3339.
     Server IDs are UUIDv7 strings.
+    Media quota: 200MB/user, 5MB/photo, 9 photos/record. Invite: link only, 7 days, max 6 members. Account delete cooling: 24h.
+
 servers:
   - url: /
 paths:
@@ -254,6 +256,83 @@ paths:
         - { name: limit, in: query, schema: { type: integer } }
       responses:
         "200": { description: Incremental changes including tombstones }
+  /api/v1/media/sts:
+    post:
+      operationId: mediaSTS
+      security: [{ bearerAuth: [] }]
+      summary: Issue a short-lived PUT URL. Android uploads directly; server never sees a long-lived AK on the client.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [mimeType, sizeBytes]
+              properties:
+                type: { type: string, enum: [PHOTO, VOICE] }
+                mimeType: { type: string, examples: ["image/jpeg"] }
+                sizeBytes: { type: integer }
+                width: { type: integer }
+                height: { type: integer }
+      responses:
+        "200": { description: mediaId, uploadUrl, headers, quota }
+        "403": { $ref: "#/components/responses/Error" }
+  /api/v1/media/complete:
+    post:
+      operationId: mediaComplete
+      security: [{ bearerAuth: [] }]
+      summary: Verify the object landed and mark READY.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [mediaId]
+              properties:
+                mediaId: { type: string }
+      responses:
+        "200": { description: READY object }
+        "409": { $ref: "#/components/responses/Error" }
+  /api/v1/media/quota:
+    get:
+      operationId: mediaQuota
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: usedBytes / maxBytes (200MB) }
+  /api/v1/media/{id}/download-url:
+    get:
+      operationId: mediaDownloadURL
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200": { description: Short-lived GET URL }
+  /api/v1/media/{id}:
+    delete:
+      operationId: mediaDelete
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200": { description: Soft-deleted }
+        "409": { $ref: "#/components/responses/Error" }
+  /api/v1/media/upload/{ticket}:
+    put:
+      operationId: mediaMockUpload
+      summary: Mock/OSS-compat PUT target when OSS_PROVIDER=mock
+      parameters:
+        - { name: ticket, in: path, required: true, schema: { type: string } }
+      responses:
+        "200": { description: Stored }
+  /api/v1/media/content/{ticket}:
+    get:
+      operationId: mediaMockDownload
+      summary: Mock signed GET when OSS_PROVIDER=mock
+      parameters:
+        - { name: ticket, in: path, required: true, schema: { type: string } }
+      responses:
+        "200": { description: Bytes }
 components:
   securitySchemes:
     bearerAuth:

@@ -3,6 +3,7 @@ package httpx
 import (
 	"errors"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/skydream9527-ctrl/xiaoquexing-server/internal/auth"
@@ -117,7 +118,13 @@ func (h authHandlers) deleteAccount(c *gin.Context) {
 		WriteInternal(c)
 		return
 	}
-	WriteOK(c, gin.H{"status": "PENDING_DELETE"})
+	grace := h.svc.AccountDeleteGrace()
+	until := time.Now().UTC().Add(grace)
+	WriteOK(c, gin.H{
+		"status": "PENDING_DELETE",
+		"coolingHours": int(grace.Hours()),
+		"purgeAfter": until.Format(time.RFC3339Nano),
+	})
 }
 
 func (h authHandlers) me(c *gin.Context) {

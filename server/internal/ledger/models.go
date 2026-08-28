@@ -27,6 +27,24 @@ type Member struct {
 	ContributedGP int64
 }
 
+type Invite struct {
+	ID        string
+	SpaceID   string
+	InviterID string
+	TokenHash string
+	ExpiresAt time.Time
+	MaxUses   int
+	UsedCount int
+	RevokedAt *time.Time
+	CreatedAt time.Time
+}
+
+const (
+	MaxSpaceMembers = 6
+	InviteTTL       = 7 * 24 * time.Hour
+	InviteMaxUses   = 10
+)
+
 type Record struct {
 	ID               string
 	ClientLocalID    *int64
@@ -103,6 +121,7 @@ type MutationPayload struct {
 }
 
 type MediaInput struct {
+	MediaID  string `json:"mediaId"`
 	Type     string `json:"type"`
 	MimeType string `json:"mimeType"`
 }
@@ -149,6 +168,7 @@ type RecordDTO struct {
 	GPBreakdown   growth.Breakdown `json:"gpBreakdown"`
 	Version       int64            `json:"version"`
 	DeletedAt     *string          `json:"deletedAt,omitempty"`
+	Media         []any            `json:"media,omitempty"`
 }
 
 func (r Record) DTO() RecordDTO {

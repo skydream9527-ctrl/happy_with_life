@@ -10,6 +10,16 @@ type Store interface {
 	ListRecords(spaceID, afterOccurred, afterID string, limit int) ([]Record, error)
 	ListChanges(userID string, afterSeq int64, limit int) ([]Change, error)
 	ApplyTx(fn func(tx Tx) error) error
+	CreateSpace(sp Space, owner Member) error
+	UpdateSpace(sp Space) error
+	ListMembers(spaceID string) ([]Member, error)
+	SaveMember(m Member) error
+	CountActiveMembers(spaceID string) (int, error)
+	InsertInvite(inv Invite) error
+	GetInviteByHash(hash string) (*Invite, error)
+	GetInvite(id string) (*Invite, error)
+	UpdateInvite(inv Invite) error
+	ListInvites(spaceID string) ([]Invite, error)
 }
 
 type Tx interface {
