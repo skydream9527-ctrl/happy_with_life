@@ -137,4 +137,13 @@ interface RecordDao {
 
     @Query("SELECT COUNT(*) FROM records WHERE sync_state != 0")
     fun observePendingSyncCount(): Flow<Int>
+
+    @Query("SELECT * FROM records WHERE sync_state != 0 ORDER BY updated_at ASC LIMIT 50")
+    suspend fun listPendingSync(): List<RecordEntity>
+
+    @Query(
+        "UPDATE records SET server_id = :serverId, gp_final = :gpFinal, version = :version, " +
+            "sync_state = 0, updated_at = :now WHERE local_id = :recordId"
+    )
+    suspend fun markSynced(recordId: Long, serverId: String, gpFinal: Int, version: Int, now: Long)
 }

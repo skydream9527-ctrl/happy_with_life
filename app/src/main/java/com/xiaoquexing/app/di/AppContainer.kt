@@ -1,9 +1,15 @@
 package com.xiaoquexing.app.di
 
 import android.content.Context
+import com.xiaoquexing.app.BuildConfig
 import com.xiaoquexing.app.data.DataBootstrap
 import com.xiaoquexing.app.data.db.AppDatabase
 import com.xiaoquexing.app.data.media.MediaImporter
+import com.xiaoquexing.app.data.remote.SessionRepository
+import com.xiaoquexing.app.data.remote.SyncEngine
+import com.xiaoquexing.app.data.remote.TokenHolder
+import com.xiaoquexing.app.data.remote.TokenStore
+import com.xiaoquexing.app.data.remote.createApiService
 import com.xiaoquexing.app.data.repository.AchievementRepository
 import com.xiaoquexing.app.data.repository.PlantRepository
 import com.xiaoquexing.app.data.repository.RecordRepository
@@ -27,4 +33,26 @@ class AppContainer(private val appContext: Context) {
     val plantRepository: PlantRepository by lazy { PlantRepository(database) }
 
     val achievementRepository: AchievementRepository by lazy { AchievementRepository(database) }
+
+    val tokenHolder = TokenHolder()
+
+    val tokenStore: TokenStore by lazy { TokenStore(appContext) }
+
+    val apiService by lazy {
+        createApiService(
+            baseUrl = BuildConfig.XQX_API_BASE,
+            deviceId = tokenHolder.deviceId,
+            appVersion = BuildConfig.VERSION_NAME,
+            tokenProvider = { tokenHolder.accessToken },
+            deviceIdProvider = { tokenHolder.deviceId },
+        )
+    }
+
+    val sessionRepository: SessionRepository by lazy {
+        SessionRepository(apiService, tokenStore, tokenHolder)
+    }
+
+    val syncEngine: SyncEngine by lazy {
+        SyncEngine(database, apiService, tokenStore)
+    }
 }

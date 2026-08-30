@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.xiaoquexing.app.XiaoQueXingApp
 import com.xiaoquexing.app.ui.share.ShareViewModel
 import com.xiaoquexing.app.viewmodel.AlbumViewModel
+import com.xiaoquexing.app.viewmodel.AuthViewModel
 import com.xiaoquexing.app.viewmodel.HomeViewModel
 import com.xiaoquexing.app.viewmodel.ProfileViewModel
 import com.xiaoquexing.app.viewmodel.RecordViewModel
@@ -30,7 +31,7 @@ class XiaoQueXingViewModelFactory(
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return when {
             modelClass.isAssignableFrom(RecordViewModel::class.java) ->
-                RecordViewModel(container.recordRepository, container.mediaImporter)
+                RecordViewModel(container.recordRepository, container.mediaImporter, container.syncEngine)
 
             modelClass.isAssignableFrom(HomeViewModel::class.java) ->
                 HomeViewModel(container.recordRepository, container.plantRepository)
@@ -44,6 +45,9 @@ class XiaoQueXingViewModelFactory(
                     container.plantRepository,
                     container.achievementRepository
                 )
+
+            modelClass.isAssignableFrom(AuthViewModel::class.java) ->
+                AuthViewModel(container.sessionRepository, container.tokenStore, container.syncEngine)
 
             modelClass.isAssignableFrom(AlbumViewModel::class.java) ->
                 AlbumViewModel()
