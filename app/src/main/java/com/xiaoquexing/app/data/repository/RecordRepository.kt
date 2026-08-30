@@ -21,7 +21,10 @@ import com.xiaoquexing.app.data.model.GPBreakdown
 import com.xiaoquexing.app.util.DateKeys
 import com.xiaoquexing.app.util.GPCalculator
 import com.xiaoquexing.app.util.StreakCalculator
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import org.json.JSONObject
 import java.time.LocalDate
@@ -32,6 +35,7 @@ import java.time.LocalDate
  * 读 API 返回 v1 形状的领域 Record（媒体/标签重新拼回扁平字符串），
  * 让既有 UI 与 ViewModel 零改动；occurredAt 语义在实体层已就位，Z1-04 再放开编辑。
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 class RecordRepository(private val db: AppDatabase) {
 
     private val recordDao = db.recordDao()
@@ -54,25 +58,37 @@ class RecordRepository(private val db: AppDatabase) {
     // ---- 读（UI 兼容） ----
 
     fun getAllRecords(): Flow<List<Record>> =
-        recordDao.observeAllRecordDetails().map { list -> list.map(::toDomain) }
+        spaceDao.observeDefaultSpace().flatMapLatest { space ->
+            if (space == null) flowOf(emptyList())
+            else recordDao.observeRecordDetailsInSpace(space.localId).map { list -> list.map(::toDomain) }
+        }
 
     fun getRecentRecords(limit: Int = 5): Flow<List<Record>> =
-        recordDao.observeRecentRecordDetails(limit).map { list -> list.map(::toDomain) }
+        getAllRecords().map { it.take(limit) }
 
     fun getLatestRecord(): Flow<Record?> =
-        recordDao.observeLatestRecordDetail().map { it?.let(::toDomain) }
+        getAllRecords().map { it.firstOrNull() }
 
     suspend fun getRecordById(id: Long): Record? =
         recordDao.getRecordDetailById(id)?.let(::toDomain)
 
-    fun getTotalCount(): Flow<Int> = recordDao.observeTotalCountAll()
+    fun getTotalCount(): Flow<Int> =
+        spaceDao.observeDefaultSpace().flatMapLatest { space ->
+            if (space == null) flowOf(0) else recordDao.observeTotalCount(space.localId)
+        }
 
-    /** 空间总 GP（ADR D7 唯一真相来源 = 记录集合之和） */
-    fun getTotalGp(): Flow<Int> = recordDao.observeTotalGpAll()
+    /** 当前默认空间总 GP（ADR D7） */
+    fun getTotalGp(): Flow<Int> =
+        spaceDao.observeDefaultSpace().flatMapLatest { space ->
+            if (space == null) flowOf(0) else recordDao.observeTotalGp(space.localId)
+        }
 
     /** 今日已得 GP：按「发生日期」口径（ADR D3），不再用 createdAt */
     fun getTodayGp(): Flow<Int> =
-        recordDao.observeGpOnDateAll(LocalDate.now().toEpochDay().toInt())
+        spaceDao.observeDefaultSpace().flatMapLatest { space ->
+            val key = LocalDate.now().toEpochDay().toInt()
+            if (space == null) flowOf(0) else recordDao.observeGpOnDate(space.localId, key)
+        }
 
     suspend fun calculateStreakDays(): Int {
         val space = spaceDao.getDefaultSpace() ?: return 0

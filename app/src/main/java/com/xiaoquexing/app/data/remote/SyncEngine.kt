@@ -69,8 +69,9 @@ class SyncEngine(
                 continue
             }
             val media = runCatching { photos?.uploadForRecord(row.localId).orEmpty() }.getOrDefault(emptyList())
+            val targetSpace = db.spaceDao().getById(row.spaceId)?.serverId?.takeIf { it.isNotBlank() } ?: spaceId
             val write = RecordWrite(
-                spaceId = spaceId,
+                spaceId = targetSpace,
                 moodTag = row.moodTag,
                 contentText = row.contentText.orEmpty(),
                 timezone = ZoneId.systemDefault().id,

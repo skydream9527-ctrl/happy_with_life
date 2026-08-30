@@ -58,6 +58,10 @@ interface RecordDao {
     fun observeAllRecordDetails(): Flow<List<RecordWithDetails>>
 
     @Transaction
+    @Query("SELECT * FROM records WHERE space_id = :spaceId AND deleted_at IS NULL ORDER BY occurred_at DESC")
+    fun observeRecordDetailsInSpace(spaceId: Long): Flow<List<RecordWithDetails>>
+
+    @Transaction
     @Query("SELECT * FROM records WHERE deleted_at IS NULL ORDER BY occurred_at DESC LIMIT :limit")
     fun observeRecentRecordDetails(limit: Int): Flow<List<RecordWithDetails>>
 
@@ -108,6 +112,12 @@ interface RecordDao {
 
     @Query("SELECT COALESCE(SUM(gp_final), 0) FROM records WHERE deleted_at IS NULL")
     fun observeTotalGpAll(): Flow<Int>
+
+    @Query("SELECT COALESCE(SUM(gp_final), 0) FROM records WHERE space_id = :spaceId AND deleted_at IS NULL")
+    fun observeTotalGp(spaceId: Long): Flow<Int>
+
+    @Query("SELECT COALESCE(SUM(gp_final), 0) FROM records WHERE space_id = :spaceId AND occurred_date_key = :dateKey AND deleted_at IS NULL")
+    fun observeGpOnDate(spaceId: Long, dateKey: Int): Flow<Int>
 
     @Query("SELECT COALESCE(SUM(gp_final), 0) FROM records WHERE occurred_date_key = :dateKey AND deleted_at IS NULL")
     fun observeGpOnDateAll(dateKey: Int): Flow<Int>

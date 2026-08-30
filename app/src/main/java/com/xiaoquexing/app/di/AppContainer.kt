@@ -14,6 +14,7 @@ import com.xiaoquexing.app.data.remote.createApiService
 import com.xiaoquexing.app.data.repository.AchievementRepository
 import com.xiaoquexing.app.data.repository.PlantRepository
 import com.xiaoquexing.app.data.repository.RecordRepository
+import com.xiaoquexing.app.data.repository.SpaceRepository
 
 /**
  * 生产环境依赖容器（ADR-002）。
@@ -59,5 +60,9 @@ class AppContainer(private val appContext: Context) {
 
     val syncEngine: SyncEngine by lazy {
         SyncEngine(database, apiService, tokenStore, photoUploader)
+    }
+
+    val spaceRepository: SpaceRepository by lazy {
+        SpaceRepository(database, apiService)
     }
 }
