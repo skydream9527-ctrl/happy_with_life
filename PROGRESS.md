@@ -34,13 +34,13 @@
 
 - 服务端：dev CORS 默认放开；Android SDK 补 `sync/push|pull` 与记录 PATCH/DELETE；新增 `tests/android_handoff_test.go`。
 - 客户端：Retrofit 接入、`data/remote`、DataStore Token、登录页、「我的 → 登录与同步」、待同步记录 `createRecord` 出站。
-- 仍为 Mock 短信（验证码 123456）和 Mock OSS。合种 UI、正式阿里云短信/OSS 未做。
+- 仍为 Mock 短信（验证码 123456）和 Mock OSS。正式阿里云短信/OSS 未接（缺生产密钥）。
 - 照片压缩后 STS 直传；启动/登录/发布走 `syncAll`（含 pull 与冲突标记）；时间线可进编辑/补记/软删。
+- 合种：创建共享空间、邀请码、加入、成员、切换当前空间；记录/植物按默认空间隔离。
 
 ## 未实现
 
 - 正式阿里云短信签名与生产 OSS。
-- 共享空间成员/邀请 UI。
 - 地图、月年回顾、通知、Widget、订阅与 AI。
 
 ## 下一轮分工

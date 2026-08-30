@@ -32,4 +32,19 @@ interface SpaceDao {
 
     @Query("UPDATE spaces SET server_id = :serverId, updated_at = :now WHERE local_id = :spaceId")
     suspend fun bindServerId(spaceId: Long, serverId: String, now: Long)
+
+    @Query("SELECT * FROM spaces WHERE local_id = :spaceId LIMIT 1")
+    suspend fun getById(spaceId: Long): SpaceEntity?
+
+    @Query("SELECT * FROM spaces WHERE server_id = :serverId LIMIT 1")
+    suspend fun findByServerId(serverId: String): SpaceEntity?
+
+    @Query("UPDATE spaces SET is_default = 0, updated_at = :now WHERE deleted_at IS NULL")
+    suspend fun clearDefault(now: Long)
+
+    @Query("UPDATE spaces SET is_default = 1, updated_at = :now WHERE local_id = :spaceId")
+    suspend fun setDefault(spaceId: Long, now: Long)
+
+    @Query("SELECT * FROM spaces WHERE deleted_at IS NULL ORDER BY is_default DESC, created_at ASC")
+    fun observeAll(): Flow<List<SpaceEntity>>
 }

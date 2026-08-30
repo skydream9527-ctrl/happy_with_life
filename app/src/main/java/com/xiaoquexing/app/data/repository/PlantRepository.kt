@@ -33,7 +33,7 @@ class PlantRepository(private val db: AppDatabase) {
                 combine(
                     plantDao.observePlantDefs(),
                     plantDao.observeActiveSpacePlant(space.localId),
-                    db.recordDao().observeTotalGpAll()
+                    db.recordDao().observeTotalGp(space.localId)
                 ) { defs, active, totalGp ->
                     defs.map { toDomain(it, active?.plantType, totalGp, active?.startedAt) }
                 }
@@ -48,7 +48,7 @@ class PlantRepository(private val db: AppDatabase) {
                 combine(
                     plantDao.observePlantDefs(),
                     plantDao.observeActiveSpacePlant(space.localId),
-                    db.recordDao().observeTotalGpAll()
+                    db.recordDao().observeTotalGp(space.localId)
                 ) { defs, active, totalGp ->
                     active?.let { a ->
                         defs.find { it.plantType == a.plantType }

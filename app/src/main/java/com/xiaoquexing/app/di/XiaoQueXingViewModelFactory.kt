@@ -13,6 +13,7 @@ import com.xiaoquexing.app.viewmodel.AuthViewModel
 import com.xiaoquexing.app.viewmodel.HomeViewModel
 import com.xiaoquexing.app.viewmodel.ProfileViewModel
 import com.xiaoquexing.app.viewmodel.RecordViewModel
+import com.xiaoquexing.app.viewmodel.SharedSpaceViewModel
 import com.xiaoquexing.app.viewmodel.TimelineViewModel
 
 /**
@@ -48,6 +49,9 @@ class XiaoQueXingViewModelFactory(
 
             modelClass.isAssignableFrom(AuthViewModel::class.java) ->
                 AuthViewModel(container.sessionRepository, container.tokenStore, container.syncEngine)
+
+            modelClass.isAssignableFrom(SharedSpaceViewModel::class.java) ->
+                SharedSpaceViewModel(container.spaceRepository, container.tokenStore)
 
             modelClass.isAssignableFrom(AlbumViewModel::class.java) ->
                 AlbumViewModel()

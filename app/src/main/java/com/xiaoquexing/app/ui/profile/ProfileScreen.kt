@@ -52,6 +52,7 @@ fun ProfileScreen(
     onNavigateToAchievement: () -> Unit,
     onNavigateToPlantGuide: () -> Unit,
     onNavigateToLogin: () -> Unit = {},
+    onNavigateToSpaces: () -> Unit = {},
     viewModel: ProfileViewModel = viewModel(factory = rememberXiaoQueXingViewModelFactory())
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -136,7 +137,7 @@ fun ProfileScreen(
                     icon = Icons.Default.Group,
                     title = "共享空间",
                     subtitle = "和朋友一起记录小确幸",
-                    onClick = { /* TODO */ },
+                    onClick = onNavigateToSpaces,
                     iconTint = Color(0xFF7EC8CE)
                 )
                 MenuItem(
