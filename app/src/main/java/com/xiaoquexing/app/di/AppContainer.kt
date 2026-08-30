@@ -5,6 +5,7 @@ import com.xiaoquexing.app.BuildConfig
 import com.xiaoquexing.app.data.DataBootstrap
 import com.xiaoquexing.app.data.db.AppDatabase
 import com.xiaoquexing.app.data.media.MediaImporter
+import com.xiaoquexing.app.data.media.PhotoUploader
 import com.xiaoquexing.app.data.remote.SessionRepository
 import com.xiaoquexing.app.data.remote.SyncEngine
 import com.xiaoquexing.app.data.remote.TokenHolder
@@ -52,7 +53,11 @@ class AppContainer(private val appContext: Context) {
         SessionRepository(apiService, tokenStore, tokenHolder)
     }
 
+    val photoUploader: PhotoUploader by lazy {
+        PhotoUploader(database, apiService, BuildConfig.XQX_API_BASE)
+    }
+
     val syncEngine: SyncEngine by lazy {
-        SyncEngine(database, apiService, tokenStore)
+        SyncEngine(database, apiService, tokenStore, photoUploader)
     }
 }

@@ -71,6 +71,9 @@ import com.xiaoquexing.app.ui.timeline.TimelineScreen
 sealed class Screen(val route: String, val title: String) {
     data object Home : Screen("home", "首页")
     data object Record : Screen("record", "记录")
+    data object RecordEdit : Screen("record/{recordId}", "编辑") {
+        fun createRoute(recordId: Long) = "record/$recordId"
+    }
     data object Timeline : Screen("timeline", "时间线")
     data object Album : Screen("album", "画册")
     data object Profile : Screen("profile", "我的")
@@ -130,9 +133,20 @@ fun AppNavigation() {
                     onBack = { navController.popBackStack() }
                 )
             }
+            composable(
+                route = Screen.RecordEdit.route,
+                arguments = listOf(navArgument("recordId") { type = NavType.LongType }),
+            ) { entry ->
+                val id = entry.arguments?.getLong("recordId") ?: 0L
+                RecordScreen(
+                    recordId = id,
+                    onPublished = { navController.popBackStack() },
+                    onBack = { navController.popBackStack() },
+                )
+            }
             composable(Screen.Timeline.route) {
                 TimelineScreen(
-                    onNavigateToShare = { recordId -> navController.navigate(Screen.Share.createRoute(recordId)) }
+                    onNavigateToShare = { recordId -> navController.navigate(Screen.RecordEdit.createRoute(recordId)) }
                 )
             }
             composable(Screen.Album.route) {

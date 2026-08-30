@@ -35,6 +35,8 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -47,6 +49,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -81,6 +84,7 @@ import kotlinx.coroutines.launch
 fun RecordScreen(
     onPublished: () -> Unit,
     onBack: () -> Unit = onPublished,
+    recordId: Long = 0L,
     viewModel: RecordViewModel = viewModel(factory = rememberXiaoQueXingViewModelFactory())
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -95,6 +99,12 @@ fun RecordScreen(
     var musicArtistInput by remember { mutableStateOf("") }
     var linkUrlInput by remember { mutableStateOf("") }
     var locationInput by remember { mutableStateOf("") }
+    var showDatePicker by remember { mutableStateOf(false) }
+    var showDeleteConfirm by remember { mutableStateOf(false) }
+
+    LaunchedEffect(recordId) {
+        if (recordId > 0) viewModel.load(recordId)
+    }
 
     // 接好录音的停止回调：picker.stopRecording() 后调到这里
     LaunchedEffect(mediaPicker) {
@@ -145,7 +155,7 @@ fun RecordScreen(
                     .height(44.dp)
             ) {
                 Text(
-                    text = "记录小确幸",
+                    text = if (uiState.editingId > 0) "编辑记录" else "记录小确幸",
                     style = MaterialTheme.typography.headlineSmall,
                     color = MaterialTheme.colorScheme.onBackground,
                     modifier = Modifier.align(Alignment.Center)
@@ -198,6 +208,26 @@ fun RecordScreen(
             }
 
             Spacer(modifier = Modifier.height(24.dp))
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                    .clickable { showDatePicker = true }
+                    .padding(horizontal = 16.dp, vertical = 14.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text("发生日期", style = MaterialTheme.typography.bodyMedium)
+                Text(
+                    text = formatOccurred(uiState.occurredAt),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
 
             // Status tags
             Text(
@@ -394,11 +424,22 @@ fun RecordScreen(
                     )
                 } else {
                     Text(
-                        text = "发布",
+                        text = if (uiState.editingId > 0) "保存修改" else "发布",
                         fontSize = 17.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = Color.White
                     )
+                }
+            }
+
+            if (uiState.editingId > 0) {
+                Spacer(modifier = Modifier.height(12.dp))
+                TextButton(
+                    onClick = { showDeleteConfirm = true },
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = !uiState.isDeleting,
+                ) {
+                    Text("删除这条记录", color = MaterialTheme.colorScheme.error)
                 }
             }
 
@@ -538,6 +579,57 @@ fun RecordScreen(
                 Spacer(modifier = Modifier.height(8.dp))
             }
         }
+    }
+
+    if (showDatePicker) {
+        val picker = rememberDatePickerState(
+            initialSelectedDateMillis = uiState.occurredAt.takeIf { it > 0 } ?: System.currentTimeMillis()
+        )
+        DatePickerDialog(
+            onDismissRequest = { showDatePicker = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    picker.selectedDateMillis?.let { viewModel.setOccurredAt(it) }
+                    showDatePicker = false
+                }) { Text("确定") }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    viewModel.clearOccurredAt()
+                    showDatePicker = false
+                }) { Text("今天") }
+            },
+        ) {
+            DatePicker(state = picker)
+        }
+    }
+
+    if (showDeleteConfirm) {
+        AlertDialog(
+            onDismissRequest = { showDeleteConfirm = false },
+            title = { Text("删除记录") },
+            text = { Text("删除后时间线和植物积分会重算，云端同步为软删除。") },
+            confirmButton = {
+                TextButton(onClick = {
+                    showDeleteConfirm = false
+                    viewModel.delete(onPublished)
+                }) { Text("删除") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteConfirm = false }) { Text("取消") }
+            },
+        )
+    }
+}
+
+private fun formatOccurred(occurredAt: Long): String {
+    val ms = if (occurredAt > 0) occurredAt else System.currentTimeMillis()
+    val date = java.time.Instant.ofEpochMilli(ms).atZone(java.time.ZoneId.systemDefault()).toLocalDate()
+    val today = java.time.LocalDate.now()
+    return when {
+        date == today -> "今天"
+        date == today.minusDays(1) -> "昨天"
+        else -> date.toString()
     }
 }
 
