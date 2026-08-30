@@ -146,4 +146,10 @@ interface RecordDao {
             "sync_state = 0, updated_at = :now WHERE local_id = :recordId"
     )
     suspend fun markSynced(recordId: Long, serverId: String, gpFinal: Int, version: Int, now: Long)
+
+    @Query("SELECT * FROM records WHERE server_id = :serverId LIMIT 1")
+    suspend fun findByServerId(serverId: String): RecordEntity?
+
+    @Query("UPDATE records SET sync_state = :syncState, updated_at = :now WHERE local_id = :recordId")
+    suspend fun setSyncState(recordId: Long, syncState: Int, now: Long)
 }

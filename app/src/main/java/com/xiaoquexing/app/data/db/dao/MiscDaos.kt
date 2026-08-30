@@ -24,6 +24,15 @@ interface MediaDao {
     @Query("UPDATE record_media SET local_path = :localPath, media_status = :status, updated_at = :now WHERE local_id = :mediaId")
     suspend fun updateLocalPath(mediaId: Long, localPath: String?, status: String, now: Long)
 
+    @Query(
+        "SELECT * FROM record_media WHERE record_id = :recordId AND type = 'PHOTO' " +
+            "AND media_status = 'READY' AND deleted_at IS NULL"
+    )
+    suspend fun readyPhotos(recordId: Long): List<RecordMediaEntity>
+
+    @Query("UPDATE record_media SET server_id = :serverId, updated_at = :now WHERE local_id = :mediaId")
+    suspend fun bindServerId(mediaId: Long, serverId: String, now: Long)
+
     /**
      * 编辑时重写子行（v1 离线物理删除；M4 接同步后改为软删保留墓碑）。
      * 记录本体仍在，级联不会触发，必须显式清理。

@@ -73,8 +73,12 @@ class AuthViewModel(
             _ui.value = snapshot.copy(verifying = true, message = null)
             runCatching { sessions.verify(snapshot.phone, snapshot.code) }
                 .onSuccess {
-                    val n = runCatching { sync.pushPending() }.getOrDefault(0)
-                    _ui.value = _ui.value.copy(verifying = false, lastSynced = n, message = "已登录，同步 $n 条")
+                    val report = runCatching { sync.syncAll() }.getOrDefault(com.xiaoquexing.app.data.remote.SyncReport())
+                    _ui.value = _ui.value.copy(
+                        verifying = false,
+                        lastSynced = report.pushed,
+                        message = report.error ?: "已登录，上传 ${report.pushed} 条" + if (report.conflicts > 0) "，${report.conflicts} 条冲突" else "",
+                    )
                 }
                 .onFailure {
                     val msg = (it as? ApiException)?.err?.message ?: it.message ?: "验证失败"
@@ -86,11 +90,15 @@ class AuthViewModel(
     fun syncNow() {
         viewModelScope.launch {
             _ui.value = _ui.value.copy(syncing = true, message = null)
-            val n = runCatching { sync.pushPending() }.getOrElse {
+            val report = runCatching { sync.syncAll() }.getOrElse {
                 _ui.value = _ui.value.copy(syncing = false, message = it.message)
                 return@launch
             }
-            _ui.value = _ui.value.copy(syncing = false, lastSynced = n, message = "已同步 $n 条")
+            _ui.value = _ui.value.copy(
+                syncing = false,
+                lastSynced = report.pushed,
+                message = report.error ?: "已同步 ${report.pushed} 条 / 拉取 ${report.pulled} 条",
+            )
         }
     }
 

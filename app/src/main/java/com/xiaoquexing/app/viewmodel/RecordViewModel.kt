@@ -40,7 +40,9 @@ data class RecordUiState(
     val estimatedGp: Int = 0,
     val todayGp: Int = 0,
     val currentStreak: Int = 0,
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    val editingId: Long = 0L,
+    val isDeleting: Boolean = false,
 )
 
 class RecordViewModel(
@@ -174,6 +176,36 @@ class RecordViewModel(
         recalculateEstimatedGp()
     }
 
+    fun load(recordId: Long) {
+        if (recordId <= 0) return
+        viewModelScope.launch {
+            val row = recordRepo.getRecordById(recordId) ?: run {
+                _uiState.value = _uiState.value.copy(errorMessage = "记录不存在或已删除")
+                return@launch
+            }
+            _uiState.value = _uiState.value.copy(
+                editingId = recordId,
+                text = row.text,
+                selectedMood = row.moodTag,
+                selectedStatusTags = row.getStatusTagList().toSet(),
+                photoUris = row.getPhotoUriList(),
+                voiceUri = row.voiceUri,
+                voiceDuration = row.voiceDuration,
+                musicTitle = row.musicTitle,
+                musicArtist = row.musicArtist,
+                musicUri = row.musicUri,
+                linkUrl = row.linkUrl,
+                linkTitle = row.linkTitle,
+                linkSummary = row.linkSummary,
+                locationName = row.locationName,
+                locationLat = row.locationLat,
+                locationLng = row.locationLng,
+                occurredAt = row.createdAt,
+            )
+            recalculateEstimatedGp()
+        }
+    }
+
     private fun estimateIsBackdated(): Boolean {
         val occurred = _uiState.value.occurredAt
         return occurred > 0 && DateKeys.epochDay(occurred) != DateKeys.epochDay(System.currentTimeMillis())
@@ -237,7 +269,10 @@ class RecordViewModel(
 
             // 记录、媒体、标签、当日额度、空间 GP、植物阶段、成就、Outbox 在同一事务内
             // 原子写入（Z1-02）；GP 由事务内按数据库当前额度计算，避免过期读数
-            val result = runCatching { recordRepo.publish(record) }.getOrElse { e ->
+            val result = runCatching {
+                if (state.editingId > 0) recordRepo.editRecord(state.editingId, record)
+                else recordRepo.publish(record)
+            }.getOrElse { e ->
                 _uiState.value = _uiState.value.copy(
                     isPublishing = false,
                     errorMessage = "保存失败，请重试（${e.message}）"
@@ -248,7 +283,7 @@ class RecordViewModel(
             // content:// 照片复制到私有目录（K5）：事务成功后的独立步骤，失败置 MISSING 可重试
             viewModelScope.launch {
                 runCatching { mediaImporter.importPending(result.recordId) }
-                runCatching { syncEngine?.pushPending() }
+                runCatching { syncEngine?.syncAll(retries = 2) }
             }
 
             _uiState.value = _uiState.value.copy(
@@ -265,5 +300,24 @@ class RecordViewModel(
 
     fun dismissError() {
         _uiState.value = _uiState.value.copy(errorMessage = null)
+    }
+
+    fun delete(onDone: () -> Unit) {
+        val id = _uiState.value.editingId
+        if (id <= 0) return
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isDeleting = true)
+            runCatching { recordRepo.softDelete(id) }
+                .onSuccess {
+                    runCatching { syncEngine?.syncAll(retries = 1) }
+                    onDone()
+                }
+                .onFailure {
+                    _uiState.value = _uiState.value.copy(
+                        isDeleting = false,
+                        errorMessage = it.message ?: "删除失败",
+                    )
+                }
+        }
     }
 }
