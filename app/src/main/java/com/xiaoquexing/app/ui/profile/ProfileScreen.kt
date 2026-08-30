@@ -51,6 +51,7 @@ fun ProfileScreen(
     onNavigateToPlantSelection: () -> Unit,
     onNavigateToAchievement: () -> Unit,
     onNavigateToPlantGuide: () -> Unit,
+    onNavigateToLogin: () -> Unit = {},
     viewModel: ProfileViewModel = viewModel(factory = rememberXiaoQueXingViewModelFactory())
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -137,6 +138,13 @@ fun ProfileScreen(
                     subtitle = "和朋友一起记录小确幸",
                     onClick = { /* TODO */ },
                     iconTint = Color(0xFF7EC8CE)
+                )
+                MenuItem(
+                    icon = Icons.Default.Settings,
+                    title = "登录与同步",
+                    subtitle = "手机号登录后把本地记录合并到云端",
+                    onClick = onNavigateToLogin,
+                    iconTint = Color(0xFF5E9B6A)
                 )
                 MenuItem(
                     icon = Icons.Default.Settings,

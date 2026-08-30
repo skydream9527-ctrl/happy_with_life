@@ -29,4 +29,7 @@ interface SpaceDao {
 
     @Query("UPDATE spaces SET total_gp = :totalGp, updated_at = :now WHERE local_id = :spaceId")
     suspend fun setTotalGp(spaceId: Long, totalGp: Int, now: Long)
+
+    @Query("UPDATE spaces SET server_id = :serverId, updated_at = :now WHERE local_id = :spaceId")
+    suspend fun bindServerId(spaceId: Long, serverId: String, now: Long)
 }

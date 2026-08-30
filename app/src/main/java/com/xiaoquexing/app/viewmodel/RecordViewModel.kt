@@ -6,6 +6,7 @@ import com.xiaoquexing.app.data.entity.Record
 import com.xiaoquexing.app.data.media.MediaImporter
 import com.xiaoquexing.app.data.model.MoodTag
 import com.xiaoquexing.app.data.model.StatusTag
+import com.xiaoquexing.app.data.remote.SyncEngine
 import com.xiaoquexing.app.data.repository.RecordRepository
 import com.xiaoquexing.app.util.DateKeys
 import com.xiaoquexing.app.util.GPCalculator
@@ -44,7 +45,8 @@ data class RecordUiState(
 
 class RecordViewModel(
     private val recordRepo: RecordRepository,
-    private val mediaImporter: MediaImporter
+    private val mediaImporter: MediaImporter,
+    private val syncEngine: SyncEngine? = null,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(RecordUiState())
@@ -246,6 +248,7 @@ class RecordViewModel(
             // content:// 照片复制到私有目录（K5）：事务成功后的独立步骤，失败置 MISSING 可重试
             viewModelScope.launch {
                 runCatching { mediaImporter.importPending(result.recordId) }
+                runCatching { syncEngine?.pushPending() }
             }
 
             _uiState.value = _uiState.value.copy(

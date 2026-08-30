@@ -1,8 +1,8 @@
 # 小确幸 Android 当前进度
 
-> 更新日期：2026-08-27
-> 当前阶段：M1 数据可靠性基线
-> 验证口径：只认 GitHub Actions，不执行本地 Gradle。
+> 更新日期：2026-08-30
+> 当前阶段：Phase C 登录 + 记录上云（Mock）
+> 验证口径：Android 只认 GitHub Actions；服务端本机 `go test`。
 
 ## 已验证完成
 
@@ -30,10 +30,16 @@
 | 电子画册 | 列表与九类页面骨架 | 真实数据聚合、稳定排版、长图/PDF 导出 |
 | 视觉质量 | 基础主题和设计文档 | 深色模式、1.3x 字体、TalkBack、硬编码颜色收口 |
 
+## 联调进度（2026-08-30）
+
+- 服务端：dev CORS 默认放开；Android SDK 补 `sync/push|pull` 与记录 PATCH/DELETE；新增 `tests/android_handoff_test.go`。
+- 客户端：Retrofit 接入、`data/remote`、DataStore Token、登录页、「我的 → 登录与同步」、待同步记录 `createRecord` 出站。
+- 仍为 Mock 短信（验证码 123456）和 Mock OSS。合种 UI、正式阿里云短信/OSS、WorkManager 未做。
+
 ## 未实现
 
-- 账号认证、云端同步、OSS、服务端 API。
-- 共享空间成员/邀请/权限/共同 GP。
+- 正式阿里云短信签名与生产 OSS。
+- 共享空间成员/邀请 UI。
 - 地图、月年回顾、通知、Widget、订阅与 AI。
 
 ## 下一轮分工

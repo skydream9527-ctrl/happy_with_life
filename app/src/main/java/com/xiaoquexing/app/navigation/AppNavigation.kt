@@ -58,6 +58,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.xiaoquexing.app.ui.album.AlbumScreen
 import com.xiaoquexing.app.ui.album.AlbumViewerScreen
+import com.xiaoquexing.app.ui.auth.LoginScreen
 import com.xiaoquexing.app.ui.home.HomeScreen
 import com.xiaoquexing.app.ui.profile.AchievementScreen
 import com.xiaoquexing.app.ui.profile.PlantGuideScreen
@@ -73,6 +74,7 @@ sealed class Screen(val route: String, val title: String) {
     data object Timeline : Screen("timeline", "时间线")
     data object Album : Screen("album", "画册")
     data object Profile : Screen("profile", "我的")
+    data object Login : Screen("login", "登录")
     data object PlantSelection : Screen("plant_selection", "选择植物")
     data object PlantGuide : Screen("plant_guide", "植物图鉴")
     data object Achievement : Screen("achievement", "成就墙")
@@ -142,8 +144,12 @@ fun AppNavigation() {
                 ProfileScreen(
                     onNavigateToPlantSelection = { navController.navigate(Screen.PlantSelection.route) },
                     onNavigateToAchievement = { navController.navigate(Screen.Achievement.route) },
-                    onNavigateToPlantGuide = { navController.navigate(Screen.PlantGuide.route) }
+                    onNavigateToPlantGuide = { navController.navigate(Screen.PlantGuide.route) },
+                    onNavigateToLogin = { navController.navigate(Screen.Login.route) }
                 )
+            }
+            composable(Screen.Login.route) {
+                LoginScreen(onBack = { navController.popBackStack() })
             }
             composable(Screen.PlantSelection.route) {
                 PlantSelectionScreen(

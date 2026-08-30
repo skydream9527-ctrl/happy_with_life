@@ -27,8 +27,12 @@ func NewRouter(cfg config.Config, log *slog.Logger, deps Deps) *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
 	r.Use(RequestID(), Recovery(log), Timeout(cfg.HTTPTimeout), BodyLimit(cfg.HTTPMaxBodyBytes), AccessLog(log))
-	if len(cfg.CORSOrigins) > 0 {
-		r.Use(CORS(cfg.CORSOrigins))
+	origins := cfg.CORSOrigins
+	if len(origins) == 0 && (cfg.AppEnv == "dev" || cfg.AppEnv == "test") {
+		origins = []string{"*"}
+	}
+	if len(origins) > 0 {
+		r.Use(CORS(origins))
 	}
 
 	r.GET("/health/live", func(c *gin.Context) {

@@ -19,8 +19,9 @@
 1. [前后端分离与阿里云架构](./architecture-alibaba-cloud.md)
 2. [服务端开发规格 v1](./development-spec-v1.md)
 3. [OpenAPI 与同步协议纲要](./openapi-sync-contract-v1.md)
-4. [交给 Gork 的首轮开发提示词](../../agent-prompts/gork-server.md)
-5. [Android 已完成工作审计](../reviews/completed-work-audit-2026-08-27.md)
+4. [Android 联调](./android-integration.md)
+5. [交给 Gork 的首轮开发提示词](../../agent-prompts/gork-server.md)
+6. [Android 已完成工作审计](../reviews/completed-work-audit-2026-08-27.md)
 
 ## 范围约束
 
