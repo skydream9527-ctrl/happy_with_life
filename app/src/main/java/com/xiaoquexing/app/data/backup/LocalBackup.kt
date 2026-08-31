@@ -86,7 +86,8 @@ object LocalBackup {
             ZipInputStream(input).use { zip ->
                 var entry = zip.nextEntry
                 while (entry != null) {
-                    val out = File(dir, entry.name)
+                    val out = File(dir, entry.name).canonicalFile
+                    if (!out.path.startsWith(dir.canonicalPath)) error("备份文件不合法")
                     out.parentFile?.mkdirs()
                     if (!entry.isDirectory) out.outputStream().use { zip.copyTo(it) }
                     zip.closeEntry()
