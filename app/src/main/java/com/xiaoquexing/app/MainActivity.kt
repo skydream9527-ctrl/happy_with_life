@@ -1,6 +1,8 @@
 package com.xiaoquexing.app
 
+import android.content.Intent
 import android.os.Bundle
+import androidx.compose.runtime.mutableStateOf
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -16,10 +18,13 @@ import com.xiaoquexing.app.ui.theme.Appearance
 import com.xiaoquexing.app.ui.theme.XiaoQueXingTheme
 
 class MainActivity : ComponentActivity() {
+    private val openCompose = mutableStateOf(false)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         Appearance.load((application as XiaoQueXingApp).container.settingsStore)
+        consumeCompose(intent)
         setContent {
             val mode by Appearance.mode.collectAsState()
             val large by Appearance.largeText.collectAsState()
@@ -31,9 +36,26 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    AppNavigation()
+                    AppNavigation(openCompose = openCompose.value)
                 }
             }
         }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        consumeCompose(intent)
+    }
+
+    private fun consumeCompose(intent: Intent?) {
+        if (intent?.getBooleanExtra(EXTRA_OPEN_COMPOSE, false) == true) {
+            openCompose.value = true
+            intent.removeExtra(EXTRA_OPEN_COMPOSE)
+        }
+    }
+
+    companion object {
+        const val EXTRA_OPEN_COMPOSE = "open_compose"
     }
 }

@@ -34,4 +34,18 @@
         android:text="0 GP"
         android:textColor="#5E9B6A"
         android:textSize="12sp" />
+
+    <TextView
+        android:id="@+id/widget_compose"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:background="#2F5D3A"
+        android:gravity="center"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:text="写一条"
+        android:textColor="#FFFFFF"
+        android:textSize="14sp"
+        android:textStyle="bold" />
 </LinearLayout>
