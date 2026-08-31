@@ -69,6 +69,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.xiaoquexing.app.di.rememberXiaoQueXingViewModelFactory
 import com.xiaoquexing.app.media.rememberMediaPicker
+import com.xiaoquexing.app.media.rememberVoicePlayer
 import com.xiaoquexing.app.ui.components.AddContentRow
 import com.xiaoquexing.app.ui.components.LinkCard
 import com.xiaoquexing.app.ui.components.LocationCard
@@ -91,6 +92,9 @@ fun RecordScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
     val mediaPicker = rememberMediaPicker()
+    val voicePlayer = rememberVoicePlayer()
+    var voicePlaying by remember { mutableStateOf(false) }
+    var voiceProgress by remember { mutableStateOf(0f) }
     var showAddMusicDialog by remember { mutableStateOf(false) }
     var showAddLinkDialog by remember { mutableStateOf(false) }
     var showAddLocationDialog by remember { mutableStateOf(false) }
@@ -106,6 +110,13 @@ fun RecordScreen(
         if (recordId > 0) viewModel.load(recordId)
     }
 
+    LaunchedEffect(voicePlaying) {
+        while (voicePlaying) {
+            voiceProgress = voicePlayer.progress()
+            kotlinx.coroutines.delay(100)
+        }
+    }
+
     // 接好录音的停止回调：picker.stopRecording() 后调到这里
     LaunchedEffect(mediaPicker) {
         mediaPicker.setOnRecordStoppedCallback { path, durationMs ->
@@ -113,6 +124,10 @@ fun RecordScreen(
                 viewModel.setVoice(path, durationMs)
             } else {
                 viewModel.setVoiceRecording(false)
+                if (path == null) {
+                    viewModel.dismissError()
+                    snackbarHostState.showSnackbar("录音失败或文件损坏")
+                }
             }
         }
     }
@@ -308,8 +323,37 @@ fun RecordScreen(
                     },
                     recordedDurationMs = uiState.voiceDuration,
                     hasRecording = uiState.voiceUri != null,
+                    isPlaying = voicePlaying,
+                    playProgress = voiceProgress,
+                    onPlay = {
+                        val path = uiState.voiceUri
+                        if (path.isNullOrBlank()) return@VoiceRecorder
+                        if (voicePlayer.isPlaying()) {
+                            voicePlayer.resume()
+                            voicePlaying = true
+                        } else {
+                            val ok = voicePlayer.play(
+                                path,
+                                onProgress = { voiceProgress = it },
+                                onDone = {
+                                    voicePlaying = false
+                                    voiceProgress = 1f
+                                },
+                            )
+                            voicePlaying = ok
+                            if (!ok) {
+                                coroutineScope.launch { snackbarHostState.showSnackbar("无法播放，文件可能已损坏") }
+                            }
+                        }
+                    },
+                    onPause = {
+                        voicePlayer.pause()
+                        voicePlaying = false
+                    },
                     onDelete = {
-                        // 录音过程中删除 = 取消；已录好的 = 删文件
+                        voicePlayer.stop()
+                        voicePlaying = false
+                        voiceProgress = 0f
                         if (uiState.isRecording) {
                             mediaPicker.cancelRecording()
                         }

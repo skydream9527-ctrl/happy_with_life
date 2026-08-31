@@ -124,8 +124,18 @@ class RecordViewModel(
     }
 
     fun setVoice(uri: String, durationMs: Long) {
+        val accepted = com.xiaoquexing.app.data.media.VoiceFiles.accept(uri, durationMs)
+        if (!accepted.ok) {
+            _uiState.value = _uiState.value.copy(
+                isRecording = false,
+                errorMessage = accepted.reason ?: "录音失败",
+            )
+            return
+        }
         _uiState.value = _uiState.value.copy(
-            voiceUri = uri, voiceDuration = durationMs, isRecording = false
+            voiceUri = accepted.path,
+            voiceDuration = accepted.durationMs,
+            isRecording = false,
         )
         recalculateEstimatedGp()
     }

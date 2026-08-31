@@ -17,6 +17,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
+import com.xiaoquexing.app.data.media.VoiceFiles
 import com.xiaoquexing.app.util.FileUtil
 import java.io.File
 
@@ -158,7 +159,13 @@ class MediaPicker(private val activity: ComponentActivity) {
                 setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
                 setAudioEncodingBitRate(96_000)
                 setAudioSamplingRate(44_100)
+                setMaxDuration(VoiceFiles.MAX_DURATION_MS.toInt())
                 setOutputFile(file.absolutePath)
+                setOnInfoListener { _, what, _ ->
+                    if (what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_DURATION_REACHED) {
+                        stopRecording()
+                    }
+                }
                 prepare()
                 start()
             }
@@ -186,8 +193,12 @@ class MediaPicker(private val activity: ComponentActivity) {
             currentAudioFile = null
             recorder = null
         }
-        recordStoppedCallback?.invoke(file?.absolutePath, duration)
-        // 不清 recordStoppedCallback —— caller 会反复 start/stop
+        val accepted = VoiceFiles.accept(file?.absolutePath, duration)
+        if (accepted.ok) {
+            recordStoppedCallback?.invoke(accepted.path, accepted.durationMs)
+        } else {
+            recordStoppedCallback?.invoke(null, 0)
+        }
     }
 
     fun cancelRecording() {
@@ -240,7 +251,8 @@ class MediaPicker(private val activity: ComponentActivity) {
      * 正常 Compose rotation 重建 Activity 时 registerForActivityResult 不会泄漏。
      */
     fun onDestroy() {
-        cancelRecording()
+        // 旋转会重建 Activity：停录并保留文件，不要 cancel 删掉
+        if (isRecording()) stopRecording() else releaseRecorder()
     }
 
     companion object {
