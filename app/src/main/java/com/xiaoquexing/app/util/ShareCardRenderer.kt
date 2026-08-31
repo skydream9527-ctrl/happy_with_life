@@ -201,13 +201,19 @@ object ShareCardRenderer {
         )
         val qrBgPaint = Paint().apply { color = android.graphics.Color.parseColor("#F5F5F5") }
         canvas.drawRoundRect(qrRect, 8f * density, 8f * density, qrBgPaint)
-        val qrTextPaint = Paint().apply {
-            color = TEXT_SECONDARY
-            textSize = 16f * density
-            isAntiAlias = true
-            textAlign = Paint.Align.CENTER
+        val qrBmp = QrBitmaps.render(data.qrPayload.ifBlank { QrBitmaps.APP_LINK }, qrSize.toInt())
+        if (qrBmp != null) {
+            canvas.drawBitmap(qrBmp, null, qrRect, null)
+            if (!qrBmp.isRecycled) qrBmp.recycle()
+        } else {
+            val qrTextPaint = Paint().apply {
+                color = TEXT_SECONDARY
+                textSize = 16f * density
+                isAntiAlias = true
+                textAlign = Paint.Align.CENTER
+            }
+            canvas.drawText("二维码", qrRect.centerX(), qrRect.centerY() + 6f * density, qrTextPaint)
         }
-        canvas.drawText("二维码", qrRect.centerX(), qrRect.centerY() + 6f * density, qrTextPaint)
 
         return bitmap
     }

@@ -1,6 +1,7 @@
 package com.xiaoquexing.app.data.model
 
 import com.xiaoquexing.app.data.entity.PlantType
+import com.xiaoquexing.app.util.QrBitmaps
 
 data class ShareCardData(
     val recordText: String = "",
@@ -12,5 +13,6 @@ data class ShareCardData(
     val musicTitle: String? = null,
     val musicArtist: String? = null,
     val totalGp: Int = 0,
-    val footerText: String = "用小确幸记录生活"
+    val footerText: String = "用小确幸记录生活",
+    val qrPayload: String = QrBitmaps.APP_LINK,
 )
