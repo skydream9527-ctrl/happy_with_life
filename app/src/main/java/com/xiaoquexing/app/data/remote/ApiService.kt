@@ -15,6 +15,12 @@ interface ApiService {
     @POST("/api/v1/auth/sms/verify")
     suspend fun smsVerify(@Body body: SmsVerifyReq): Envelope<TokenPair>
 
+    @POST("/api/v1/auth/register")
+    suspend fun register(@Body body: PasswordAuthReq): Envelope<TokenPair>
+
+    @POST("/api/v1/auth/login")
+    suspend fun login(@Body body: PasswordAuthReq): Envelope<TokenPair>
+
     @POST("/api/v1/auth/token/refresh")
     suspend fun refresh(@Body body: RefreshReq): Envelope<TokenPair>
 

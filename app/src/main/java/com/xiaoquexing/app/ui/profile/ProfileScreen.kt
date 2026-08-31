@@ -161,7 +161,7 @@ fun ProfileScreen(
                 MenuItem(
                     icon = Icons.Default.Settings,
                     title = "登录与同步",
-                    subtitle = "手机号登录后把本地记录合并到云端",
+                    subtitle = "账号密码登录后把本地记录合并到云端",
                     onClick = onNavigateToLogin,
                     iconTint = Color(0xFF5E9B6A)
                 )

@@ -14,8 +14,8 @@ import kotlinx.coroutines.launch
 
 data class AuthUiState(
     val session: Session? = null,
-    val phone: String = "",
-    val code: String = "",
+    val account: String = "",
+    val password: String = "",
     val sending: Boolean = false,
     val verifying: Boolean = false,
     val syncing: Boolean = false,
@@ -40,49 +40,47 @@ class AuthViewModel(
         }
     }
 
-    fun onPhone(v: String) {
-        _ui.value = _ui.value.copy(phone = v.filter { it.isDigit() }.take(11))
+    fun onAccount(v: String) {
+        _ui.value = _ui.value.copy(account = v.trim().take(32))
     }
 
-    fun onCode(v: String) {
-        _ui.value = _ui.value.copy(code = v.filter { it.isDigit() }.take(6))
+    fun onPassword(v: String) {
+        _ui.value = _ui.value.copy(password = v.take(72))
     }
 
-    fun sendCode() {
-        val phone = _ui.value.phone
-        if (phone.length != 11) {
-            _ui.value = _ui.value.copy(message = "请输入 11 位手机号")
+    fun register() = authenticate(register = true)
+    fun login() = authenticate(register = false)
+
+    private fun authenticate(register: Boolean) {
+        val snapshot = _ui.value
+        if (snapshot.account.length < 3) {
+            _ui.value = snapshot.copy(message = "账号至少 3 位字母数字或下划线")
+            return
+        }
+        if (snapshot.password.length < 6) {
+            _ui.value = snapshot.copy(message = "密码至少 6 位")
             return
         }
         viewModelScope.launch {
-            _ui.value = _ui.value.copy(sending = true, message = null)
-            runCatching { sessions.sendCode(phone) }
-                .onSuccess {
-                    _ui.value = _ui.value.copy(sending = false, message = "验证码已发送（开发环境填 123456）")
-                }
-                .onFailure {
-                    val msg = (it as? ApiException)?.err?.message ?: it.message ?: "发送失败"
-                    _ui.value = _ui.value.copy(sending = false, message = msg)
-                }
-        }
-    }
-
-    fun verify() {
-        val snapshot = _ui.value
-        viewModelScope.launch {
-            _ui.value = snapshot.copy(verifying = true, message = null)
-            runCatching { sessions.verify(snapshot.phone, snapshot.code) }
+            _ui.value = snapshot.copy(verifying = true, sending = register, message = null)
+            val call = if (register) {
+                { sessions.register(snapshot.account, snapshot.password) }
+            } else {
+                { sessions.login(snapshot.account, snapshot.password) }
+            }
+            runCatching { call() }
                 .onSuccess {
                     val report = runCatching { sync.syncAll() }.getOrDefault(com.xiaoquexing.app.data.remote.SyncReport())
                     _ui.value = _ui.value.copy(
                         verifying = false,
+                        sending = false,
                         lastSynced = report.pushed,
                         message = report.error ?: "已登录，上传 ${report.pushed} 条" + if (report.conflicts > 0) "，${report.conflicts} 条冲突" else "",
                     )
                 }
                 .onFailure {
-                    val msg = (it as? ApiException)?.err?.message ?: it.message ?: "验证失败"
-                    _ui.value = _ui.value.copy(verifying = false, message = msg)
+                    val msg = (it as? ApiException)?.err?.message ?: it.message ?: "失败"
+                    _ui.value = _ui.value.copy(verifying = false, sending = false, message = msg)
                 }
         }
     }

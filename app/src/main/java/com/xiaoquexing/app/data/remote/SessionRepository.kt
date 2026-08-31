@@ -12,6 +12,12 @@ class SessionRepository(
         body.error?.let { throw ApiException(it) }
     }
 
+    suspend fun register(account: String, password: String): Session =
+        savePair(api.register(PasswordAuthReq(account.trim(), password, tokens.deviceId(), "android", BuildConfig.VERSION_NAME)))
+
+    suspend fun login(account: String, password: String): Session =
+        savePair(api.login(PasswordAuthReq(account.trim(), password, tokens.deviceId(), "android", BuildConfig.VERSION_NAME)))
+
     suspend fun verify(phone: String, code: String): Session {
         val env = api.smsVerify(
             SmsVerifyReq(
@@ -23,12 +29,21 @@ class SessionRepository(
             )
         )
         val pair = env.data ?: throw ApiException(env.error ?: ApiError("AUTH", "登录失败"))
+        return persist(pair)
+    }
+
+    private suspend fun savePair(env: Envelope<TokenPair>): Session {
+        val pair = env.data ?: throw ApiException(env.error ?: ApiError("AUTH", "登录失败"))
+        return persist(pair)
+    }
+
+    private suspend fun persist(pair: TokenPair): Session {
         tokens.save(pair, null)
         applyHolder(pair.accessToken, pair.deviceId)
         val me = runCatching { api.me().data }.getOrNull()
         tokens.save(pair, me)
         if (me != null) tokens.bindPersonalSpace(me.personalSpaceId)
-        return tokens.current() ?: error("session missing after verify")
+        return tokens.current() ?: error("session missing after auth")
     }
 
     suspend fun refresh(): Session? {
