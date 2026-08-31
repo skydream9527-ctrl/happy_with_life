@@ -21,6 +21,12 @@ interface MediaDao {
     @Query("SELECT * FROM record_media WHERE type = 'PHOTO' AND media_status = 'PENDING_COPY' AND record_id = :recordId")
     suspend fun pendingPhotos(recordId: Long): List<RecordMediaEntity>
 
+    @Query("SELECT * FROM record_media WHERE type = 'PHOTO' AND media_status = 'MISSING' AND record_id = :recordId")
+    suspend fun missingPhotos(recordId: Long): List<RecordMediaEntity>
+
+    @Query("UPDATE record_media SET media_status = 'PENDING_COPY', updated_at = :now WHERE local_id = :mediaId")
+    suspend fun markPending(mediaId: Long, now: Long)
+
     @Query("UPDATE record_media SET local_path = :localPath, media_status = :status, updated_at = :now WHERE local_id = :mediaId")
     suspend fun updateLocalPath(mediaId: Long, localPath: String?, status: String, now: Long)
 

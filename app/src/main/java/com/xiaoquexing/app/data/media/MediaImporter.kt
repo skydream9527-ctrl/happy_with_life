@@ -32,7 +32,7 @@ class MediaImporter(
         pending.forEach { media ->
             val sourceUri = media.sourceUri ?: return@forEach
             runCatching {
-                val file = copyToPrivateDir(Uri.parse(sourceUri), media.recordId, media.sortOrder, media.localId)
+                val file = persistNormalized(Uri.parse(sourceUri), media.recordId, media.sortOrder, media.localId)
                 mediaDao.updateLocalPath(media.localId, file.absolutePath, MediaStatus.READY, System.currentTimeMillis())
                 copied++
             }.onFailure {
@@ -41,6 +41,18 @@ class MediaImporter(
         }
         copied
     }
+
+    /** 把 MISSING 行改回 PENDING_COPY 再落盘，用于源还在时的重试。 */
+    suspend fun retryMissing(recordId: Long): Int = withContext(Dispatchers.IO) {
+        val now = System.currentTimeMillis()
+        mediaDao.missingPhotos(recordId).forEach { mediaDao.markPending(it.localId, now) }
+        importPending(recordId)
+    }
+
+    fun persistPreview(uri: String): String? = runCatching {
+        val dest = File(context.cacheDir, "photo_preview_${System.currentTimeMillis()}.jpg")
+        PhotoNormalize.write(context, Uri.parse(uri), dest).absolutePath
+    }.getOrNull()
 
     /** 删除软删除超过保留期的记录的媒体文件；行保留（同步元数据），local_path 置空。 */
     suspend fun cleanupOrphanFiles(retentionDays: Int = ORPHAN_RETENTION_DAYS): Int =
@@ -55,23 +67,14 @@ class MediaImporter(
             removed
         }
 
-    private fun copyToPrivateDir(uri: Uri, recordId: Long, sortOrder: Int, mediaId: Long): File {
+    private fun persistNormalized(uri: Uri, recordId: Long, sortOrder: Int, mediaId: Long): File {
         val dir = File(context.filesDir, MEDIA_DIR).apply { mkdirs() }
-        val target = File(dir, "r${recordId}_m${mediaId}_s${sortOrder}.${extensionOf(uri)}")
-        context.contentResolver.openInputStream(uri)?.use { input ->
-            target.outputStream().use { output -> input.copyTo(output) }
-        } ?: error("无法打开输入流: $uri")
-        return target
-    }
-
-    private fun extensionOf(uri: Uri): String {
-        val fromPath = uri.lastPathSegment?.substringAfterLast('.', "")?.lowercase()
-        return if (fromPath in KNOWN_EXTENSIONS) fromPath!! else "jpg"
+        val target = File(dir, "r${recordId}_m${mediaId}_s${sortOrder}.jpg")
+        return PhotoNormalize.write(context, uri, target)
     }
 
     companion object {
         const val MEDIA_DIR = "media/photos"
         const val ORPHAN_RETENTION_DAYS = 7
-        private val KNOWN_EXTENSIONS = setOf("jpg", "jpeg", "png", "webp", "heic", "gif")
     }
 }
