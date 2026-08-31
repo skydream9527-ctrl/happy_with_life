@@ -12,4 +12,7 @@
     <files-path
         name="internal_files"
         path="." />
+    <cache-path
+        name="share_cache"
+        path="." />
 </paths>

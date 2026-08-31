@@ -3,6 +3,7 @@ package com.xiaoquexing.app.ui.share
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -58,8 +59,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.xiaoquexing.app.di.rememberXiaoQueXingViewModelFactory
-import com.xiaoquexing.app.ui.components.ShareCardCompose
-import com.xiaoquexing.app.util.ShareCardRenderer
+import android.content.Intent
+import androidx.compose.ui.platform.LocalContext
+import com.xiaoquexing.app.ui.components.ShareCardPreview
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -93,7 +95,18 @@ fun ShareScreen(
         }
     }
 
+    val context = LocalContext.current
     val demoData = uiState.cardData
+
+    LaunchedEffect(uiState.shareUri) {
+        val uri = uiState.shareUri ?: return@LaunchedEffect
+        val intent = Intent.createChooser(
+            ShareViewModel.imageShareIntent(uri, viewModel.shareText()),
+            "分享小确幸",
+        )
+        context.startActivity(intent)
+        viewModel.consumeShareUri()
+    }
 
     Scaffold(
         snackbarHost = { androidx.compose.material3.SnackbarHost(snackbarHostState) },
@@ -127,11 +140,10 @@ fun ShareScreen(
             )
 
             // 分享卡片预览
-            ShareCardCompose(
+            ShareCardPreview(
                 data = demoData ?: com.xiaoquexing.app.data.model.ShareCardData(),
                 modifier = Modifier
-                    .fillMaxWidth(0.75f)
-                    .aspectRatio(1080f / 1920f)
+                    .fillMaxWidth(0.9f)
             )
 
             Spacer(modifier = Modifier.height(20.dp))
@@ -153,22 +165,26 @@ fun ShareScreen(
                 ShareChannelButton(
                     icon = "💬",
                     label = "微信",
-                    color = Color(0xFF07C160)
+                    color = Color(0xFF07C160),
+                    onClick = { viewModel.shareViaSystem() },
                 )
                 ShareChannelButton(
                     icon = "🌏",
                     label = "朋友圈",
-                    color = Color(0xFF07C160)
+                    color = Color(0xFF07C160),
+                    onClick = { viewModel.shareViaSystem() },
                 )
                 ShareChannelButton(
                     icon = "📕",
                     label = "小红书",
-                    color = Color(0xFFFF2442)
+                    color = Color(0xFFFF2442),
+                    onClick = { viewModel.shareViaSystem() },
                 )
                 ShareChannelButton(
                     icon = "🐦",
                     label = "微博",
-                    color = Color(0xFFE6162D)
+                    color = Color(0xFFE6162D),
+                    onClick = { viewModel.shareViaSystem() },
                 )
             }
 
@@ -182,13 +198,13 @@ fun ShareScreen(
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 OutlinedButton(
-                    onClick = { /* 复制链接 */ },
+                    onClick = { viewModel.shareViaSystem() },
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(12.dp)
                 ) {
                     Icon(Icons.Default.ContentCopy, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(modifier = Modifier.width(6.dp))
-                    Text("复制链接")
+                    Text("系统分享")
                 }
                 Button(
                     onClick = { viewModel.saveToGallery() },
@@ -218,10 +234,12 @@ fun ShareScreen(
 fun ShareChannelButton(
     icon: String,
     label: String,
-    color: Color
+    color: Color,
+    onClick: () -> Unit = {},
 ) {
     Column(
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.clickable(onClick = onClick),
     ) {
         Box(
             modifier = Modifier
