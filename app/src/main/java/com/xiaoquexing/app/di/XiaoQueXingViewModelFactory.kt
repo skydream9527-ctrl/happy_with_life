@@ -13,6 +13,7 @@ import com.xiaoquexing.app.viewmodel.AuthViewModel
 import com.xiaoquexing.app.viewmodel.ConflictViewModel
 import com.xiaoquexing.app.viewmodel.FootprintViewModel
 import com.xiaoquexing.app.viewmodel.HomeViewModel
+import com.xiaoquexing.app.viewmodel.PlanViewModel
 import com.xiaoquexing.app.viewmodel.ProfileViewModel
 import com.xiaoquexing.app.viewmodel.RecordDetailViewModel
 import com.xiaoquexing.app.viewmodel.RecordViewModel
@@ -72,6 +73,9 @@ class XiaoQueXingViewModelFactory(
 
             modelClass.isAssignableFrom(FootprintViewModel::class.java) ->
                 FootprintViewModel(container.recordRepository)
+
+            modelClass.isAssignableFrom(PlanViewModel::class.java) ->
+                PlanViewModel(container.planStore)
 
             modelClass.isAssignableFrom(SettingsViewModel::class.java) ->
                 SettingsViewModel(
