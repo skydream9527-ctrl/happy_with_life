@@ -14,6 +14,7 @@ import com.xiaoquexing.app.data.model.ShareCardData
 import com.xiaoquexing.app.data.repository.PlantRepository
 import com.xiaoquexing.app.data.repository.RecordRepository
 import com.xiaoquexing.app.util.PhotoSaver
+import com.xiaoquexing.app.util.QrBitmaps
 import com.xiaoquexing.app.util.ShareCardRenderer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -63,7 +64,8 @@ class ShareViewModel(
                 musicTitle = "Morning Breeze",
                 musicArtist = "治愈电台",
                 totalGp = 42,
-                footerText = "用小确幸记录生活"
+                footerText = "用小确幸记录生活",
+                qrPayload = QrBitmaps.payload(0),
             )
         )
     }
@@ -92,7 +94,8 @@ class ShareViewModel(
                     musicTitle = record.musicTitle,
                     musicArtist = record.musicArtist,
                     totalGp = totalGp,
-                    footerText = "用小确幸记录生活"
+                    footerText = "用小确幸记录生活",
+                    qrPayload = QrBitmaps.payload(recordId),
                 )
             )
         }
