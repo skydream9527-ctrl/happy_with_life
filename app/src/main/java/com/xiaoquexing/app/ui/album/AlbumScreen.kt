@@ -87,7 +87,15 @@ fun AlbumScreen(
                 )
             }
 
-            LazyVerticalGrid(
+            if (uiState.albums.isEmpty()) {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    com.xiaoquexing.app.ui.components.EmptyHint(
+                        emoji = "📒",
+                        title = "还没有画册",
+                        subtitle = "记下带照片的小确幸，再来这里做成一本。",
+                    )
+                }
+            } else LazyVerticalGrid(
                 columns = GridCells.Fixed(2),
                 contentPadding = androidx.compose.foundation.layout.PaddingValues(
                     start = 16.dp, end = 16.dp, top = 8.dp, bottom = 120.dp

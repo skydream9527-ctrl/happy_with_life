@@ -1,9 +1,15 @@
 package com.xiaoquexing.app.navigation
 
+import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -69,6 +75,7 @@ import com.xiaoquexing.app.ui.profile.ConflictScreen
 import com.xiaoquexing.app.ui.profile.ReviewScreen
 import com.xiaoquexing.app.ui.profile.FootprintScreen
 import com.xiaoquexing.app.ui.profile.PlanScreen
+import com.xiaoquexing.app.ui.theme.Motion
 import com.xiaoquexing.app.ui.profile.SettingsScreen
 import com.xiaoquexing.app.ui.profile.SharedSpaceScreen
 import com.xiaoquexing.app.ui.record.RecordDetailScreen
@@ -133,11 +140,28 @@ fun AppNavigation(openCompose: Boolean = false) {
         Screen.Album.route, Screen.Profile.route
     ).any { it == currentDestination?.route }
 
+    val reduceMotion = Motion.reduce()
     Box(modifier = Modifier.fillMaxSize()) {
         NavHost(
             navController = navController,
             startDestination = Screen.Home.route,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
+            enterTransition = {
+                if (reduceMotion) fadeIn(tween(0))
+                else fadeIn(tween(Motion.NORMAL)) + slideIntoContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Start,
+                    tween(Motion.NORMAL),
+                ) { it / 16 }
+            },
+            exitTransition = { if (reduceMotion) fadeOut(tween(0)) else fadeOut(tween(Motion.FAST)) },
+            popEnterTransition = { if (reduceMotion) fadeIn(tween(0)) else fadeIn(tween(Motion.FAST)) },
+            popExitTransition = {
+                if (reduceMotion) fadeOut(tween(0))
+                else fadeOut(tween(Motion.NORMAL)) + slideOutOfContainer(
+                    AnimatedContentTransitionScope.SlideDirection.End,
+                    tween(Motion.NORMAL),
+                ) { it / 16 }
+            },
         ) {
             composable(Screen.Home.route) {
                 HomeScreen(
@@ -147,7 +171,22 @@ fun AppNavigation(openCompose: Boolean = false) {
                     onNavigateToShare = { recordId -> navController.navigate(Screen.Share.createRoute(recordId)) }
                 )
             }
-            composable(Screen.Record.route) {
+            composable(
+                Screen.Record.route,
+                enterTransition = {
+                    if (reduceMotion) fadeIn(tween(0))
+                    else fadeIn(tween(Motion.NORMAL)) + slideInVertically(tween(Motion.NORMAL)) { it }
+                },
+                exitTransition = {
+                    if (reduceMotion) fadeOut(tween(0))
+                    else fadeOut(tween(Motion.FAST)) + slideOutVertically(tween(Motion.FAST)) { it / 4 }
+                },
+                popEnterTransition = { if (reduceMotion) fadeIn(tween(0)) else fadeIn(tween(Motion.FAST)) },
+                popExitTransition = {
+                    if (reduceMotion) fadeOut(tween(0))
+                    else fadeOut(tween(Motion.NORMAL)) + slideOutVertically(tween(Motion.NORMAL)) { it }
+                },
+            ) {
                 RecordScreen(
                     onPublished = { navController.popBackStack(Screen.Home.route, false) },
                     onBack = { navController.popBackStack() }

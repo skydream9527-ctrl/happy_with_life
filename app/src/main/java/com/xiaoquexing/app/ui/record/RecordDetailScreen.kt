@@ -1,6 +1,8 @@
 package com.xiaoquexing.app.ui.record
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.ui.window.Dialog
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -57,6 +59,7 @@ fun RecordDetailScreen(
     val ui by viewModel.uiState.collectAsState()
     LaunchedEffect(recordId) { viewModel.load(recordId) }
     val rec = ui.record
+    var preview by remember { mutableStateOf<String?>(null) }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -95,7 +98,10 @@ fun RecordDetailScreen(
                 AsyncImage(
                     model = uri,
                     contentDescription = "照片",
-                    modifier = Modifier.fillMaxWidth().height(220.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(220.dp)
+                        .clickable { preview = uri },
                     contentScale = ContentScale.Crop,
                 )
             }
@@ -117,6 +123,16 @@ fun RecordDetailScreen(
             Text("删除")
         }
         Spacer(Modifier.height(16.dp))
+    }
+    preview?.let { uri ->
+        androidx.compose.ui.window.Dialog(onDismissRequest = { preview = null }) {
+            AsyncImage(
+                model = uri,
+                contentDescription = "预览",
+                modifier = Modifier.fillMaxWidth().clickable { preview = null },
+                contentScale = ContentScale.Fit,
+            )
+        }
     }
 }
 

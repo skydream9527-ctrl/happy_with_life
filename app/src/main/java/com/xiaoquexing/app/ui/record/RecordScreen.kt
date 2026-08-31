@@ -139,8 +139,11 @@ fun RecordScreen(
         }
     }
 
-    // GP Animation overlay
-    if (uiState.showGpAnimation) {
+    androidx.compose.animation.AnimatedVisibility(
+        visible = uiState.showGpAnimation,
+        enter = androidx.compose.animation.fadeIn() + androidx.compose.animation.scaleIn(),
+        exit = androidx.compose.animation.fadeOut(),
+    ) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -198,10 +201,12 @@ fun RecordScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp)
         ) {
-            if (uiState.draftRestored && uiState.editingId == 0L) {
-                Text("已恢复上次未发布的草稿", style = MaterialTheme.typography.bodySmall)
-                TextButton(onClick = { viewModel.discardDraft() }) { Text("丢弃草稿") }
-                Spacer(modifier = Modifier.height(8.dp))
+            androidx.compose.animation.AnimatedVisibility(visible = uiState.draftRestored && uiState.editingId == 0L) {
+                Column {
+                    Text("已恢复上次未发布的草稿", style = MaterialTheme.typography.bodySmall)
+                    TextButton(onClick = { viewModel.discardDraft() }) { Text("丢弃草稿") }
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
             }
             // Mood tags
             Text(
@@ -464,6 +469,10 @@ fun RecordScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             // Publish button
+            val canPublish = uiState.selectedMood != null && (
+                uiState.text.isNotBlank() || uiState.photoUris.isNotEmpty() || uiState.voiceUri != null ||
+                    uiState.musicTitle != null || uiState.linkUrl != null || uiState.locationName != null
+                )
             Button(
                 onClick = { viewModel.publish(onPublished) },
                 modifier = Modifier
@@ -471,7 +480,7 @@ fun RecordScreen(
                     .height(56.dp),
                 shape = RoundedCornerShape(14.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-                enabled = !uiState.isPublishing
+                enabled = !uiState.isPublishing && canPublish
             ) {
                 if (uiState.isPublishing) {
                     CircularProgressIndicator(

@@ -162,6 +162,10 @@ fun HomeScreen(
                 }
             }
         }
+        FirstRunOverlay(
+            onWrite = onNavigateToRecord,
+            onPlant = onNavigateToPlantSelection,
+        )
     }
 }
 
@@ -246,12 +250,17 @@ private fun PlantHeroCard(uiState: com.xiaoquexing.app.viewmodel.HomeUiState) {
             ) {
                 val plant = uiState.activePlant
                 if (plant != null) {
-                    PlantView(
-                        plantType = plant.plantType,
-                        stage = PlantStage.fromGp(plant.totalGp),
-                        gp = plant.totalGp,
-                        modifier = Modifier.fillMaxSize()
-                    )
+                    androidx.compose.animation.AnimatedContent(
+                        targetState = com.xiaoquexing.app.data.entity.PlantStage.fromGp(uiState.currentGp),
+                        label = "plant-stage",
+                    ) {
+                        PlantView(
+                            plantType = plant.plantType,
+                            stage = it,
+                            gp = plant.totalGp,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
                 } else {
                     Box(
                         modifier = Modifier.fillMaxSize(),
@@ -430,5 +439,51 @@ private fun RecordCtaButton(onClick: () -> Unit) {
             style = MaterialTheme.typography.titleLarge,
             color = Color.White
         )
+    }
+}
+
+@Composable
+private fun FirstRunOverlay(
+    onWrite: () -> Unit,
+    onPlant: () -> Unit,
+) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val store = androidx.compose.runtime.remember { com.xiaoquexing.app.ui.theme.GuideStore(context) }
+    var page by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(if (store.seen) -1 else 0) }
+    if (page < 0) return
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.45f))
+            .clickable(enabled = false) {},
+        contentAlignment = Alignment.Center,
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(28.dp)
+                .clip(RoundedCornerShape(20.dp))
+                .background(MaterialTheme.colorScheme.surface)
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text(if (page == 0) "先选一株植物" else "写第一条小确幸", style = MaterialTheme.typography.titleLarge)
+            Spacer(Modifier.height(8.dp))
+            Text(
+                if (page == 0) "它会陪着你慢慢长大。" else "一分钟就够，植物会记得。",
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            Spacer(Modifier.height(16.dp))
+            androidx.compose.material3.Button(onClick = {
+                if (page == 0) {
+                    page = 1
+                    onPlant()
+                } else {
+                    store.seen = true
+                    page = -1
+                    onWrite()
+                }
+            }) { Text(if (page == 0) "去选植物" else "去写一条") }
+            androidx.compose.material3.TextButton(onClick = { store.seen = true; page = -1 }) { Text("跳过") }
+        }
     }
 }

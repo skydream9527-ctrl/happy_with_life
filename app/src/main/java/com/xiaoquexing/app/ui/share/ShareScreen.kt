@@ -1,6 +1,7 @@
 package com.xiaoquexing.app.ui.share
 
 import androidx.compose.foundation.Image
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -144,6 +145,7 @@ fun ShareScreen(
                 data = demoData ?: com.xiaoquexing.app.data.model.ShareCardData(),
                 modifier = Modifier
                     .fillMaxWidth(0.9f)
+                    .graphicsLayer { shadowElevation = 12f }
             )
 
             Spacer(modifier = Modifier.height(20.dp))
