@@ -128,7 +128,9 @@ fun RecordScreen(
                 viewModel.setVoiceRecording(false)
                 if (path == null) {
                     viewModel.dismissError()
-                    snackbarHostState.showSnackbar("录音失败或文件损坏")
+                    coroutineScope.launch {
+                        snackbarHostState.showSnackbar("录音失败或文件损坏")
+                    }
                 }
             }
         }
