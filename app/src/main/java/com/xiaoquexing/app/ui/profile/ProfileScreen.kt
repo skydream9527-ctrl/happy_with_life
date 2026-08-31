@@ -56,6 +56,7 @@ fun ProfileScreen(
     onNavigateToSpaces: () -> Unit = {},
     onNavigateToReview: () -> Unit = {},
     onNavigateToConflicts: () -> Unit = {},
+    onNavigateToSettings: () -> Unit = {},
     viewModel: ProfileViewModel = viewModel(factory = rememberXiaoQueXingViewModelFactory())
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -168,7 +169,7 @@ fun ProfileScreen(
                     icon = Icons.Default.Settings,
                     title = "设置",
                     subtitle = "通知、隐私、主题",
-                    onClick = { /* TODO */ },
+                    onClick = onNavigateToSettings,
                     iconTint = Color(0xFF9E9E9E)
                 )
                 MenuItem(

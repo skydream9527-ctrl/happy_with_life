@@ -21,6 +21,9 @@ interface ApiService {
     @POST("/api/v1/auth/logout")
     suspend fun logout(@Body body: RefreshReq): Envelope<Map<String, Boolean>>
 
+    @retrofit2.http.DELETE("/api/v1/account")
+    suspend fun deleteAccount(): Envelope<AccountDeleteRes>
+
     @GET("/api/v1/me")
     suspend fun me(): Envelope<Profile>
 
