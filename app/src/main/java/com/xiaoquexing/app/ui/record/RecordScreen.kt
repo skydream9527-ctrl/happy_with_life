@@ -297,6 +297,10 @@ fun RecordScreen(
                     onRemove = { viewModel.removePhoto(it) },
                     showAddButton = false
                 )
+                uiState.mediaHint?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
+                if (uiState.mediaRetryId > 0) {
+                    TextButton(onClick = { viewModel.retryFailedPhotos() }) { Text("重试失败的照片") }
+                }
                 Spacer(modifier = Modifier.height(12.dp))
             }
 

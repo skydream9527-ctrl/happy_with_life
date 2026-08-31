@@ -43,6 +43,8 @@ data class RecordUiState(
     val errorMessage: String? = null,
     val editingId: Long = 0L,
     val isDeleting: Boolean = false,
+    val mediaRetryId: Long = 0L,
+    val mediaHint: String? = null,
 )
 
 class RecordViewModel(
@@ -95,21 +97,25 @@ class RecordViewModel(
         recalculateEstimatedGp()
     }
 
-    fun addPhoto(uri: String) {
-        if (_uiState.value.photoUris.size < 9) {
-            _uiState.value = _uiState.value.copy(photoUris = _uiState.value.photoUris + uri)
-            recalculateEstimatedGp()
-        }
-    }
+    fun addPhoto(uri: String) = addPhotos(listOf(uri))
 
     fun addPhotos(uris: List<String>) {
         if (uris.isEmpty()) return
         val current = _uiState.value.photoUris
         val space = 9 - current.size
         if (space <= 0) return
-        val merged = (current + uris.take(space)).distinct()
-        _uiState.value = _uiState.value.copy(photoUris = merged)
+        val incoming = uris.take(space)
+        val merged = (current + incoming).distinct()
+        _uiState.value = _uiState.value.copy(photoUris = merged, mediaHint = "正在校正方向并压缩…")
         recalculateEstimatedGp()
+        viewModelScope.launch {
+            val normalized = incoming.map { src -> mediaImporter.persistPreview(src) ?: src }
+            val withoutRaw = (_uiState.value.photoUris - incoming.toSet()) + normalized
+            _uiState.value = _uiState.value.copy(
+                photoUris = withoutRaw.distinct().take(9),
+                mediaHint = "照片已压缩并校正方向",
+            )
+        }
     }
 
     fun removePhoto(index: Int) {
@@ -292,7 +298,14 @@ class RecordViewModel(
 
             // content:// 照片复制到私有目录（K5）：事务成功后的独立步骤，失败置 MISSING 可重试
             viewModelScope.launch {
-                runCatching { mediaImporter.importPending(result.recordId) }
+                val copied = runCatching { mediaImporter.importPending(result.recordId) }.getOrDefault(0)
+                val failed = state.photoUris.isNotEmpty() && copied < state.photoUris.size
+                if (failed) {
+                    _uiState.value = _uiState.value.copy(
+                        mediaRetryId = result.recordId,
+                        mediaHint = "有照片导入失败，可重试",
+                    )
+                }
                 runCatching { syncEngine?.syncAll(retries = 2) }
             }
 
@@ -310,6 +323,18 @@ class RecordViewModel(
 
     fun dismissError() {
         _uiState.value = _uiState.value.copy(errorMessage = null)
+    }
+
+    fun retryFailedPhotos() {
+        val id = _uiState.value.mediaRetryId
+        if (id <= 0) return
+        viewModelScope.launch {
+            val copied = runCatching { mediaImporter.retryMissing(id) }.getOrDefault(0)
+            _uiState.value = _uiState.value.copy(
+                mediaRetryId = if (copied > 0) 0 else id,
+                mediaHint = if (copied > 0) "照片已重新导入" else "仍失败，请检查相册权限后再试",
+            )
+        }
     }
 
     fun delete(onDone: () -> Unit) {

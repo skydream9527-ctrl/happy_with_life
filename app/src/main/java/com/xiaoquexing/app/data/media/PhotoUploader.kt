@@ -1,7 +1,5 @@
 package com.xiaoquexing.app.data.media
 
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import com.xiaoquexing.app.data.db.AppDatabase
 import com.xiaoquexing.app.data.remote.ApiService
 import com.xiaoquexing.app.data.remote.MediaRef
@@ -12,7 +10,6 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
-import java.io.ByteArrayOutputStream
 import java.io.File
 import java.util.concurrent.TimeUnit
 
@@ -39,7 +36,7 @@ class PhotoUploader(
             val path = photo.localPath ?: continue
             val file = File(path)
             if (!file.exists()) continue
-            val packed = compress(file)
+            val packed = PhotoNormalize.compressExisting(file)
             val stsEnv = api.mediaSts(
                 MediaStsReq(
                     type = "PHOTO",
@@ -73,31 +70,8 @@ class PhotoUploader(
         return if (raw.startsWith("/")) base + raw else "$base/$raw"
     }
 
-    private fun compress(file: File): Packed {
-        val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
-        BitmapFactory.decodeFile(file.absolutePath, bounds)
-        var sample = 1
-        val maxSide = maxOf(bounds.outWidth, bounds.outHeight).coerceAtLeast(1)
-        while (maxSide / sample > MAX_EDGE) sample *= 2
-        val opts = BitmapFactory.Options().apply { inSampleSize = sample }
-        val bitmap = BitmapFactory.decodeFile(file.absolutePath, opts)
-            ?: return Packed(file.readBytes(), bounds.outWidth, bounds.outHeight)
-        val out = ByteArrayOutputStream()
-        var quality = 88
-        do {
-            out.reset()
-            bitmap.compress(Bitmap.CompressFormat.JPEG, quality, out)
-            quality -= 8
-        } while (out.size() > MAX_BYTES && quality >= 50)
-        if (!bitmap.isRecycled) bitmap.recycle()
-        val bytes = out.toByteArray()
-        return Packed(bytes, opts.outWidth, opts.outHeight)
-    }
-
-    private data class Packed(val bytes: ByteArray, val width: Int, val height: Int)
-
     companion object {
-        const val MAX_EDGE = 1280
-        const val MAX_BYTES = 5 * 1024 * 1024
+        const val MAX_EDGE = PhotoNormalize.MAX_EDGE
+        const val MAX_BYTES = PhotoNormalize.MAX_BYTES
     }
 }
