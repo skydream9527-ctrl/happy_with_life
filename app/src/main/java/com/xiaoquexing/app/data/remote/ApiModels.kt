@@ -35,6 +35,13 @@ data class TokenPair(
 data class RefreshReq(val refreshToken: String, val deviceId: String)
 
 @Serializable
+data class AccountDeleteRes(
+    val status: String = "",
+    val coolingHours: Int = 0,
+    val purgeAfter: String = "",
+)
+
+@Serializable
 data class Profile(
     val userId: String,
     val displayName: String,
