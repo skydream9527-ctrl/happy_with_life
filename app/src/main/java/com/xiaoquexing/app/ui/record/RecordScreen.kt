@@ -198,6 +198,11 @@ fun RecordScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp)
         ) {
+            if (uiState.draftRestored && uiState.editingId == 0L) {
+                Text("已恢复上次未发布的草稿", style = MaterialTheme.typography.bodySmall)
+                TextButton(onClick = { viewModel.discardDraft() }) { Text("丢弃草稿") }
+                Spacer(modifier = Modifier.height(8.dp))
+            }
             // Mood tags
             Text(
                 text = "今天的心情是？",

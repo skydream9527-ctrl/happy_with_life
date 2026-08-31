@@ -6,6 +6,8 @@ import com.xiaoquexing.app.data.entity.Record
 import com.xiaoquexing.app.data.media.MediaImporter
 import com.xiaoquexing.app.data.model.MoodTag
 import com.xiaoquexing.app.data.model.StatusTag
+import com.xiaoquexing.app.data.remote.DraftStore
+import com.xiaoquexing.app.data.remote.RecordDraft
 import com.xiaoquexing.app.data.remote.SyncEngine
 import com.xiaoquexing.app.data.repository.RecordRepository
 import com.xiaoquexing.app.util.DateKeys
@@ -45,12 +47,14 @@ data class RecordUiState(
     val isDeleting: Boolean = false,
     val mediaRetryId: Long = 0L,
     val mediaHint: String? = null,
+    val draftRestored: Boolean = false,
 )
 
 class RecordViewModel(
     private val recordRepo: RecordRepository,
     private val mediaImporter: MediaImporter,
     private val syncEngine: SyncEngine? = null,
+    private val drafts: DraftStore? = null,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(RecordUiState())
@@ -70,6 +74,30 @@ class RecordViewModel(
             // 初始加载一次 streak
             refreshStreak()
         }
+        restoreDraftIfNeeded()
+    }
+
+    private fun restoreDraftIfNeeded() {
+        if (_uiState.value.editingId > 0) return
+        val draft = drafts?.load() ?: return
+        if (DraftStore.isEmpty(draft)) return
+        _uiState.value = applyDraft(_uiState.value, draft).copy(draftRestored = true)
+        recalculateEstimatedGp()
+    }
+
+    fun discardDraft() {
+        drafts?.clear()
+        if (_uiState.value.editingId > 0) return
+        _uiState.value = RecordUiState(
+            todayGp = _uiState.value.todayGp,
+            currentStreak = _uiState.value.currentStreak,
+        )
+        recalculateEstimatedGp()
+    }
+
+    private fun persistDraft() {
+        if (_uiState.value.editingId > 0) return
+        drafts?.save(snapshotDraft(_uiState.value))
     }
 
     suspend fun refreshStreak() {
@@ -83,11 +111,13 @@ class RecordViewModel(
     fun updateText(text: String) {
         _uiState.value = _uiState.value.copy(text = text)
         recalculateEstimatedGp()
+        persistDraft()
     }
 
     fun selectMood(mood: String?) {
         _uiState.value = _uiState.value.copy(selectedMood = mood)
         recalculateEstimatedGp()
+        persistDraft()
     }
 
     fun toggleStatusTag(tag: String) {
@@ -95,6 +125,7 @@ class RecordViewModel(
         if (current.contains(tag)) current.remove(tag) else current.add(tag)
         _uiState.value = _uiState.value.copy(selectedStatusTags = current)
         recalculateEstimatedGp()
+        persistDraft()
     }
 
     fun addPhoto(uri: String) = addPhotos(listOf(uri))
@@ -115,6 +146,7 @@ class RecordViewModel(
                 photoUris = withoutRaw.distinct().take(9),
                 mediaHint = "照片已压缩并校正方向",
             )
+            persistDraft()
         }
     }
 
@@ -123,6 +155,7 @@ class RecordViewModel(
             photoUris = _uiState.value.photoUris.toMutableList().apply { removeAt(index) }
         )
         recalculateEstimatedGp()
+        persistDraft()
     }
 
     fun setVoiceRecording(recording: Boolean) {
@@ -144,41 +177,49 @@ class RecordViewModel(
             isRecording = false,
         )
         recalculateEstimatedGp()
+        persistDraft()
     }
 
     fun removeVoice() {
         _uiState.value = _uiState.value.copy(voiceUri = null, voiceDuration = 0)
         recalculateEstimatedGp()
+        persistDraft()
     }
 
     fun setMusic(title: String, artist: String, uri: String? = null) {
         _uiState.value = _uiState.value.copy(musicTitle = title, musicArtist = artist, musicUri = uri)
         recalculateEstimatedGp()
+        persistDraft()
     }
 
     fun removeMusic() {
         _uiState.value = _uiState.value.copy(musicTitle = null, musicArtist = null, musicUri = null)
         recalculateEstimatedGp()
+        persistDraft()
     }
 
     fun setLink(url: String, title: String? = null, summary: String? = null) {
         _uiState.value = _uiState.value.copy(linkUrl = url, linkTitle = title, linkSummary = summary)
         recalculateEstimatedGp()
+        persistDraft()
     }
 
     fun removeLink() {
         _uiState.value = _uiState.value.copy(linkUrl = null, linkTitle = null, linkSummary = null)
         recalculateEstimatedGp()
+        persistDraft()
     }
 
     fun setLocation(name: String, lat: Double? = null, lng: Double? = null) {
         _uiState.value = _uiState.value.copy(locationName = name, locationLat = lat, locationLng = lng)
         recalculateEstimatedGp()
+        persistDraft()
     }
 
     fun removeLocation() {
         _uiState.value = _uiState.value.copy(locationName = null, locationLat = null, locationLng = null)
         recalculateEstimatedGp()
+        persistDraft()
     }
 
     /** 补记入口（Z1-04）：传入发生时间；窗口与未来时间由仓储层强制校验。 */
@@ -309,11 +350,13 @@ class RecordViewModel(
                 runCatching { syncEngine?.syncAll(retries = 2) }
             }
 
+            drafts?.clear()
             _uiState.value = _uiState.value.copy(
                 currentStreak = result.streakDays,
                 isPublishing = false,
                 showGpAnimation = true,
-                earnedGp = result.earnedGp
+                earnedGp = result.earnedGp,
+                draftRestored = false,
             )
 
             kotlinx.coroutines.delay(1500)
@@ -355,4 +398,42 @@ class RecordViewModel(
                 }
         }
     }
+
+    private fun snapshotDraft(state: RecordUiState) = RecordDraft(
+        text = state.text,
+        mood = state.selectedMood,
+        statusTags = state.selectedStatusTags.toList(),
+        photoUris = state.photoUris,
+        voiceUri = state.voiceUri,
+        voiceDuration = state.voiceDuration,
+        musicTitle = state.musicTitle,
+        musicArtist = state.musicArtist,
+        musicUri = state.musicUri,
+        linkUrl = state.linkUrl,
+        linkTitle = state.linkTitle,
+        linkSummary = state.linkSummary,
+        locationName = state.locationName,
+        locationLat = state.locationLat,
+        locationLng = state.locationLng,
+        occurredAt = state.occurredAt,
+    )
+
+    private fun applyDraft(state: RecordUiState, draft: RecordDraft) = state.copy(
+        text = draft.text,
+        selectedMood = draft.mood,
+        selectedStatusTags = draft.statusTags.toSet(),
+        photoUris = draft.photoUris,
+        voiceUri = draft.voiceUri,
+        voiceDuration = draft.voiceDuration,
+        musicTitle = draft.musicTitle,
+        musicArtist = draft.musicArtist,
+        musicUri = draft.musicUri,
+        linkUrl = draft.linkUrl,
+        linkTitle = draft.linkTitle,
+        linkSummary = draft.linkSummary,
+        locationName = draft.locationName,
+        locationLat = draft.locationLat,
+        locationLng = draft.locationLng,
+        occurredAt = draft.occurredAt,
+    )
 }

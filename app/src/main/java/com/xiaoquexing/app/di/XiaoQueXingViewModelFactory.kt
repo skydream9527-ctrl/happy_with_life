@@ -37,7 +37,7 @@ class XiaoQueXingViewModelFactory(
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return when {
             modelClass.isAssignableFrom(RecordViewModel::class.java) ->
-                RecordViewModel(container.recordRepository, container.mediaImporter, container.syncEngine)
+                RecordViewModel(container.recordRepository, container.mediaImporter, container.syncEngine, container.draftStore)
 
             modelClass.isAssignableFrom(RecordDetailViewModel::class.java) ->
                 RecordDetailViewModel(container.recordRepository)
