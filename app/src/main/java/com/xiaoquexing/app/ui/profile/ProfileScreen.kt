@@ -55,6 +55,7 @@ fun ProfileScreen(
     onNavigateToLogin: () -> Unit = {},
     onNavigateToSpaces: () -> Unit = {},
     onNavigateToReview: () -> Unit = {},
+    onNavigateToConflicts: () -> Unit = {},
     viewModel: ProfileViewModel = viewModel(factory = rememberXiaoQueXingViewModelFactory())
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -148,6 +149,13 @@ fun ProfileScreen(
                     subtitle = "本月热力与年度 GP",
                     onClick = onNavigateToReview,
                     iconTint = Color(0xFF5E9B6A)
+                )
+                MenuItem(
+                    icon = Icons.Default.Settings,
+                    title = "同步冲突",
+                    subtitle = "本地和云端不一致时在这里选择",
+                    onClick = onNavigateToConflicts,
+                    iconTint = Color(0xFFE07A3D)
                 )
                 MenuItem(
                     icon = Icons.Default.Settings,
