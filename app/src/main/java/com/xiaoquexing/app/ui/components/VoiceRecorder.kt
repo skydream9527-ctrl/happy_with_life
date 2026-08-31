@@ -39,6 +39,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.xiaoquexing.app.data.media.VoiceFiles
 import com.xiaoquexing.app.util.FileUtil
 import kotlinx.coroutines.delay
 
@@ -62,7 +63,11 @@ fun VoiceRecorder(
             elapsedMs = 0
             while (true) {
                 delay(100)
-                elapsedMs += 100
+                elapsedMs = (elapsedMs + 100).coerceAtMost(VoiceFiles.MAX_DURATION_MS)
+                if (elapsedMs >= VoiceFiles.MAX_DURATION_MS) {
+                    onStopRecording()
+                    break
+                }
             }
         }
     }
@@ -105,7 +110,7 @@ fun VoiceRecorder(
                     if (isRecording) {
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = FileUtil.formatDuration(elapsedMs),
+                            text = "${FileUtil.formatDuration(elapsedMs)} / ${FileUtil.formatDuration(VoiceFiles.MAX_DURATION_MS)}",
                             style = MaterialTheme.typography.titleLarge,
                             color = Color(0xFFE53935)
                         )
@@ -163,7 +168,11 @@ fun VoiceRecorder(
                     }
                     Spacer(modifier = Modifier.width(12.dp))
                     Column(modifier = Modifier.weight(1f)) {
-                        // Waveform visualization
+                        LinearProgressIndicator(
+                            progress = playProgress.coerceIn(0f, 1f),
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                        Spacer(modifier = Modifier.height(6.dp))
                         Row(
                             horizontalArrangement = Arrangement.spacedBy(2.dp),
                             verticalAlignment = Alignment.CenterVertically,
@@ -187,7 +196,7 @@ fun VoiceRecorder(
                         }
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = FileUtil.formatDuration(recordedDurationMs),
+                            text = "${FileUtil.formatDuration((recordedDurationMs * playProgress).toLong())} / ${FileUtil.formatDuration(recordedDurationMs)}",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
