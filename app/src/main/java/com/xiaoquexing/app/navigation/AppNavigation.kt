@@ -64,6 +64,7 @@ import com.xiaoquexing.app.ui.profile.AchievementScreen
 import com.xiaoquexing.app.ui.profile.PlantGuideScreen
 import com.xiaoquexing.app.ui.profile.PlantSelectionScreen
 import com.xiaoquexing.app.ui.profile.ProfileScreen
+import com.xiaoquexing.app.ui.profile.ReviewScreen
 import com.xiaoquexing.app.ui.profile.SharedSpaceScreen
 import com.xiaoquexing.app.ui.record.RecordScreen
 import com.xiaoquexing.app.ui.share.ShareScreen
@@ -80,6 +81,7 @@ sealed class Screen(val route: String, val title: String) {
     data object Profile : Screen("profile", "我的")
     data object Login : Screen("login", "登录")
     data object Spaces : Screen("spaces", "共享空间")
+    data object Review : Screen("review", "月年回顾")
     data object PlantSelection : Screen("plant_selection", "选择植物")
     data object PlantGuide : Screen("plant_guide", "植物图鉴")
     data object Achievement : Screen("achievement", "成就墙")
@@ -163,7 +165,11 @@ fun AppNavigation() {
                     onNavigateToPlantGuide = { navController.navigate(Screen.PlantGuide.route) },
                     onNavigateToLogin = { navController.navigate(Screen.Login.route) },
                     onNavigateToSpaces = { navController.navigate(Screen.Spaces.route) },
+                    onNavigateToReview = { navController.navigate(Screen.Review.route) },
                 )
+            }
+            composable(Screen.Review.route) {
+                ReviewScreen(onBack = { navController.popBackStack() })
             }
             composable(Screen.Spaces.route) {
                 SharedSpaceScreen(

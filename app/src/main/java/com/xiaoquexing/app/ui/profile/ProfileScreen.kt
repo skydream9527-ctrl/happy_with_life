@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.EmojiNature
 import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.LocalFlorist
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Card
@@ -53,6 +54,7 @@ fun ProfileScreen(
     onNavigateToPlantGuide: () -> Unit,
     onNavigateToLogin: () -> Unit = {},
     onNavigateToSpaces: () -> Unit = {},
+    onNavigateToReview: () -> Unit = {},
     viewModel: ProfileViewModel = viewModel(factory = rememberXiaoQueXingViewModelFactory())
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -139,6 +141,13 @@ fun ProfileScreen(
                     subtitle = "和朋友一起记录小确幸",
                     onClick = onNavigateToSpaces,
                     iconTint = Color(0xFF7EC8CE)
+                )
+                MenuItem(
+                    icon = Icons.Default.DateRange,
+                    title = "月年回顾",
+                    subtitle = "本月热力与年度 GP",
+                    onClick = onNavigateToReview,
+                    iconTint = Color(0xFF5E9B6A)
                 )
                 MenuItem(
                     icon = Icons.Default.Settings,
