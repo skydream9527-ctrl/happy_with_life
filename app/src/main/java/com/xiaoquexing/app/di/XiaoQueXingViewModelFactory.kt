@@ -54,7 +54,7 @@ class XiaoQueXingViewModelFactory(
                 SharedSpaceViewModel(container.spaceRepository, container.tokenStore)
 
             modelClass.isAssignableFrom(AlbumViewModel::class.java) ->
-                AlbumViewModel()
+                AlbumViewModel(application, container.recordRepository, container.plantRepository)
 
             modelClass.isAssignableFrom(ShareViewModel::class.java) ->
                 ShareViewModel(
