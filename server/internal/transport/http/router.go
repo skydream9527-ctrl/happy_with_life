@@ -108,6 +108,8 @@ func NewRouter(cfg config.Config, log *slog.Logger, deps Deps) *gin.Engine {
 	v1.POST("/auth/login", h.login)
 	v1.POST("/auth/token/refresh", h.refresh)
 	v1.POST("/auth/logout", optionalBearer(deps.Auth), h.logout)
+	v1.POST("/auth/password/change", bearerAuth(deps.Auth), h.changePassword)
+	v1.POST("/auth/password/reset-on-device", bearerAuth(deps.Auth), h.resetPassword)
 	v1.GET("/me", bearerAuth(deps.Auth), h.me)
 	v1.PATCH("/me", bearerAuth(deps.Auth), h.patchMe)
 	v1.DELETE("/account", bearerAuth(deps.Auth), h.deleteAccount)

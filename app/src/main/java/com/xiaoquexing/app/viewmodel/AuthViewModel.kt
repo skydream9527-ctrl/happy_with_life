@@ -16,6 +16,8 @@ data class AuthUiState(
     val session: Session? = null,
     val account: String = "",
     val password: String = "",
+    val oldPassword: String = "",
+    val newPassword: String = "",
     val sending: Boolean = false,
     val verifying: Boolean = false,
     val syncing: Boolean = false,
@@ -46,6 +48,48 @@ class AuthViewModel(
 
     fun onPassword(v: String) {
         _ui.value = _ui.value.copy(password = v.take(72))
+    }
+
+    fun onOldPassword(v: String) {
+        _ui.value = _ui.value.copy(oldPassword = v.take(72))
+    }
+
+    fun onNewPassword(v: String) {
+        _ui.value = _ui.value.copy(newPassword = v.take(72))
+    }
+
+    fun changePassword() {
+        val snap = _ui.value
+        if (snap.newPassword.length < 6) {
+            _ui.value = snap.copy(message = "新密码至少 6 位")
+            return
+        }
+        viewModelScope.launch {
+            _ui.value = snap.copy(verifying = true, message = null)
+            runCatching { sessions.changePassword(snap.oldPassword, snap.newPassword) }
+                .onSuccess { _ui.value = _ui.value.copy(verifying = false, oldPassword = "", newPassword = "", message = "密码已修改") }
+                .onFailure {
+                    val msg = (it as? ApiException)?.err?.message ?: it.message ?: "修改失败"
+                    _ui.value = _ui.value.copy(verifying = false, message = msg)
+                }
+        }
+    }
+
+    fun resetOnDevice() {
+        val snap = _ui.value
+        if (snap.newPassword.length < 6) {
+            _ui.value = snap.copy(message = "新密码至少 6 位")
+            return
+        }
+        viewModelScope.launch {
+            _ui.value = snap.copy(verifying = true, message = null)
+            runCatching { sessions.resetPasswordOnDevice(snap.newPassword) }
+                .onSuccess { _ui.value = _ui.value.copy(verifying = false, newPassword = "", message = "已在本机重置密码") }
+                .onFailure {
+                    val msg = (it as? ApiException)?.err?.message ?: it.message ?: "重置失败"
+                    _ui.value = _ui.value.copy(verifying = false, message = msg)
+                }
+        }
     }
 
     fun register() = authenticate(register = true)

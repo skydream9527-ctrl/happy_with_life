@@ -241,3 +241,43 @@ func TestPasswordRegisterAndLogin(t *testing.T) {
 		t.Fatal("bad password should fail")
 	}
 }
+
+func TestPasswordChangeAndDeviceReset(t *testing.T) {
+	ts, _ := testServer(t)
+	defer ts.Close()
+	_, body := postJSON(t, ts, "/api/v1/auth/register", map[string]string{
+		"account": "reset_me", "password": "oldpass", "deviceId": "dev-r",
+	}, nil)
+	access := body["data"].(map[string]any)["accessToken"].(string)
+	auth := map[string]string{"Authorization": "Bearer " + access}
+	code, _ := postJSON(t, ts, "/api/v1/auth/password/change", map[string]string{
+		"oldPassword": "wrong", "newPassword": "newpass",
+	}, auth)
+	if code == 200 {
+		t.Fatal("wrong old password should fail")
+	}
+	code, _ = postJSON(t, ts, "/api/v1/auth/password/change", map[string]string{
+		"oldPassword": "oldpass", "newPassword": "newpass",
+	}, auth)
+	if code != 200 {
+		t.Fatalf("change %d", code)
+	}
+	code, _ = postJSON(t, ts, "/api/v1/auth/login", map[string]string{
+		"account": "reset_me", "password": "newpass", "deviceId": "dev-r",
+	}, nil)
+	if code != 200 {
+		t.Fatal("login after change failed")
+	}
+	code, _ = postJSON(t, ts, "/api/v1/auth/password/reset-on-device", map[string]string{
+		"newPassword": "third1",
+	}, auth)
+	if code != 200 {
+		t.Fatalf("device reset %d", code)
+	}
+	code, _ = postJSON(t, ts, "/api/v1/auth/login", map[string]string{
+		"account": "reset_me", "password": "third1", "deviceId": "dev-r",
+	}, nil)
+	if code != 200 {
+		t.Fatal("login after device reset failed")
+	}
+}

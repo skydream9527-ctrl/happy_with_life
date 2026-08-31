@@ -100,6 +100,20 @@ func (s *MemoryStore) MarkUserPendingDelete(userID string, at time.Time) error {
 	return nil
 }
 
+func (s *MemoryStore) UpdateIdentitySecret(identityID string, secret []byte, at time.Time) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	for hash, it := range s.idents {
+		if it.ID == identityID {
+			it.PhoneEncrypted = secret
+			it.VerifiedAt = at
+			s.idents[hash] = it
+			return nil
+		}
+	}
+	return fmt.Errorf("identity not found")
+}
+
 func (s *MemoryStore) UpsertDevice(d Device) (Device, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()

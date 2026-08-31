@@ -41,6 +41,12 @@ data class PasswordAuthReq(
 )
 
 @Serializable
+data class ChangePasswordReq(val oldPassword: String, val newPassword: String)
+
+@Serializable
+data class ResetPasswordReq(val newPassword: String)
+
+@Serializable
 data class RefreshReq(val refreshToken: String, val deviceId: String)
 
 @Serializable

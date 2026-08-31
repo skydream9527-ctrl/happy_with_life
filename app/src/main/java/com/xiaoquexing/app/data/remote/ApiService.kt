@@ -21,6 +21,12 @@ interface ApiService {
     @POST("/api/v1/auth/login")
     suspend fun login(@Body body: PasswordAuthReq): Envelope<TokenPair>
 
+    @POST("/api/v1/auth/password/change")
+    suspend fun changePassword(@Body body: ChangePasswordReq): Envelope<Map<String, Boolean>>
+
+    @POST("/api/v1/auth/password/reset-on-device")
+    suspend fun resetPasswordOnDevice(@Body body: ResetPasswordReq): Envelope<Map<String, Boolean>>
+
     @POST("/api/v1/auth/token/refresh")
     suspend fun refresh(@Body body: RefreshReq): Envelope<TokenPair>
 
