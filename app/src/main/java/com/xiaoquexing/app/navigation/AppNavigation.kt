@@ -37,6 +37,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -118,9 +119,12 @@ private val tabItems = listOf(
 )
 
 @Composable
-fun AppNavigation() {
+fun AppNavigation(openCompose: Boolean = false) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
+    LaunchedEffect(openCompose) {
+        if (openCompose) navController.navigate(Screen.Record.route)
+    }
     val currentDestination = navBackStackEntry?.destination
     val showBottomBar = listOf(
         Screen.Home.route, Screen.Timeline.route,

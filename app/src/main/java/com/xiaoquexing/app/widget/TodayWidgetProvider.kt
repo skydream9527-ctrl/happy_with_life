@@ -56,6 +56,15 @@ class TodayWidgetProvider : AppWidgetProvider() {
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
             )
             views.setOnClickPendingIntent(R.id.widget_root, open)
+            val compose = PendingIntent.getActivity(
+                context,
+                32,
+                Intent(context, MainActivity::class.java)
+                    .putExtra(MainActivity.EXTRA_OPEN_COMPOSE, true)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP),
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            )
+            views.setOnClickPendingIntent(R.id.widget_compose, compose)
             return views
         }
     }
