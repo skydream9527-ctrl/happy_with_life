@@ -22,14 +22,10 @@ object PhotoNormalize {
 
     fun write(context: Context, source: Uri, dest: File): File {
         dest.parentFile?.mkdirs()
-        val normalized = runCatching { encode(context, source) }.getOrNull()
-        if (normalized != null) {
-            dest.outputStream().use { it.write(normalized) }
-            return dest
-        }
-        context.contentResolver.openInputStream(source)?.use { input ->
-            dest.outputStream().use { output -> input.copyTo(output) }
-        } ?: error("无法打开输入流: $source")
+        val raw = context.contentResolver.openInputStream(source)?.use { it.readBytes() }
+            ?: error("无法打开输入流: $source")
+        val normalized = runCatching { encodeBytes(raw) }.getOrNull()
+        dest.writeBytes(normalized ?: raw)
         return dest
     }
 
@@ -51,17 +47,17 @@ object PhotoNormalize {
         return Packed(bytes, bounds.outWidth.coerceAtLeast(1), bounds.outHeight.coerceAtLeast(1))
     }
 
-    private fun encode(context: Context, uri: Uri): ByteArray {
-        val orientation = context.contentResolver.openInputStream(uri)?.use { stream ->
-            ExifInterface(stream).getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
-        } ?: ExifInterface.ORIENTATION_NORMAL
+    private fun encodeBytes(raw: ByteArray): ByteArray {
+        val orientation = runCatching {
+            ExifInterface(java.io.ByteArrayInputStream(raw))
+                .getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
+        }.getOrDefault(ExifInterface.ORIENTATION_NORMAL)
         val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
-        context.contentResolver.openInputStream(uri)?.use { BitmapFactory.decodeStream(it, null, bounds) }
+        BitmapFactory.decodeByteArray(raw, 0, raw.size, bounds)
         val sample = sampleFor(bounds.outWidth, bounds.outHeight)
         val opts = BitmapFactory.Options().apply { inSampleSize = sample }
-        val raw = context.contentResolver.openInputStream(uri)?.use { BitmapFactory.decodeStream(it, null, opts) }
-            ?: error("decode failed")
-        return jpeg(rotate(raw, degrees(orientation)))
+        val bmp = BitmapFactory.decodeByteArray(raw, 0, raw.size, opts) ?: error("decode failed")
+        return jpeg(rotate(bmp, degrees(orientation)))
     }
 
     private fun encodeFile(file: File): ByteArray {
