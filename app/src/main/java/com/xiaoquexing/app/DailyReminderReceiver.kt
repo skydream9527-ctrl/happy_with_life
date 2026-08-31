@@ -1,14 +1,19 @@
 package com.xiaoquexing.app
 
+import android.Manifest
+import android.annotation.SuppressLint
+import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
 import com.xiaoquexing.app.util.ReminderScheduler
 
 class DailyReminderReceiver : BroadcastReceiver() {
@@ -32,7 +37,7 @@ class DailyReminderReceiver : BroadcastReceiver() {
                 .setContentIntent(open)
                 .setAutoCancel(true)
                 .build()
-            runCatching { NotificationManagerCompat.from(context).notify(2102, note) }
+            notifySafely(context, 2102, note)
         }
         com.xiaoquexing.app.data.remote.AnniversaryStore(context).today().forEachIndexed { index, item ->
             val note = NotificationCompat.Builder(context, CHANNEL)
@@ -42,8 +47,19 @@ class DailyReminderReceiver : BroadcastReceiver() {
                 .setContentIntent(open)
                 .setAutoCancel(true)
                 .build()
-            runCatching { NotificationManagerCompat.from(context).notify(2200 + index, note) }
+            notifySafely(context, 2200 + index, note)
         }
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun notifySafely(context: Context, id: Int, note: Notification) {
+        if (Build.VERSION.SDK_INT >= 33 &&
+            ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) !=
+            PackageManager.PERMISSION_GRANTED
+        ) {
+            return
+        }
+        runCatching { NotificationManagerCompat.from(context).notify(id, note) }
     }
 
     private fun ensureChannel(context: Context) {
