@@ -14,6 +14,7 @@ import com.xiaoquexing.app.viewmodel.ConflictViewModel
 import com.xiaoquexing.app.viewmodel.FootprintViewModel
 import com.xiaoquexing.app.viewmodel.HomeViewModel
 import com.xiaoquexing.app.viewmodel.ProfileViewModel
+import com.xiaoquexing.app.viewmodel.RecordDetailViewModel
 import com.xiaoquexing.app.viewmodel.RecordViewModel
 import com.xiaoquexing.app.viewmodel.ReviewViewModel
 import com.xiaoquexing.app.viewmodel.SettingsViewModel
@@ -37,6 +38,9 @@ class XiaoQueXingViewModelFactory(
         return when {
             modelClass.isAssignableFrom(RecordViewModel::class.java) ->
                 RecordViewModel(container.recordRepository, container.mediaImporter, container.syncEngine)
+
+            modelClass.isAssignableFrom(RecordDetailViewModel::class.java) ->
+                RecordDetailViewModel(container.recordRepository)
 
             modelClass.isAssignableFrom(HomeViewModel::class.java) ->
                 HomeViewModel(container.recordRepository, container.plantRepository)

@@ -69,6 +69,7 @@ import com.xiaoquexing.app.ui.profile.ReviewScreen
 import com.xiaoquexing.app.ui.profile.FootprintScreen
 import com.xiaoquexing.app.ui.profile.SettingsScreen
 import com.xiaoquexing.app.ui.profile.SharedSpaceScreen
+import com.xiaoquexing.app.ui.record.RecordDetailScreen
 import com.xiaoquexing.app.ui.record.RecordScreen
 import com.xiaoquexing.app.ui.share.ShareScreen
 import com.xiaoquexing.app.ui.timeline.TimelineScreen
@@ -78,6 +79,9 @@ sealed class Screen(val route: String, val title: String) {
     data object Record : Screen("record", "记录")
     data object RecordEdit : Screen("record/{recordId}", "编辑") {
         fun createRoute(recordId: Long) = "record/$recordId"
+    }
+    data object RecordDetail : Screen("record_detail/{recordId}", "记录") {
+        fun createRoute(recordId: Long) = "record_detail/$recordId"
     }
     data object Timeline : Screen("timeline", "时间线")
     data object Album : Screen("album", "画册")
@@ -154,9 +158,21 @@ fun AppNavigation() {
                     onBack = { navController.popBackStack() },
                 )
             }
+            composable(
+                route = Screen.RecordDetail.route,
+                arguments = listOf(navArgument("recordId") { type = NavType.LongType }),
+            ) { entry ->
+                val id = entry.arguments?.getLong("recordId") ?: 0L
+                RecordDetailScreen(
+                    recordId = id,
+                    onBack = { navController.popBackStack() },
+                    onEdit = { navController.navigate(Screen.RecordEdit.createRoute(it)) },
+                    onShare = { navController.navigate(Screen.Share.createRoute(it)) },
+                )
+            }
             composable(Screen.Timeline.route) {
                 TimelineScreen(
-                    onNavigateToShare = { recordId -> navController.navigate(Screen.RecordEdit.createRoute(recordId)) }
+                    onNavigateToShare = { recordId -> navController.navigate(Screen.RecordDetail.createRoute(recordId)) }
                 )
             }
             composable(Screen.Album.route) {
