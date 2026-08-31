@@ -84,9 +84,22 @@ fun RecordCard(
                 Text(
                     text = record.text,
                     style = MaterialTheme.typography.bodyMedium,
-                    maxLines = if (compact) 3 else Int.MAX_VALUE,
+                    maxLines = if (compact) 3 else 6,
                     overflow = TextOverflow.Ellipsis,
                     color = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+
+            record.getPhotoUriList().firstOrNull()?.let { photo ->
+                coil.compose.AsyncImage(
+                    model = photo,
+                    contentDescription = "照片",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(if (compact) 132.dp else 180.dp)
+                        .clip(RoundedCornerShape(12.dp)),
+                    contentScale = androidx.compose.ui.layout.ContentScale.Crop,
                 )
                 Spacer(modifier = Modifier.height(8.dp))
             }

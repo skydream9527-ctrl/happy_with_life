@@ -118,6 +118,7 @@ fun ProfileScreen(
                 modifier = Modifier.padding(horizontal = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
+                Text("种植", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 MenuItem(
                     icon = Icons.Default.LocalFlorist,
                     title = "我的植物",
@@ -146,6 +147,8 @@ fun ProfileScreen(
                     onClick = onNavigateToSpaces,
                     iconTint = Color(0xFF7EC8CE)
                 )
+                Spacer(Modifier.height(8.dp))
+                Text("记录", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 MenuItem(
                     icon = Icons.Default.DateRange,
                     title = "月年回顾",
@@ -160,13 +163,17 @@ fun ProfileScreen(
                     onClick = onNavigateToFootprints,
                     iconTint = Color(0xFF7AB886)
                 )
-                MenuItem(
-                    icon = Icons.Default.Settings,
-                    title = "同步冲突",
-                    subtitle = "本地和云端不一致时在这里选择",
-                    onClick = onNavigateToConflicts,
-                    iconTint = Color(0xFFE07A3D)
-                )
+                if (uiState.conflictCount > 0) {
+                    MenuItem(
+                        icon = Icons.Default.Settings,
+                        title = "同步冲突",
+                        subtitle = "${uiState.conflictCount} 条待处理",
+                        onClick = onNavigateToConflicts,
+                        iconTint = Color(0xFFE07A3D)
+                    )
+                }
+                Spacer(Modifier.height(8.dp))
+                Text("账号", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 MenuItem(
                     icon = Icons.Default.Settings,
                     title = "登录与同步",

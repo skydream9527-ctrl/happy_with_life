@@ -44,7 +44,7 @@ class XiaoQueXingViewModelFactory(
                 RecordDetailViewModel(container.recordRepository)
 
             modelClass.isAssignableFrom(HomeViewModel::class.java) ->
-                HomeViewModel(container.recordRepository, container.plantRepository)
+                HomeViewModel(container.recordRepository, container.plantRepository, container.tokenStore)
 
             modelClass.isAssignableFrom(TimelineViewModel::class.java) ->
                 TimelineViewModel(container.recordRepository)
@@ -53,7 +53,8 @@ class XiaoQueXingViewModelFactory(
                 ProfileViewModel(
                     container.recordRepository,
                     container.plantRepository,
-                    container.achievementRepository
+                    container.achievementRepository,
+                    container.syncEngine,
                 )
 
             modelClass.isAssignableFrom(AuthViewModel::class.java) ->

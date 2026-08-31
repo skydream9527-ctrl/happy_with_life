@@ -177,7 +177,7 @@ fun AppNavigation(openCompose: Boolean = false) {
                     onNavigateToRecord = { navController.navigate(Screen.Record.route) },
                     onNavigateToPlantSelection = { navController.navigate(Screen.PlantSelection.route) },
                     onNavigateToPlantGuide = { navController.navigate(Screen.PlantGuide.route) },
-                    onNavigateToShare = { recordId -> navController.navigate(Screen.Share.createRoute(recordId)) }
+                    onNavigateToShare = { recordId -> navController.navigate(Screen.RecordDetail.createRoute(recordId)) }
                 )
             }
             composable(

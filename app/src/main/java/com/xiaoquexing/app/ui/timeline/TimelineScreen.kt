@@ -159,6 +159,7 @@ fun TimelineScreen(
                         items(records, key = { record: Record -> record.id }) { record ->
                             RecordCard(
                                 record = record,
+                                compact = true,
                                 onClick = { onNavigateToShare(record.id) }
                             )
                         }
