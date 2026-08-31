@@ -48,6 +48,12 @@ fun SettingsScreen(
     val permission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         viewModel.setReminder(granted)
     }
+    val export = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/zip")) { uri ->
+        uri?.let(viewModel::exportBackup)
+    }
+    val restore = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        uri?.let(viewModel::importBackup)
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -91,6 +97,18 @@ fun SettingsScreen(
             }
         }
         ToggleRow("大字体（1.3 倍）", ui.largeText, viewModel::setLargeText)
+        Spacer(Modifier.height(16.dp))
+        Text("本地备份", style = MaterialTheme.typography.titleMedium)
+        Text("导出记录和照片/录音到一个 zip，换机可再导入。重复条目会跳过。", style = MaterialTheme.typography.bodySmall)
+        Spacer(Modifier.height(8.dp))
+        Button(onClick = { export.launch("xqx-backup.zip") }, modifier = Modifier.fillMaxWidth()) {
+            Text("导出备份")
+        }
+        Spacer(Modifier.height(8.dp))
+        OutlinedButton(
+            onClick = { restore.launch(arrayOf("application/zip", "application/octet-stream", "*/*")) },
+            modifier = Modifier.fillMaxWidth(),
+        ) { Text("从文件恢复") }
         Text("TalkBack 可朗读按钮和照片。系统字体缩放也会作用在本页。", style = MaterialTheme.typography.bodySmall)
         Spacer(Modifier.height(16.dp))
         Text("账号注销", style = MaterialTheme.typography.titleMedium)

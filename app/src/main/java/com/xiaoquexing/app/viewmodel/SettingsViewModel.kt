@@ -3,7 +3,14 @@ package com.xiaoquexing.app.viewmodel
 import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import android.net.Uri
+import com.xiaoquexing.app.data.backup.LocalBackup
 import com.xiaoquexing.app.data.remote.ApiService
+import com.xiaoquexing.app.data.repository.RecordRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withContext
+import java.io.File
 import com.xiaoquexing.app.data.remote.SessionRepository
 import com.xiaoquexing.app.data.remote.SettingsStore
 import com.xiaoquexing.app.ui.theme.Appearance
@@ -36,6 +43,7 @@ class SettingsViewModel(
     private val sessions: SessionRepository,
     private val tokens: TokenStore,
     private val api: ApiService,
+    private val records: RecordRepository,
 ) : ViewModel() {
 
     private val _ui = MutableStateFlow(refresh())
@@ -44,6 +52,54 @@ class SettingsViewModel(
     init {
         viewModelScope.launch {
             tokens.session.collect { _ui.value = refresh() }
+        }
+    }
+
+    fun exportBackup(dest: Uri) {
+        viewModelScope.launch {
+            runCatching {
+                withContext(Dispatchers.IO) {
+                    val rows = records.getAllRecords().first()
+                    val tmp = File(app.cacheDir, "xqx-backup.zip")
+                    LocalBackup.pack(app, rows, tmp)
+                    app.contentResolver.openOutputStream(dest)?.use { out ->
+                        tmp.inputStream().use { it.copyTo(out) }
+                    } ?: error("无法写入所选位置")
+                    rows.size
+                }
+            }.onSuccess { n ->
+                _ui.value = _ui.value.copy(message = "已导出 $n 条")
+            }.onFailure {
+                _ui.value = _ui.value.copy(message = it.message ?: "导出失败")
+            }
+        }
+    }
+
+    fun importBackup(src: Uri) {
+        viewModelScope.launch {
+            runCatching {
+                withContext(Dispatchers.IO) {
+                    val existing = records.getAllRecords().first()
+                        .map { LocalBackup.fingerprint(it.text, it.createdAt) }
+                        .toSet()
+                    val (envelope, dir) = LocalBackup.unpack(app, src)
+                    var added = 0
+                    var skipped = 0
+                    envelope.records.forEach { row ->
+                        if (LocalBackup.shouldSkip(existing, row)) {
+                            skipped++
+                        } else {
+                            records.publish(LocalBackup.toDraft(row, dir))
+                            added++
+                        }
+                    }
+                    added to skipped
+                }
+            }.onSuccess { (added, skipped) ->
+                _ui.value = _ui.value.copy(message = "恢复 $added 条，跳过 $skipped 条重复")
+            }.onFailure {
+                _ui.value = _ui.value.copy(message = it.message ?: "恢复失败")
+            }
         }
     }
 

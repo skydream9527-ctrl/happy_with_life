@@ -80,6 +80,7 @@ class XiaoQueXingViewModelFactory(
                     container.sessionRepository,
                     container.tokenStore,
                     container.apiService,
+                    container.recordRepository,
                 )
 
             modelClass.isAssignableFrom(ShareViewModel::class.java) ->
