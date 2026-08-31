@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -163,8 +165,42 @@ fun RecordScreen(
         }
     }
 
+    val canPublish = uiState.selectedMood != null && (
+        uiState.text.isNotBlank() || uiState.photoUris.isNotEmpty() || uiState.voiceUri != null ||
+            uiState.musicTitle != null || uiState.linkUrl != null || uiState.locationName != null
+        )
     Scaffold(
+        modifier = Modifier.imePadding(),
         snackbarHost = { SnackbarHost(snackbarHostState) },
+        bottomBar = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .navigationBarsPadding()
+                    .background(MaterialTheme.colorScheme.background)
+                    .padding(horizontal = 20.dp, vertical = 12.dp),
+            ) {
+                Text(
+                    text = "预计 +${uiState.estimatedGp} GP",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Button(
+                    onClick = { viewModel.publish(onPublished) },
+                    modifier = Modifier.fillMaxWidth().height(52.dp),
+                    shape = RoundedCornerShape(14.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                    enabled = !uiState.isPublishing && canPublish,
+                ) {
+                    if (uiState.isPublishing) {
+                        CircularProgressIndicator(modifier = Modifier.size(22.dp), color = Color.White, strokeWidth = 2.dp)
+                    } else {
+                        Text(if (uiState.editingId > 0) "保存修改" else "发布", fontWeight = FontWeight.SemiBold, color = Color.White)
+                    }
+                }
+            }
+        },
         topBar = {
             // iOS 风格居中标题导航栏
             Box(
@@ -438,65 +474,7 @@ fun RecordScreen(
                 onLocationClick = { showAddLocationDialog = true }
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Estimated GP - iOS 风格浅绿卡片
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(14.dp))
-                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.08f))
-                    .padding(horizontal = 16.dp, vertical = 14.dp)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "预计获得",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Text(
-                        text = "+${uiState.estimatedGp} GP 🌱",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-            }
-
             Spacer(modifier = Modifier.height(24.dp))
-
-            // Publish button
-            val canPublish = uiState.selectedMood != null && (
-                uiState.text.isNotBlank() || uiState.photoUris.isNotEmpty() || uiState.voiceUri != null ||
-                    uiState.musicTitle != null || uiState.linkUrl != null || uiState.locationName != null
-                )
-            Button(
-                onClick = { viewModel.publish(onPublished) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                shape = RoundedCornerShape(14.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-                enabled = !uiState.isPublishing && canPublish
-            ) {
-                if (uiState.isPublishing) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(24.dp),
-                        color = Color.White,
-                        strokeWidth = 2.dp
-                    )
-                } else {
-                    Text(
-                        text = if (uiState.editingId > 0) "保存修改" else "发布",
-                        fontSize = 17.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = Color.White
-                    )
-                }
-            }
 
             if (uiState.editingId > 0) {
                 Spacer(modifier = Modifier.height(12.dp))

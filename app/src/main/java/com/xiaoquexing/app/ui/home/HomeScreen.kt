@@ -93,7 +93,7 @@ fun HomeScreen(
                 ) {
                     Column {
                         Text(
-                            text = "${uiState.greeting} ☀️",
+                            text = "${uiState.greeting} ${uiState.greetingEmoji}",
                             style = MaterialTheme.typography.displayLarge,
                             color = MaterialTheme.colorScheme.onBackground
                         )
@@ -102,6 +102,11 @@ fun HomeScreen(
                             text = uiState.dateStr,
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = uiState.syncLabel,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.primary
                         )
                     }
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -220,9 +225,9 @@ private fun PlantHeroCard(uiState: com.xiaoquexing.app.viewmodel.HomeUiState) {
             .background(
                 Brush.linearGradient(
                     listOf(
-                        Color(0xFFE8F3EA),
-                        Color(0xFFF4F9F2),
-                        Color(0xFFFBFAF5)
+                        MaterialTheme.colorScheme.secondaryContainer,
+                        MaterialTheme.colorScheme.surface,
+                        MaterialTheme.colorScheme.background,
                     )
                 )
             )

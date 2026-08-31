@@ -19,13 +19,15 @@ data class ProfileUiState(
     val totalGp: Int = 0,
     val streakDays: Int = 1,
     val unlockedPlantCount: Int = 1,
-    val unlockedAchievementCount: Int = 0
+    val unlockedAchievementCount: Int = 0,
+    val conflictCount: Int = 0,
 )
 
 class ProfileViewModel(
     private val recordRepo: RecordRepository,
     private val plantRepo: PlantRepository,
-    private val achievementRepo: AchievementRepository
+    private val achievementRepo: AchievementRepository,
+    private val sync: com.xiaoquexing.app.data.remote.SyncEngine? = null,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ProfileUiState())
@@ -67,6 +69,11 @@ class ProfileViewModel(
         viewModelScope.launch {
             achievementRepo.getUnlockedCount().collect { count ->
                 _uiState.value = _uiState.value.copy(unlockedAchievementCount = count)
+            }
+        }
+        viewModelScope.launch {
+            sync?.observeConflictCount()?.collect { n ->
+                _uiState.value = _uiState.value.copy(conflictCount = n)
             }
         }
         viewModelScope.launch {
