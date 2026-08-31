@@ -291,6 +291,10 @@ fun RecordScreen(
                 ),
                 maxLines = 8
             )
+            TextButton(onClick = { viewModel.applyAssistant() }) {
+                Text(if (uiState.text.isBlank()) "帮我写一句" else "再补一句收尾")
+            }
+            Text("先按心情、地点和时段用规则生成，接上模型密钥后可替换。", style = MaterialTheme.typography.bodySmall)
 
             Spacer(modifier = Modifier.height(12.dp))
 

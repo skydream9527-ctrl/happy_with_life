@@ -108,6 +108,20 @@ class RecordViewModel(
         }
     }
 
+    fun applyAssistant() {
+        val state = _uiState.value
+        val hour = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)
+        val line = com.xiaoquexing.app.util.NoteAssistant.suggest(
+            com.xiaoquexing.app.util.CaptionHint(
+                mood = state.selectedMood,
+                text = state.text,
+                location = state.locationName,
+                hour = hour,
+            )
+        )
+        updateText(line)
+    }
+
     fun updateText(text: String) {
         _uiState.value = _uiState.value.copy(text = text)
         recalculateEstimatedGp()
