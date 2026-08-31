@@ -7,6 +7,7 @@ import com.xiaoquexing.app.data.db.AppDatabase
 import com.xiaoquexing.app.data.media.MediaImporter
 import com.xiaoquexing.app.data.media.PhotoUploader
 import com.xiaoquexing.app.data.remote.SessionRepository
+import com.xiaoquexing.app.data.remote.SettingsStore
 import com.xiaoquexing.app.data.remote.SyncEngine
 import com.xiaoquexing.app.data.remote.TokenHolder
 import com.xiaoquexing.app.data.remote.TokenStore
@@ -39,6 +40,8 @@ class AppContainer(private val appContext: Context) {
     val tokenHolder = TokenHolder()
 
     val tokenStore: TokenStore by lazy { TokenStore(appContext) }
+
+    val settingsStore: SettingsStore by lazy { SettingsStore(appContext) }
 
     val apiService by lazy {
         createApiService(

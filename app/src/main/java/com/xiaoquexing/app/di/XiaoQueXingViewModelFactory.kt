@@ -15,6 +15,7 @@ import com.xiaoquexing.app.viewmodel.HomeViewModel
 import com.xiaoquexing.app.viewmodel.ProfileViewModel
 import com.xiaoquexing.app.viewmodel.RecordViewModel
 import com.xiaoquexing.app.viewmodel.ReviewViewModel
+import com.xiaoquexing.app.viewmodel.SettingsViewModel
 import com.xiaoquexing.app.viewmodel.SharedSpaceViewModel
 import com.xiaoquexing.app.viewmodel.TimelineViewModel
 
@@ -63,6 +64,15 @@ class XiaoQueXingViewModelFactory(
 
             modelClass.isAssignableFrom(ConflictViewModel::class.java) ->
                 ConflictViewModel(container.syncEngine)
+
+            modelClass.isAssignableFrom(SettingsViewModel::class.java) ->
+                SettingsViewModel(
+                    application,
+                    container.settingsStore,
+                    container.sessionRepository,
+                    container.tokenStore,
+                    container.apiService,
+                )
 
             modelClass.isAssignableFrom(ShareViewModel::class.java) ->
                 ShareViewModel(
