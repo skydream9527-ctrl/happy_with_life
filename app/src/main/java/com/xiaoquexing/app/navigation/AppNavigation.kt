@@ -68,6 +68,7 @@ import com.xiaoquexing.app.ui.profile.ProfileScreen
 import com.xiaoquexing.app.ui.profile.ConflictScreen
 import com.xiaoquexing.app.ui.profile.ReviewScreen
 import com.xiaoquexing.app.ui.profile.FootprintScreen
+import com.xiaoquexing.app.ui.profile.PlanScreen
 import com.xiaoquexing.app.ui.profile.SettingsScreen
 import com.xiaoquexing.app.ui.profile.SharedSpaceScreen
 import com.xiaoquexing.app.ui.record.RecordDetailScreen
@@ -92,6 +93,7 @@ sealed class Screen(val route: String, val title: String) {
     data object Review : Screen("review", "月年回顾")
     data object Conflicts : Screen("conflicts", "同步冲突")
     data object Settings : Screen("settings", "设置")
+    data object Plan : Screen("plan", "订阅")
     data object Footprints : Screen("footprints", "足迹")
     data object PlantSelection : Screen("plant_selection", "选择植物")
     data object PlantGuide : Screen("plant_guide", "植物图鉴")
@@ -194,11 +196,15 @@ fun AppNavigation(openCompose: Boolean = false) {
                     onNavigateToReview = { navController.navigate(Screen.Review.route) },
                     onNavigateToConflicts = { navController.navigate(Screen.Conflicts.route) },
                     onNavigateToSettings = { navController.navigate(Screen.Settings.route) },
+                    onNavigateToPlan = { navController.navigate(Screen.Plan.route) },
                     onNavigateToFootprints = { navController.navigate(Screen.Footprints.route) },
                 )
             }
             composable(Screen.Footprints.route) {
                 FootprintScreen(onBack = { navController.popBackStack() })
+            }
+            composable(Screen.Plan.route) {
+                PlanScreen(onBack = { navController.popBackStack() })
             }
             composable(Screen.Settings.route) {
                 SettingsScreen(onBack = { navController.popBackStack() })

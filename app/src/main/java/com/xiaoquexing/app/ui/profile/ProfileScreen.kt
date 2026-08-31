@@ -57,6 +57,7 @@ fun ProfileScreen(
     onNavigateToReview: () -> Unit = {},
     onNavigateToConflicts: () -> Unit = {},
     onNavigateToSettings: () -> Unit = {},
+    onNavigateToPlan: () -> Unit = {},
     onNavigateToFootprints: () -> Unit = {},
     viewModel: ProfileViewModel = viewModel(factory = rememberXiaoQueXingViewModelFactory())
 ) {
@@ -179,6 +180,13 @@ fun ProfileScreen(
                     subtitle = "通知、隐私、主题",
                     onClick = onNavigateToSettings,
                     iconTint = Color(0xFF9E9E9E)
+                )
+                MenuItem(
+                    icon = Icons.Default.Settings,
+                    title = "订阅",
+                    subtitle = "免费 / 会员对照，支付尚未接入",
+                    onClick = onNavigateToPlan,
+                    iconTint = Color(0xFF5E9B6A)
                 )
                 MenuItem(
                     icon = Icons.Default.Share,
