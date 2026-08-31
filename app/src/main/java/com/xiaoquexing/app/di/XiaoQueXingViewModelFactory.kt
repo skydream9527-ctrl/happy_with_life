@@ -59,7 +59,7 @@ class XiaoQueXingViewModelFactory(
                 AuthViewModel(container.sessionRepository, container.tokenStore, container.syncEngine)
 
             modelClass.isAssignableFrom(SharedSpaceViewModel::class.java) ->
-                SharedSpaceViewModel(container.spaceRepository, container.tokenStore)
+                SharedSpaceViewModel(application, container.spaceRepository, container.tokenStore)
 
             modelClass.isAssignableFrom(AlbumViewModel::class.java) ->
                 AlbumViewModel(application, container.recordRepository, container.plantRepository)

@@ -62,6 +62,7 @@ fun SharedSpaceScreen(
             Text("合种需要先登录。两个人各自登录后，一方建空间并发邀请码，另一方粘贴加入。")
             Spacer(Modifier.height(12.dp))
             Button(onClick = onNeedLogin, modifier = Modifier.fillMaxWidth()) { Text("去登录") }
+            AnniversaryBlock(ui, viewModel)
             return
         }
         Text("当前空间的新记录会算进这个空间的植物。个人空间以外最多邀请朋友一起养。", style = MaterialTheme.typography.bodySmall)
@@ -129,6 +130,39 @@ fun SharedSpaceScreen(
             Spacer(Modifier.height(16.dp))
             Text(it, color = MaterialTheme.colorScheme.primary)
         }
+        AnniversaryBlock(ui, viewModel)
         Spacer(Modifier.height(32.dp))
+    }
+}
+
+@Composable
+private fun AnniversaryBlock(
+    ui: com.xiaoquexing.app.viewmodel.SharedSpaceUi,
+    viewModel: SharedSpaceViewModel,
+) {
+    Spacer(Modifier.height(20.dp))
+    Text("纪念日", style = MaterialTheme.typography.titleMedium)
+    Text("当天 21 点用本地通知提醒，不依赖推送服务。", style = MaterialTheme.typography.bodySmall)
+    Spacer(Modifier.height(8.dp))
+    OutlinedTextField(value = ui.annTitle, onValueChange = viewModel::onAnnTitle, label = { Text("名称") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+    Spacer(Modifier.height(8.dp))
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+        OutlinedTextField(value = ui.annMonth, onValueChange = viewModel::onAnnMonth, label = { Text("月") }, modifier = Modifier.weight(1f), singleLine = true)
+        OutlinedTextField(value = ui.annDay, onValueChange = viewModel::onAnnDay, label = { Text("日") }, modifier = Modifier.weight(1f), singleLine = true)
+    }
+    Spacer(Modifier.height(8.dp))
+    Button(onClick = { viewModel.addAnniversary() }, modifier = Modifier.fillMaxWidth()) { Text("添加纪念日") }
+    ui.anniversaries.forEach { item ->
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Text("${item.month}月${item.day}日  ${item.title}")
+            Text(
+                "删除",
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.clickable { viewModel.removeAnniversary(item.id) },
+            )
+        }
     }
 }

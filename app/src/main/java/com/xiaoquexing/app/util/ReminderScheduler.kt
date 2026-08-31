@@ -21,7 +21,13 @@ object ReminderScheduler {
             .edit()
             .putBoolean(KEY_ENABLED, enabled)
             .apply()
-        if (enabled) schedule(context) else cancel(context)
+        ensure(context)
+    }
+
+    fun ensure(context: Context) {
+        val needDaily = isEnabled(context)
+        val needAnn = com.xiaoquexing.app.data.remote.AnniversaryStore(context).list().isNotEmpty()
+        if (needDaily || needAnn) schedule(context) else cancel(context)
     }
 
     fun schedule(context: Context) {

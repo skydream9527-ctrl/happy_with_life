@@ -36,9 +36,7 @@ class XiaoQueXingApp : Application() {
                 com.xiaoquexing.app.data.remote.SyncWork.ensurePeriodic(this@XiaoQueXingApp)
                 com.xiaoquexing.app.data.remote.SyncWork.enqueueOnce(this@XiaoQueXingApp)
             }
-            if (com.xiaoquexing.app.util.ReminderScheduler.isEnabled(this@XiaoQueXingApp)) {
-                runCatching { com.xiaoquexing.app.util.ReminderScheduler.schedule(this@XiaoQueXingApp) }
-            }
+            runCatching { com.xiaoquexing.app.util.ReminderScheduler.ensure(this@XiaoQueXingApp) }
             runCatching { com.xiaoquexing.app.widget.TodayWidgetProvider.refreshAll(this@XiaoQueXingApp) }
         }
     }
