@@ -32,6 +32,9 @@ class XiaoQueXingApp : Application() {
             runCatching { container.mediaImporter.cleanupOrphanFiles() }
             runCatching { container.sessionRepository.restore() }
             runCatching { container.syncEngine.syncAll() }
+            if (com.xiaoquexing.app.util.ReminderScheduler.isEnabled(this@XiaoQueXingApp)) {
+                runCatching { com.xiaoquexing.app.util.ReminderScheduler.schedule(this@XiaoQueXingApp) }
+            }
         }
     }
 
