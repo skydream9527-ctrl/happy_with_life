@@ -102,6 +102,12 @@ interface RecordDao {
     @Query("SELECT COUNT(*) FROM records WHERE space_id = :spaceId AND occurred_date_key = :dateKey AND deleted_at IS NULL")
     suspend fun countOnDate(spaceId: Long, dateKey: Int): Int
 
+    @Query("SELECT COUNT(*) FROM records WHERE occurred_date_key = :dateKey AND deleted_at IS NULL")
+    suspend fun countOnDateAll(dateKey: Int): Int
+
+    @Query("SELECT * FROM records WHERE deleted_at IS NULL ORDER BY occurred_at DESC LIMIT 1")
+    suspend fun latestRecord(): RecordEntity?
+
     @Query("SELECT COUNT(DISTINCT author_id) FROM records WHERE space_id = :spaceId AND occurred_date_key = :dateKey AND deleted_at IS NULL")
     suspend fun countAuthorsOnDate(spaceId: Long, dateKey: Int): Int
 
