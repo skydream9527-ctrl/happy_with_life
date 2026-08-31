@@ -1,6 +1,12 @@
 package com.xiaoquexing.app.ui.share
 
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import androidx.core.content.FileProvider
+import com.xiaoquexing.app.data.entity.PlantStage
+import com.xiaoquexing.app.data.model.MoodTag
+import java.io.File
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.xiaoquexing.app.data.entity.PlantType
@@ -29,7 +35,8 @@ sealed class ShareSaveState {
 
 data class ShareUiState(
     val cardData: ShareCardData? = null,
-    val saveState: ShareSaveState = ShareSaveState.Idle
+    val saveState: ShareSaveState = ShareSaveState.Idle,
+    val shareUri: Uri? = null,
 )
 
 class ShareViewModel(
@@ -77,10 +84,10 @@ class ShareViewModel(
             _uiState.value = _uiState.value.copy(
                 cardData = ShareCardData(
                     recordText = record.text,
-                    moodEmoji = record.moodTag?.let { emojiForMood(it) } ?: "🌱",
+                    moodEmoji = MoodTag.fromName(record.moodTag)?.emoji ?: "🌱",
                     dateStr = dateFormat.format(Date(record.createdAt)),
                     plantType = activePlant?.plantType ?: PlantType.TREE,
-                    plantStage = 4,
+                    plantStage = PlantStage.fromGp(totalGp).ordinal,
                     photoUris = record.getPhotoUriList(),
                     musicTitle = record.musicTitle,
                     musicArtist = record.musicArtist,
@@ -96,7 +103,7 @@ class ShareViewModel(
         _uiState.value = _uiState.value.copy(saveState = ShareSaveState.Saving)
         viewModelScope.launch {
             val bitmap = withContext(Dispatchers.Default) {
-                ShareCardRenderer.render(data, width = 1080)
+                ShareCardRenderer.render(data, width = 1080, context = appContext)
             }
             val title = "XiaoQueXing_${System.currentTimeMillis()}"
             val result = PhotoSaver.saveShareCard(appContext, bitmap, title)
@@ -115,16 +122,35 @@ class ShareViewModel(
         _uiState.value = _uiState.value.copy(saveState = ShareSaveState.Idle)
     }
 
-    private fun emojiForMood(name: String): String = when (name) {
-        "开心" -> "😊"
-        "平静" -> "😌"
-        "感动" -> "🥹"
-        "兴奋" -> "🤩"
-        "治愈" -> "🌸"
-        "满足" -> "🥰"
-        "惊喜" -> "🎁"
-        "感恩" -> "🙏"
-        "放松" -> "🍃"
-        else -> "🌱"
+    fun shareViaSystem() {
+        val data = _uiState.value.cardData ?: return
+        _uiState.value = _uiState.value.copy(saveState = ShareSaveState.Saving)
+        viewModelScope.launch {
+            val uri = withContext(Dispatchers.IO) {
+                val bitmap = ShareCardRenderer.render(data, width = 1080, context = appContext)
+                val file = File(appContext.cacheDir, "share_${System.currentTimeMillis()}.jpg")
+                file.outputStream().use { bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 90, it) }
+                FileProvider.getUriForFile(appContext, "${appContext.packageName}.fileprovider", file)
+            }
+            _uiState.value = _uiState.value.copy(saveState = ShareSaveState.Idle, shareUri = uri)
+        }
     }
+
+    fun consumeShareUri() {
+        _uiState.value = _uiState.value.copy(shareUri = null)
+    }
+
+    fun shareText(): String = _uiState.value.cardData?.recordText.orEmpty()
+
+    companion object {
+        fun imageShareIntent(uri: Uri, text: String): Intent {
+            return Intent(Intent.ACTION_SEND).apply {
+                type = "image/jpeg"
+                putExtra(Intent.EXTRA_STREAM, uri)
+                putExtra(Intent.EXTRA_TEXT, text)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+        }
+    }
+
 }

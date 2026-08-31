@@ -1,10 +1,15 @@
 package com.xiaoquexing.app.util
 
+import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Paint
+import android.graphics.Rect
 import android.graphics.RectF
 import android.graphics.Typeface
+import android.net.Uri
+import java.io.File
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import com.xiaoquexing.app.data.entity.PlantType
@@ -19,7 +24,7 @@ object ShareCardRenderer {
     private val TEXT_SECONDARY = android.graphics.Color.parseColor("#757575")
     private val ACCENT_PINK = android.graphics.Color.parseColor("#F48FB1")
 
-    fun render(data: ShareCardData, width: Int = 720): Bitmap {
+    fun render(data: ShareCardData, width: Int = 720, context: Context? = null): Bitmap {
         val height = (width * 1.4f).toInt()
         val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
@@ -87,28 +92,35 @@ object ShareCardRenderer {
             y = textY + 20f * density
         }
 
-        // Photo placeholder area
         if (data.photoUris.isNotEmpty()) {
             val photoAreaTop = y.toFloat()
-            val photoAreaH = 200f * density
-            val photoPaint = Paint().apply {
-                color = android.graphics.Color.parseColor("#F5F5F5")
-                style = Paint.Style.FILL
-            }
+            val photoAreaH = 220f * density
             val photoRect = RectF(
                 cardRect.left + innerPadding, photoAreaTop,
                 cardRect.right - innerPadding, photoAreaTop + photoAreaH
             )
-            canvas.drawRoundRect(photoRect, 12f * density, 12f * density, photoPaint)
-
-            val placeholderPaint = Paint().apply {
-                color = TEXT_SECONDARY
-                textSize = 20f * density
-                textAlign = Paint.Align.CENTER
-                isAntiAlias = true
+            val decoded = context?.let { decodePhoto(it, data.photoUris.first(), photoRect.width().toInt(), photoRect.height().toInt()) }
+            if (decoded != null) {
+                canvas.save()
+                canvas.clipRect(photoRect)
+                val src = Rect(0, 0, decoded.width, decoded.height)
+                canvas.drawBitmap(decoded, src, photoRect, Paint(Paint.FILTER_BITMAP_FLAG))
+                canvas.restore()
+                decoded.recycle()
+            } else {
+                val photoPaint = Paint().apply {
+                    color = android.graphics.Color.parseColor("#F5F5F5")
+                    style = Paint.Style.FILL
+                }
+                canvas.drawRoundRect(photoRect, 12f * density, 12f * density, photoPaint)
+                val placeholderPaint = Paint().apply {
+                    color = TEXT_SECONDARY
+                    textSize = 20f * density
+                    textAlign = Paint.Align.CENTER
+                    isAntiAlias = true
+                }
+                canvas.drawText("📷 ${data.photoUris.size} 张照片", photoRect.centerX(), photoRect.centerY() + 8f * density, placeholderPaint)
             }
-            canvas.drawText("📷 ${data.photoUris.size} 张照片", photoRect.centerX(), photoRect.centerY() + 8f * density, placeholderPaint)
-
             y += photoAreaH + 20f * density
         }
 
@@ -234,5 +246,24 @@ object ShareCardRenderer {
             currentY += lineHeight
         }
         return currentY
+    }
+
+    fun decodePhoto(context: Context, uriOrPath: String, maxW: Int, maxH: Int): Bitmap? {
+        return runCatching {
+            val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+            openStream(context, uriOrPath)?.use { BitmapFactory.decodeStream(it, null, bounds) }
+            var sample = 1
+            val w = bounds.outWidth.coerceAtLeast(1)
+            val h = bounds.outHeight.coerceAtLeast(1)
+            while (w / sample > maxW * 2 || h / sample > maxH * 2) sample *= 2
+            val opts = BitmapFactory.Options().apply { inSampleSize = sample }
+            openStream(context, uriOrPath)?.use { BitmapFactory.decodeStream(it, null, opts) }
+        }.getOrNull()
+    }
+
+    private fun openStream(context: Context, uriOrPath: String) = when {
+        uriOrPath.startsWith("content://") || uriOrPath.startsWith("file://") ->
+            context.contentResolver.openInputStream(Uri.parse(uriOrPath))
+        else -> File(uriOrPath).takeIf { it.exists() }?.inputStream()
     }
 }

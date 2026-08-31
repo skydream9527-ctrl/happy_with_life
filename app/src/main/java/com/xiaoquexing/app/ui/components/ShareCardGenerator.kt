@@ -50,7 +50,7 @@ fun ShareCardPreview(
 ) {
     val context = LocalContext.current
     val bitmap = remember(data) {
-        ShareCardRenderer.render(data, width = 720)
+        ShareCardRenderer.render(data, width = 720, context = context)
     }
     Card(
         modifier = modifier
