@@ -1,5 +1,6 @@
 package com.xiaoquexing.app.data.remote
 
+import com.xiaoquexing.app.data.media.PhotoNormalize
 import com.xiaoquexing.app.data.media.PhotoUploader
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -18,7 +19,7 @@ class SyncModelsTest {
     @Test
     fun photoUploader_capsAtFiveMegabytes() {
         assertEquals(5 * 1024 * 1024, PhotoUploader.MAX_BYTES)
-        assertEquals(1280, PhotoUploader.MAX_EDGE)
+        assertEquals(PhotoNormalize.MAX_EDGE, PhotoUploader.MAX_EDGE)
     }
 
     @Test
