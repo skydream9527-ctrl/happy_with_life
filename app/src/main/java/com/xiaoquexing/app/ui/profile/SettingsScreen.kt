@@ -32,7 +32,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.material3.FilterChip
 import com.xiaoquexing.app.BuildConfig
+import com.xiaoquexing.app.data.remote.SettingsStore
 import com.xiaoquexing.app.di.rememberXiaoQueXingViewModelFactory
 import com.xiaoquexing.app.viewmodel.SettingsViewModel
 
@@ -72,6 +74,24 @@ fun SettingsScreen(
         )
         ToggleRow("关闭使用统计", ui.analyticsOff, viewModel::setAnalyticsOff)
         ToggleRow("个人页隐藏手机号", ui.hidePhone, viewModel::setHidePhone)
+        Spacer(Modifier.height(16.dp))
+        Text("外观", style = MaterialTheme.typography.titleMedium)
+        Row(modifier = Modifier.fillMaxWidth()) {
+            listOf(
+                SettingsStore.MODE_SYSTEM to "跟随系统",
+                SettingsStore.MODE_LIGHT to "浅色",
+                SettingsStore.MODE_DARK to "深色",
+            ).forEach { (mode, label) ->
+                FilterChip(
+                    selected = ui.themeMode == mode,
+                    onClick = { viewModel.setTheme(mode) },
+                    label = { Text(label) },
+                    modifier = Modifier.padding(end = 8.dp),
+                )
+            }
+        }
+        ToggleRow("大字体（1.3 倍）", ui.largeText, viewModel::setLargeText)
+        Text("TalkBack 可朗读按钮和照片。系统字体缩放也会作用在本页。", style = MaterialTheme.typography.bodySmall)
         Spacer(Modifier.height(16.dp))
         Text("账号注销", style = MaterialTheme.typography.titleMedium)
         Text(

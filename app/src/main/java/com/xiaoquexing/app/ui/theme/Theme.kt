@@ -71,6 +71,7 @@ private val DarkColorScheme = darkColorScheme(
 fun XiaoQueXingTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     dynamicColor: Boolean = false,
+    fontScale: Float = 1.0f,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
@@ -92,7 +93,7 @@ fun XiaoQueXingTheme(
 
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = Typography,
+        typography = scaledTypography(fontScale),
         content = content
     )
 }

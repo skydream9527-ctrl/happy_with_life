@@ -10,4 +10,11 @@ class SettingsStoreTest {
         assertEquals(0, SettingsStore.purgeAt(0))
         assertEquals(1_000 + SettingsStore.COOLING_MS, SettingsStore.purgeAt(1_000))
     }
+
+    @Test
+    fun themeModes_areStable() {
+        assertEquals("system", SettingsStore.MODE_SYSTEM)
+        assertEquals("light", SettingsStore.MODE_LIGHT)
+        assertEquals("dark", SettingsStore.MODE_DARK)
+    }
 }
