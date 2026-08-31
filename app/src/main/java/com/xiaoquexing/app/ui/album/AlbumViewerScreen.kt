@@ -30,6 +30,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -37,13 +40,21 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.xiaoquexing.app.di.rememberXiaoQueXingViewModelFactory
+import com.xiaoquexing.app.viewmodel.AlbumSnapshot
+import com.xiaoquexing.app.viewmodel.AlbumViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun AlbumViewerScreen(
     albumId: Long,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    viewModel: AlbumViewModel = viewModel(factory = rememberXiaoQueXingViewModelFactory()),
 ) {
+    val ui by viewModel.uiState.collectAsState()
+    LaunchedEffect(albumId) { viewModel.open(albumId) }
+    val album = ui.snapshot
     val pages = listOf("cover", "growth", "mood", "tags", "location", "music", "links", "back")
     val pagerState = rememberPagerState(pageCount = { pages.size })
 
@@ -53,27 +64,45 @@ fun AlbumViewerScreen(
             .background(MaterialTheme.colorScheme.background)
     ) {
         TopAppBar(
-            title = { Text("我的画册", fontWeight = FontWeight.Bold) },
+            title = { Text(album?.title ?: "我的画册", fontWeight = FontWeight.Bold) },
             navigationIcon = {
                 IconButton(onClick = onBack) {
                     Icon(Icons.Default.ArrowBack, contentDescription = "返回")
                 }
+            },
+            actions = {
+                androidx.compose.material3.TextButton(
+                    onClick = { viewModel.exportImage() },
+                    enabled = !ui.exporting && album != null,
+                ) { Text("长图") }
+                androidx.compose.material3.TextButton(
+                    onClick = { viewModel.exportPdf() },
+                    enabled = !ui.exporting && album != null,
+                ) { Text("PDF") }
             }
         )
+        ui.message?.let {
+            Text(
+                text = it,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(horizontal = 16.dp),
+            )
+        }
 
         Box(modifier = Modifier.fillMaxSize()) {
             HorizontalPager(
                 state = pagerState,
                 modifier = Modifier.fillMaxSize()
             ) { page ->
+                val snap = album
                 when (pages[page]) {
-                    "cover" -> AlbumCoverPage()
-                    "growth" -> AlbumGrowthPage()
-                    "mood" -> AlbumMoodPage()
-                    "tags" -> AlbumTagsPage()
-                    "location" -> AlbumLocationPage()
-                    "music" -> AlbumMusicPage()
-                    "links" -> AlbumLinksPage()
+                    "cover" -> AlbumCoverPage(snap)
+                    "growth" -> AlbumGrowthPage(snap)
+                    "mood" -> AlbumMoodPage(snap)
+                    "tags" -> AlbumTagsPage(snap)
+                    "location" -> AlbumLocationPage(snap)
+                    "music" -> AlbumMusicPage(snap)
+                    "links" -> AlbumLinksPage(snap)
                     "back" -> AlbumBackPage()
                 }
             }
@@ -128,37 +157,33 @@ private fun AlbumPage(title: String, emoji: String, content: @Composable () -> U
 }
 
 @Composable
-private fun AlbumCoverPage() {
-    AlbumPage(title = "我的小确幸", emoji = "🌱") {
-        Text("2024年1月", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.primary)
+private fun AlbumCoverPage(album: AlbumSnapshot?) {
+    AlbumPage(title = album?.title ?: "我的小确幸", emoji = "🌱") {
+        Text(album?.dateRange ?: "暂无记录", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.primary)
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = "5条记录 · 116 GP",
+            text = "${album?.recordCount ?: 0}条记录 · ${album?.totalGp ?: 0} GP",
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         Spacer(modifier = Modifier.height(32.dp))
-        Text("小确幸之树 · 幼苗 🌳", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(album?.plantLabel ?: "小确幸之树", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        album?.let { /* keep for recomposition */ }
     }
 }
 
 @Composable
-private fun AlbumGrowthPage() {
+private fun AlbumGrowthPage(album: AlbumSnapshot?) {
     AlbumPage(title = "成长时间轴", emoji = "📈") {
         Column {
-            listOf(
-                "第1天: 种子发芽了 🌱" to "+15 GP",
-                "第2天: 小芽冒头 🌿" to "+20 GP",
-                "第3天: 长出新叶 🍃" to "+28 GP",
-                "第4天: 茁壮成长 🌳" to "+25 GP",
-                "第5天: 越来越茂盛 🌲" to "+30 GP"
-            ).forEach { (text, gp) ->
+            val rows = album?.days.orEmpty().ifEmpty { listOf("还没有记录" to 0) }
+            rows.take(8).forEach { (text, gp) ->
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(text, style = MaterialTheme.typography.bodyMedium)
-                    Text(gp, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                    if (gp > 0) Text("+$gp GP", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
                 }
             }
         }
@@ -166,17 +191,17 @@ private fun AlbumGrowthPage() {
 }
 
 @Composable
-private fun AlbumMoodPage() {
+private fun AlbumMoodPage(album: AlbumSnapshot?) {
     AlbumPage(title = "心情合集", emoji = "😊") {
-        val moods = listOf("😊 开心" to 2, "😐 平静" to 1, "🤩 兴奋" to 1, "🥹 感动" to 1)
+        val moods = album?.moods.orEmpty().ifEmpty { listOf("还没有心情" to 0) }
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            moods.forEach { (mood, count) ->
+            moods.take(8).forEach { (mood, count) ->
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(mood, style = MaterialTheme.typography.bodyLarge)
-                    Text("$count 次", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Medium)
+                    if (count > 0) Text("$count 次", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Medium)
                 }
             }
         }
@@ -184,9 +209,9 @@ private fun AlbumMoodPage() {
 }
 
 @Composable
-private fun AlbumTagsPage() {
+private fun AlbumTagsPage(album: AlbumSnapshot?) {
     AlbumPage(title = "标签精选", emoji = "🏷️") {
-        val tags = listOf("自然" to 2, "美食" to 2, "居家" to 1, "聚会" to 1, "运动" to 1, "电影" to 1, "阅读" to 1)
+        val tags = album?.tags.orEmpty().ifEmpty { listOf("暂无" to 0) }
         FlowRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -206,16 +231,17 @@ private fun AlbumTagsPage() {
 }
 
 @Composable
-private fun AlbumLocationPage() {
+private fun AlbumLocationPage(album: AlbumSnapshot?) {
     AlbumPage(title = "足迹", emoji = "📍") {
         Column {
-            listOf("🏠 家里" to "2次", "🌳 公园" to "1次", "🍜 餐厅" to "1次", "🏃 跑道" to "1次").forEach { (loc, count) ->
+            val rows = album?.locations.orEmpty().ifEmpty { listOf("还没有地点" to 0) }
+            rows.take(8).forEach { (loc, count) ->
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(loc, style = MaterialTheme.typography.bodyLarge)
-                    Text(count, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Medium)
+                    if (count > 0) Text("${count}次", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Medium)
                 }
             }
         }
@@ -223,10 +249,11 @@ private fun AlbumLocationPage() {
 }
 
 @Composable
-private fun AlbumMusicPage() {
+private fun AlbumMusicPage(album: AlbumSnapshot?) {
     AlbumPage(title = "BGM精选", emoji = "🎵") {
         Column {
-            listOf("🎵 晴天 - 周杰伦", "🎵 稻香 - 周杰伦", "🎵 小幸运 - 田馥甄").forEach { music ->
+            val rows = album?.music.orEmpty().ifEmpty { listOf("还没有音乐") }
+            rows.take(8).forEach { music ->
                 Card(
                     modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
                     shape = RoundedCornerShape(12.dp),
@@ -240,10 +267,10 @@ private fun AlbumMusicPage() {
 }
 
 @Composable
-private fun AlbumLinksPage() {
+private fun AlbumLinksPage(album: AlbumSnapshot?) {
     AlbumPage(title = "精选链接", emoji = "🔗") {
         Text(
-            "这本画册里还没有分享链接哦～",
+            album?.links?.joinToString("\n")?.ifBlank { null } ?: "这本画册里还没有分享链接哦～",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center
