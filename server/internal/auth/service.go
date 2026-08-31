@@ -353,7 +353,9 @@ func (s *Service) Me(userID string) (*Profile, error) {
 	}
 	masked := ""
 	if ident, err := s.store.FindIdentityByUserID(userID); err == nil && ident != nil {
-		if phone, err := DecryptPhone(ident.PhoneEncrypted, s.cfg.PhoneEncryptionKey); err == nil {
+		if ident.Type == "PASSWORD" {
+			masked = u.DisplayName
+		} else if phone, err := DecryptPhone(ident.PhoneEncrypted, s.cfg.PhoneEncryptionKey); err == nil {
 			masked = MaskPhone(phone)
 		}
 	}

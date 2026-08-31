@@ -24,6 +24,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.xiaoquexing.app.di.rememberXiaoQueXingViewModelFactory
@@ -73,42 +74,42 @@ fun LoginScreen(
             }
         } else {
             Text(
-                "开发环境验证码固定为 123456。正式短信尚未接入。",
+                "用账号和密码注册或登录。账号 3-32 位字母数字或下划线，密码至少 6 位。",
                 style = MaterialTheme.typography.bodySmall,
             )
             Spacer(Modifier.height(16.dp))
             OutlinedTextField(
-                value = ui.phone,
-                onValueChange = viewModel::onPhone,
-                label = { Text("手机号") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                value = ui.account,
+                onValueChange = viewModel::onAccount,
+                label = { Text("账号") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
             )
             Spacer(Modifier.height(8.dp))
             OutlinedTextField(
-                value = ui.code,
-                onValueChange = viewModel::onCode,
-                label = { Text("验证码") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                value = ui.password,
+                onValueChange = viewModel::onPassword,
+                label = { Text("密码") },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                visualTransformation = PasswordVisualTransformation(),
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
             )
             Spacer(Modifier.height(16.dp))
-            OutlinedButton(
-                onClick = { viewModel.sendCode() },
-                enabled = !ui.sending,
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Text(if (ui.sending) "发送中…" else "获取验证码")
-            }
-            Spacer(Modifier.height(8.dp))
             Button(
-                onClick = { viewModel.verify() },
+                onClick = { viewModel.login() },
                 enabled = !ui.verifying,
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                Text(if (ui.verifying) "登录中…" else "登录并合并本地记录")
+                Text(if (ui.verifying && !ui.sending) "登录中…" else "登录并合并本地记录")
+            }
+            Spacer(Modifier.height(8.dp))
+            OutlinedButton(
+                onClick = { viewModel.register() },
+                enabled = !ui.verifying,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text(if (ui.sending) "注册中…" else "注册新账号")
             }
         }
         ui.message?.let {

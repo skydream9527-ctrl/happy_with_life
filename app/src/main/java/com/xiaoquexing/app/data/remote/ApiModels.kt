@@ -32,6 +32,15 @@ data class TokenPair(
 )
 
 @Serializable
+data class PasswordAuthReq(
+    val account: String,
+    val password: String,
+    val deviceId: String,
+    val platform: String = "android",
+    val appVersion: String = "",
+)
+
+@Serializable
 data class RefreshReq(val refreshToken: String, val deviceId: String)
 
 @Serializable

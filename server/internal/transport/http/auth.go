@@ -35,6 +35,14 @@ type logoutReq struct {
 	RefreshToken string `json:"refreshToken"`
 }
 
+type passwordReq struct {
+	Account    string `json:"account"`
+	Password   string `json:"password"`
+	DeviceID   string `json:"deviceId"`
+	Platform   string `json:"platform"`
+	AppVersion string `json:"appVersion"`
+}
+
 func (h authHandlers) send(c *gin.Context) {
 	var req sendReq
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -74,6 +82,46 @@ func (h authHandlers) verify(c *gin.Context) {
 		WriteUnauthorized(c, CodeSMSCodeInvalid, "验证码无效或已过期")
 	case errors.Is(err, auth.ErrSMSUnavailable):
 		WriteUnavailable(c, "验证码服务暂不可用")
+	default:
+		WriteInternal(c)
+	}
+}
+
+func (h authHandlers) register(c *gin.Context) {
+	h.passwordAuth(c, true)
+}
+
+func (h authHandlers) login(c *gin.Context) {
+	h.passwordAuth(c, false)
+}
+
+func (h authHandlers) passwordAuth(c *gin.Context, register bool) {
+	var req passwordReq
+	if err := c.ShouldBindJSON(&req); err != nil {
+		WriteInvalid(c, "请求体无效")
+		return
+	}
+	device := firstNonEmpty(req.DeviceID, c.GetHeader(HeaderDeviceID))
+	platform := firstNonEmpty(req.Platform, c.GetHeader("X-Platform"))
+	appv := firstNonEmpty(req.AppVersion, c.GetHeader("X-App-Version"))
+	var pair *auth.TokenPair
+	var err error
+	if register {
+		pair, err = h.svc.Register(req.Account, req.Password, device, platform, appv)
+	} else {
+		pair, err = h.svc.Login(req.Account, req.Password, device, platform, appv)
+	}
+	switch {
+	case err == nil:
+		WriteOK(c, pair)
+	case errors.Is(err, auth.ErrInvalidAccount):
+		WriteInvalid(c, "账号需为 3-32 位字母数字或下划线")
+	case errors.Is(err, auth.ErrWeakPassword):
+		WriteInvalid(c, "密码至少 6 位")
+	case errors.Is(err, auth.ErrAccountTaken):
+		WriteInvalid(c, "账号已被注册")
+	case errors.Is(err, auth.ErrInvalidCredentials):
+		WriteUnauthorized(c, CodeSMSCodeInvalid, "账号或密码不正确")
 	default:
 		WriteInternal(c)
 	}

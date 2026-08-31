@@ -32,7 +32,7 @@ go run ./cmd/api
 
 内存模式会在日志中明确警告，禁止用于 staging/prod。
 
-Dev 默认 Mock SMS：向 `/api/v1/auth/sms/send` 发请求后，使用 `.env.example` 里的 `SMS_DEV_CODE`（默认 `123456`）调用 `/api/v1/auth/sms/verify`。日志只打印固定提示，不打印验证码或完整手机号。
+登录：`POST /api/v1/auth/register` 与 `POST /api/v1/auth/login`（账号 + 密码）。账号 3-32 位字母数字或下划线，密码至少 6 位。旧短信接口仍保留，客户端不再使用。
 
 ## 接口
 

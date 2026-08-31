@@ -212,3 +212,32 @@ func TestLogoutAndAccountDelete(t *testing.T) {
 		t.Fatalf("delete %d", res.StatusCode)
 	}
 }
+
+func TestPasswordRegisterAndLogin(t *testing.T) {
+	ts, _ := testServer(t)
+	defer ts.Close()
+	code, body := postJSON(t, ts, "/api/v1/auth/register", map[string]string{
+		"account": "Ada_01", "password": "secret1", "deviceId": "dev-p",
+	}, nil)
+	if code != 200 {
+		t.Fatalf("register %d %#v", code, body)
+	}
+	code, _ = postJSON(t, ts, "/api/v1/auth/register", map[string]string{
+		"account": "ada_01", "password": "secret1", "deviceId": "dev-p",
+	}, nil)
+	if code == 200 {
+		t.Fatal("duplicate register should fail")
+	}
+	code, body = postJSON(t, ts, "/api/v1/auth/login", map[string]string{
+		"account": "ada_01", "password": "secret1", "deviceId": "dev-p",
+	}, nil)
+	if code != 200 {
+		t.Fatalf("login %d %#v", code, body)
+	}
+	code, _ = postJSON(t, ts, "/api/v1/auth/login", map[string]string{
+		"account": "ada_01", "password": "wrong-password", "deviceId": "dev-p",
+	}, nil)
+	if code == 200 {
+		t.Fatal("bad password should fail")
+	}
+}

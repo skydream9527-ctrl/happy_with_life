@@ -104,6 +104,8 @@ func NewRouter(cfg config.Config, log *slog.Logger, deps Deps) *gin.Engine {
 	v1 := r.Group("/api/v1")
 	v1.POST("/auth/sms/send", h.send)
 	v1.POST("/auth/sms/verify", h.verify)
+	v1.POST("/auth/register", h.register)
+	v1.POST("/auth/login", h.login)
 	v1.POST("/auth/token/refresh", h.refresh)
 	v1.POST("/auth/logout", optionalBearer(deps.Auth), h.logout)
 	v1.GET("/me", bearerAuth(deps.Auth), h.me)

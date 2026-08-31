@@ -67,7 +67,7 @@ func (s *PGStore) FindIdentityByUserID(userID string) (*Identity, error) {
 	defer cancel()
 	row := s.pool.QueryRow(ctx, `
 		select id, user_id, type, identifier_hash, phone_encrypted, verified_at
-		from auth_identities where user_id=$1 and type='PHONE' limit 1`, userID)
+		from auth_identities where user_id=$1 order by case when type='PASSWORD' then 0 else 1 end limit 1`, userID)
 	var it Identity
 	err := row.Scan(&it.ID, &it.UserID, &it.Type, &it.IdentifierHash, &it.PhoneEncrypted, &it.VerifiedAt)
 	if errors.Is(err, pgx.ErrNoRows) {
