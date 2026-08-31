@@ -148,9 +148,11 @@ fun LoginScreen(
                 Text(if (ui.sending) "注册中…" else "注册新账号")
             }
         }
-        ui.message?.let {
-            Spacer(Modifier.height(16.dp))
-            Text(it, color = MaterialTheme.colorScheme.primary)
+        androidx.compose.animation.AnimatedVisibility(visible = ui.message != null) {
+            Column {
+                Spacer(Modifier.height(16.dp))
+                Text(ui.message.orEmpty(), color = MaterialTheme.colorScheme.primary)
+            }
         }
     }
 }

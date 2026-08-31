@@ -26,7 +26,13 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -72,6 +78,13 @@ fun VoiceRecorder(
         }
     }
 
+    val pulseT = rememberInfiniteTransition(label = "voice")
+    val pulse by pulseT.animateFloat(
+        initialValue = 0.55f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(tween(700), RepeatMode.Reverse),
+        label = "p",
+    )
     Column(modifier = Modifier.fillMaxWidth()) {
         if (!hasRecording) {
             // Recording UI
@@ -86,6 +99,7 @@ fun VoiceRecorder(
                 Box(
                     modifier = Modifier
                         .size(56.dp)
+                        .graphicsLayer { alpha = if (isRecording) pulse else 1f }
                         .clip(CircleShape)
                         .background(if (isRecording) Color(0xFFE53935) else MaterialTheme.colorScheme.primary)
                         .clickable {

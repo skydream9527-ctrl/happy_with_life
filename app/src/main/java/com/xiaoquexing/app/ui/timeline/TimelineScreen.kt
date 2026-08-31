@@ -1,5 +1,6 @@
 package com.xiaoquexing.app.ui.timeline
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -41,6 +42,7 @@ import com.xiaoquexing.app.ui.components.RecordCard
 import com.xiaoquexing.app.ui.components.TagChip
 import com.xiaoquexing.app.viewmodel.TimelineViewModel
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun TimelineScreen(
     onNavigateToShare: (Long) -> Unit,
@@ -126,36 +128,32 @@ fun TimelineScreen(
         Box(modifier = Modifier.fillMaxSize()) {
             if (uiState.recordsByDate.isEmpty() && !uiState.isLoading) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(if (uiState.query.active) "🔎" else "📔", fontSize = 64.sp)
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text(
-                            text = if (uiState.query.active) "没有符合条件的记录" else "还没有记录",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Text(
-                            text = if (uiState.query.active) "换个关键词或心情试试" else "开始记录你的第一个小确幸吧～",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
+                    com.xiaoquexing.app.ui.components.EmptyHint(
+                        emoji = if (uiState.query.active) "🔎" else "📔",
+                        title = if (uiState.query.active) "没有符合条件的记录" else "还没有记录",
+                        subtitle = if (uiState.query.active) "换个关键词或心情试试" else "开始记录你的第一个小确幸吧～",
+                    )
                 }
             } else {
-                LazyColumn(
+                val monthLabel = uiState.recordsByDate.keys.firstOrNull().orEmpty()
+                Box(modifier = Modifier.fillMaxSize()) {
+                androidx.compose.foundation.lazy.LazyColumn(
                     state = listState,
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 120.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     uiState.recordsByDate.forEach { (date, records) ->
-                        item {
+                        stickyHeader(key = "h-$date") {
                             Text(
                                 text = date,
                                 style = MaterialTheme.typography.titleSmall,
                                 fontWeight = FontWeight.SemiBold,
                                 color = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.padding(vertical = 4.dp, horizontal = 4.dp)
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(MaterialTheme.colorScheme.background)
+                                    .padding(vertical = 4.dp, horizontal = 4.dp)
                             )
                         }
                         items(records, key = { record: Record -> record.id }) { record ->
@@ -166,6 +164,19 @@ fun TimelineScreen(
                         }
                     }
                     item { Spacer(modifier = Modifier.height(80.dp)) }
+                }
+                if (monthLabel.isNotBlank() && listState.isScrollInProgress) {
+                    Text(
+                        monthLabel,
+                        modifier = Modifier
+                            .align(Alignment.TopCenter)
+                            .padding(top = 8.dp)
+                            .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(20.dp))
+                            .padding(horizontal = 12.dp, vertical = 4.dp),
+                        color = Color.White,
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                }
                 }
             }
         }

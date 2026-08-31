@@ -373,7 +373,7 @@ class RecordViewModel(
                 draftRestored = false,
             )
 
-            kotlinx.coroutines.delay(1500)
+            kotlinx.coroutines.delay(900)
             onSuccess()
         }
     }
