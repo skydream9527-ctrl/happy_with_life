@@ -57,6 +57,7 @@ fun ProfileScreen(
     onNavigateToReview: () -> Unit = {},
     onNavigateToConflicts: () -> Unit = {},
     onNavigateToSettings: () -> Unit = {},
+    onNavigateToFootprints: () -> Unit = {},
     viewModel: ProfileViewModel = viewModel(factory = rememberXiaoQueXingViewModelFactory())
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -150,6 +151,13 @@ fun ProfileScreen(
                     subtitle = "本月热力与年度 GP",
                     onClick = onNavigateToReview,
                     iconTint = Color(0xFF5E9B6A)
+                )
+                MenuItem(
+                    icon = Icons.Default.DateRange,
+                    title = "足迹",
+                    subtitle = "按地点看过往记录",
+                    onClick = onNavigateToFootprints,
+                    iconTint = Color(0xFF7AB886)
                 )
                 MenuItem(
                     icon = Icons.Default.Settings,

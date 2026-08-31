@@ -11,6 +11,7 @@ import com.xiaoquexing.app.ui.share.ShareViewModel
 import com.xiaoquexing.app.viewmodel.AlbumViewModel
 import com.xiaoquexing.app.viewmodel.AuthViewModel
 import com.xiaoquexing.app.viewmodel.ConflictViewModel
+import com.xiaoquexing.app.viewmodel.FootprintViewModel
 import com.xiaoquexing.app.viewmodel.HomeViewModel
 import com.xiaoquexing.app.viewmodel.ProfileViewModel
 import com.xiaoquexing.app.viewmodel.RecordViewModel
@@ -64,6 +65,9 @@ class XiaoQueXingViewModelFactory(
 
             modelClass.isAssignableFrom(ConflictViewModel::class.java) ->
                 ConflictViewModel(container.syncEngine)
+
+            modelClass.isAssignableFrom(FootprintViewModel::class.java) ->
+                FootprintViewModel(container.recordRepository)
 
             modelClass.isAssignableFrom(SettingsViewModel::class.java) ->
                 SettingsViewModel(
