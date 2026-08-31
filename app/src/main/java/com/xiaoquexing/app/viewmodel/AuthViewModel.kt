@@ -107,12 +107,10 @@ class AuthViewModel(
         }
         viewModelScope.launch {
             _ui.value = snapshot.copy(verifying = true, sending = register, message = null)
-            val call = if (register) {
-                { sessions.register(snapshot.account, snapshot.password) }
-            } else {
-                { sessions.login(snapshot.account, snapshot.password) }
+            runCatching {
+                if (register) sessions.register(snapshot.account, snapshot.password)
+                else sessions.login(snapshot.account, snapshot.password)
             }
-            runCatching { call() }
                 .onSuccess {
                     val report = runCatching { sync.syncAll() }.getOrDefault(com.xiaoquexing.app.data.remote.SyncReport())
                     _ui.value = _ui.value.copy(

@@ -29,8 +29,9 @@ class PhotoUploader(
         val refs = mutableListOf<MediaRef>()
         val now = System.currentTimeMillis()
         for (photo in photos) {
-            photo.serverId?.let {
-                refs += MediaRef(it, "PHOTO")
+            val existingId = photo.serverId
+            if (existingId != null) {
+                refs += MediaRef(existingId, "PHOTO")
                 continue
             }
             val path = photo.localPath ?: continue

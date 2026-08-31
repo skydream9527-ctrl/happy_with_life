@@ -46,12 +46,14 @@ class SettingsViewModel(
     private val records: RecordRepository,
 ) : ViewModel() {
 
-    private val _ui = MutableStateFlow(refresh())
+    private val _ui = MutableStateFlow(refresh(loggedIn = false))
     val uiState: StateFlow<SettingsUi> = _ui.asStateFlow()
 
     init {
         viewModelScope.launch {
-            tokens.session.collect { _ui.value = refresh() }
+            tokens.session.collect { session ->
+                _ui.value = refresh(loggedIn = session != null)
+            }
         }
     }
 
@@ -105,37 +107,37 @@ class SettingsViewModel(
 
     fun setReminder(on: Boolean) {
         ReminderScheduler.setEnabled(app, on)
-        _ui.value = refresh()
+        _ui.value = refresh(_ui.value.loggedIn)
     }
 
     fun setAnalyticsOff(on: Boolean) {
         store.analyticsOff = on
-        _ui.value = refresh()
+        _ui.value = refresh(_ui.value.loggedIn)
     }
 
     fun setHidePhone(on: Boolean) {
         store.hidePhone = on
-        _ui.value = refresh()
+        _ui.value = refresh(_ui.value.loggedIn)
     }
 
     fun setTheme(mode: String) {
         Appearance.setMode(store, mode)
-        _ui.value = refresh()
+        _ui.value = refresh(_ui.value.loggedIn)
     }
 
     fun setLargeText(on: Boolean) {
         Appearance.setLargeText(store, on)
-        _ui.value = refresh()
+        _ui.value = refresh(_ui.value.loggedIn)
     }
 
     fun requestDelete() {
         store.requestDelete()
-        _ui.value = refresh().copy(message = "已进入 7 天冷静期，到期前可取消")
+        _ui.value = refresh(_ui.value.loggedIn).copy(message = "已进入 7 天冷静期，到期前可取消")
     }
 
     fun cancelDelete() {
         store.cancelDelete()
-        _ui.value = refresh().copy(message = "已取消注销申请")
+        _ui.value = refresh(_ui.value.loggedIn).copy(message = "已取消注销申请")
     }
 
     fun confirmDelete() {
@@ -145,16 +147,16 @@ class SettingsViewModel(
                 val err = runCatching { api.deleteAccount() }.exceptionOrNull()
                 runCatching { sessions.logout() }
                 if (err != null) {
-                    _ui.value = refresh().copy(message = "已退出登录。云端删除稍后重试：${err.message}")
+                    _ui.value = refresh(_ui.value.loggedIn).copy(message = "已退出登录。云端删除稍后重试：${err.message}")
                     return@launch
                 }
             }
             store.cancelDelete()
-            _ui.value = refresh().copy(message = "账号已申请删除，本地登录已清除")
+            _ui.value = refresh(_ui.value.loggedIn).copy(message = "账号已申请删除，本地登录已清除")
         }
     }
 
-    private fun refresh(): SettingsUi {
+    private fun refresh(loggedIn: Boolean = _ui.value.loggedIn): SettingsUi {
         val start = store.deleteRequestedAt
         val until = store.purgeAfter()
         val now = System.currentTimeMillis()
@@ -165,7 +167,7 @@ class SettingsViewModel(
             hidePhone = store.hidePhone,
             themeMode = store.themeMode,
             largeText = store.largeText,
-            loggedIn = tokens.current() != null,
+            loggedIn = loggedIn,
             deleteRequested = start > 0,
             coolingOver = start > 0 && now >= until,
             purgeLabel = if (start > 0) fmt.format(Date(until)) else null,
