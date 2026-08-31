@@ -162,4 +162,21 @@ interface RecordDao {
 
     @Query("UPDATE records SET sync_state = :syncState, updated_at = :now WHERE local_id = :recordId")
     suspend fun setSyncState(recordId: Long, syncState: Int, now: Long)
+
+    @Query("SELECT * FROM records WHERE sync_state = 3 AND deleted_at IS NULL ORDER BY updated_at DESC")
+    fun observeConflicts(): Flow<List<RecordEntity>>
+
+    @Query("SELECT COUNT(*) FROM records WHERE sync_state = 3 AND deleted_at IS NULL")
+    fun observeConflictCount(): Flow<Int>
+
+    @Query(
+        "UPDATE records SET version = :version, sync_state = :syncState, updated_at = :now WHERE local_id = :recordId"
+    )
+    suspend fun setVersionAndState(recordId: Long, version: Int, syncState: Int, now: Long)
+
+    @Query(
+        "UPDATE records SET content_text = :text, mood_tag = :mood, gp_final = :gpFinal, " +
+            "version = :version, sync_state = 0, updated_at = :now WHERE local_id = :recordId"
+    )
+    suspend fun applyCloud(recordId: Long, text: String?, mood: String, gpFinal: Int, version: Int, now: Long)
 }

@@ -125,6 +125,34 @@ class SyncEngine(
         return n
     }
 
+    fun observeConflicts() = db.recordDao().observeConflicts()
+    fun observeConflictCount() = db.recordDao().observeConflictCount()
+
+    suspend fun keepLocal(recordId: Long): SyncReport {
+        val row = db.recordDao().getRawById(recordId) ?: return SyncReport(error = "记录不存在")
+        val now = System.currentTimeMillis()
+        val remoteVersion = row.serverId?.let { id ->
+            runCatching { api.record(id).data?.version?.toInt() }.getOrNull()
+        } ?: row.version
+        db.recordDao().setVersionAndState(recordId, remoteVersion, SyncStates.SYNC_PENDING, now)
+        return syncAll(retries = 2)
+    }
+
+    suspend fun keepCloud(recordId: Long): SyncReport {
+        val row = db.recordDao().getRawById(recordId) ?: return SyncReport(error = "记录不存在")
+        val serverId = row.serverId ?: return SyncReport(error = "没有云端版本")
+        val remote = api.record(serverId).data ?: return SyncReport(error = "拉不到云端记录")
+        db.recordDao().applyCloud(
+            recordId = recordId,
+            text = remote.contentText,
+            mood = remote.moodTag,
+            gpFinal = remote.gpFinal,
+            version = remote.version.toInt(),
+            now = System.currentTimeMillis(),
+        )
+        return SyncReport(pulled = 1)
+    }
+
     private suspend fun bindLocalSpace(serverSpaceId: String) {
         val local = db.spaceDao().getDefaultSpace() ?: return
         if (local.serverId != serverSpaceId) {

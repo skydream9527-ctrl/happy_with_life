@@ -64,6 +64,7 @@ import com.xiaoquexing.app.ui.profile.AchievementScreen
 import com.xiaoquexing.app.ui.profile.PlantGuideScreen
 import com.xiaoquexing.app.ui.profile.PlantSelectionScreen
 import com.xiaoquexing.app.ui.profile.ProfileScreen
+import com.xiaoquexing.app.ui.profile.ConflictScreen
 import com.xiaoquexing.app.ui.profile.ReviewScreen
 import com.xiaoquexing.app.ui.profile.SharedSpaceScreen
 import com.xiaoquexing.app.ui.record.RecordScreen
@@ -82,6 +83,7 @@ sealed class Screen(val route: String, val title: String) {
     data object Login : Screen("login", "登录")
     data object Spaces : Screen("spaces", "共享空间")
     data object Review : Screen("review", "月年回顾")
+    data object Conflicts : Screen("conflicts", "同步冲突")
     data object PlantSelection : Screen("plant_selection", "选择植物")
     data object PlantGuide : Screen("plant_guide", "植物图鉴")
     data object Achievement : Screen("achievement", "成就墙")
@@ -166,10 +168,14 @@ fun AppNavigation() {
                     onNavigateToLogin = { navController.navigate(Screen.Login.route) },
                     onNavigateToSpaces = { navController.navigate(Screen.Spaces.route) },
                     onNavigateToReview = { navController.navigate(Screen.Review.route) },
+                    onNavigateToConflicts = { navController.navigate(Screen.Conflicts.route) },
                 )
             }
             composable(Screen.Review.route) {
                 ReviewScreen(onBack = { navController.popBackStack() })
+            }
+            composable(Screen.Conflicts.route) {
+                ConflictScreen(onBack = { navController.popBackStack() })
             }
             composable(Screen.Spaces.route) {
                 SharedSpaceScreen(
