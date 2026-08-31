@@ -47,6 +47,7 @@ type Store interface {
 	FindIdentityByUserID(userID string) (*Identity, error)
 	UpdateDisplayName(userID, name string, at time.Time) error
 	MarkUserPendingDelete(userID string, at time.Time) error
+	UpdateIdentitySecret(identityID string, secret []byte, at time.Time) error
 
 	UpsertDevice(d Device) (Device, error)
 	GetDevice(id string) (*Device, error)

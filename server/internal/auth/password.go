@@ -33,13 +33,59 @@ func HashAccount(name, pepper string) string {
 	return HashPhone(name, pepper)
 }
 
+func hashPassword(raw string) ([]byte, error) {
+	if len(raw) < 6 || len(raw) > 72 {
+		return nil, ErrWeakPassword
+	}
+	return bcrypt.GenerateFromPassword([]byte(raw), bcrypt.DefaultCost)
+}
+
+func (s *Service) ChangePassword(userID, oldPassword, newPassword string) error {
+	ident, err := s.passwordIdent(userID)
+	if err != nil {
+		return err
+	}
+	if bcrypt.CompareHashAndPassword(ident.PhoneEncrypted, []byte(oldPassword)) != nil {
+		return ErrInvalidCredentials
+	}
+	return s.writePassword(ident.ID, newPassword)
+}
+
+func (s *Service) ResetPasswordOnDevice(userID, newPassword string) error {
+	ident, err := s.passwordIdent(userID)
+	if err != nil {
+		return err
+	}
+	return s.writePassword(ident.ID, newPassword)
+}
+
+func (s *Service) passwordIdent(userID string) (*Identity, error) {
+	ident, err := s.store.FindIdentityByUserID(userID)
+	if err != nil {
+		return nil, err
+	}
+	if ident == nil || ident.Type != "PASSWORD" {
+		return nil, ErrInvalidCredentials
+	}
+	return ident, nil
+}
+
+func (s *Service) writePassword(identityID, newPassword string) error {
+	secret, err := hashPassword(newPassword)
+	if err != nil {
+		return err
+	}
+	return s.store.UpdateIdentitySecret(identityID, secret, s.now().UTC())
+}
+
 func (s *Service) Register(account, password, clientDeviceID, platform, appVersion string) (*TokenPair, error) {
 	name, err := NormalizeAccount(account)
 	if err != nil {
 		return nil, err
 	}
-	if len(password) < 6 || len(password) > 72 {
-		return nil, ErrWeakPassword
+	secret, err := hashPassword(password)
+	if err != nil {
+		return nil, err
 	}
 	hash := HashAccount(name, s.cfg.PhoneHashPepper)
 	existing, err := s.store.FindIdentityByPhoneHash(hash)
@@ -48,11 +94,6 @@ func (s *Service) Register(account, password, clientDeviceID, platform, appVersi
 	}
 	if existing != nil {
 		return nil, ErrAccountTaken
-	}
-	cost := bcrypt.DefaultCost
-	secret, err := bcrypt.GenerateFromPassword([]byte(password), cost)
-	if err != nil {
-		return nil, err
 	}
 	now := s.now().UTC()
 	userID := id.New()

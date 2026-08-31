@@ -63,6 +63,16 @@ class SessionRepository(
         applyHolder(cur.accessToken, cur.deviceId)
     }
 
+    suspend fun changePassword(oldPassword: String, newPassword: String) {
+        val env = api.changePassword(ChangePasswordReq(oldPassword, newPassword))
+        env.error?.let { throw ApiException(it) }
+    }
+
+    suspend fun resetPasswordOnDevice(newPassword: String) {
+        val env = api.resetPasswordOnDevice(ResetPasswordReq(newPassword))
+        env.error?.let { throw ApiException(it) }
+    }
+
     suspend fun logout() {
         val cur = tokens.current()
         if (cur != null) {

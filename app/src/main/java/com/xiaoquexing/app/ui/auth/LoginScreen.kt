@@ -1,5 +1,7 @@
 package com.xiaoquexing.app.ui.auth
 
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -41,6 +43,7 @@ fun LoginScreen(
         modifier = Modifier
             .fillMaxSize()
             .statusBarsPadding()
+            .verticalScroll(rememberScrollState())
             .padding(horizontal = 20.dp),
     ) {
         TopAppBar(
@@ -72,6 +75,39 @@ fun LoginScreen(
             ) {
                 Text("退出登录")
             }
+            Spacer(Modifier.height(20.dp))
+            Text("修改密码", style = MaterialTheme.typography.titleMedium)
+            Text("未退出登录的设备可以改密或直接重置，不发短信。", style = MaterialTheme.typography.bodySmall)
+            Spacer(Modifier.height(8.dp))
+            OutlinedTextField(
+                value = ui.oldPassword,
+                onValueChange = viewModel::onOldPassword,
+                label = { Text("原密码") },
+                visualTransformation = PasswordVisualTransformation(),
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+            )
+            Spacer(Modifier.height(8.dp))
+            OutlinedTextField(
+                value = ui.newPassword,
+                onValueChange = viewModel::onNewPassword,
+                label = { Text("新密码") },
+                visualTransformation = PasswordVisualTransformation(),
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+            )
+            Spacer(Modifier.height(8.dp))
+            Button(
+                onClick = { viewModel.changePassword() },
+                enabled = !ui.verifying,
+                modifier = Modifier.fillMaxWidth(),
+            ) { Text("确认改密") }
+            Spacer(Modifier.height(8.dp))
+            OutlinedButton(
+                onClick = { viewModel.resetOnDevice() },
+                enabled = !ui.verifying,
+                modifier = Modifier.fillMaxWidth(),
+            ) { Text("本机直接重置（不用原密码）") }
         } else {
             Text(
                 "用账号和密码注册或登录。账号 3-32 位字母数字或下划线，密码至少 6 位。",

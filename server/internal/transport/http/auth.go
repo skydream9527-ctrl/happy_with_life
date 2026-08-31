@@ -127,6 +127,56 @@ func (h authHandlers) passwordAuth(c *gin.Context, register bool) {
 	}
 }
 
+type changePasswordReq struct {
+	OldPassword string `json:"oldPassword"`
+	NewPassword string `json:"newPassword"`
+}
+
+type resetPasswordReq struct {
+	NewPassword string `json:"newPassword"`
+}
+
+func (h authHandlers) changePassword(c *gin.Context) {
+	userID := c.GetString(ContextUserID)
+	if userID == "" {
+		WriteUnauthorized(c, CodeAuthRequired, "需要登录")
+		return
+	}
+	var req changePasswordReq
+	if err := c.ShouldBindJSON(&req); err != nil {
+		WriteInvalid(c, "请求体无效")
+		return
+	}
+	h.writePasswordErr(c, h.svc.ChangePassword(userID, req.OldPassword, req.NewPassword))
+}
+
+func (h authHandlers) resetPassword(c *gin.Context) {
+	userID := c.GetString(ContextUserID)
+	if userID == "" {
+		WriteUnauthorized(c, CodeAuthRequired, "需要登录")
+		return
+	}
+	var req resetPasswordReq
+	if err := c.ShouldBindJSON(&req); err != nil {
+		WriteInvalid(c, "请求体无效")
+		return
+	}
+	h.writePasswordErr(c, h.svc.ResetPasswordOnDevice(userID, req.NewPassword))
+}
+
+func (h authHandlers) writePasswordErr(c *gin.Context, err error) {
+	switch {
+	case err == nil:
+		WriteOK(c, gin.H{"ok": true})
+	case errors.Is(err, auth.ErrWeakPassword):
+		WriteInvalid(c, "密码至少 6 位")
+	case errors.Is(err, auth.ErrInvalidCredentials):
+		WriteUnauthorized(c, CodeSMSCodeInvalid, "原密码不正确或账号不是密码登录")
+	default:
+		WriteInternal(c)
+	}
+}
+
 func (h authHandlers) refresh(c *gin.Context) {
 	var req refreshReq
 	_ = c.ShouldBindJSON(&req)

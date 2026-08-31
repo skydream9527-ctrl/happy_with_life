@@ -114,6 +114,15 @@ func (s *PGStore) MarkUserPendingDelete(userID string, at time.Time) error {
 	return err
 }
 
+func (s *PGStore) UpdateIdentitySecret(identityID string, secret []byte, at time.Time) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	_, err := s.pool.Exec(ctx, `
+		update auth_identities set phone_encrypted=$2, verified_at=$3, updated_at=$3 where id=$1`,
+		identityID, secret, at)
+	return err
+}
+
 func (s *PGStore) UpsertDevice(d Device) (Device, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
