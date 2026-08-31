@@ -79,4 +79,4 @@ make test-race
 
 - 冷静期满后的物理注销 / OSS 对象清理 Worker
 - 成就入账与植物快照
-- 正式阿里云短信与 OSS Bucket
+- 正式阿里云短信与 OSS Bucket（需要 `SMS_ACCESS_KEY` / `OSS_ACCESS_KEY`，当前保持 Mock SMS 与 `OSS_PROVIDER=mock`）

@@ -39,6 +39,7 @@ class XiaoQueXingApp : Application() {
             if (com.xiaoquexing.app.util.ReminderScheduler.isEnabled(this@XiaoQueXingApp)) {
                 runCatching { com.xiaoquexing.app.util.ReminderScheduler.schedule(this@XiaoQueXingApp) }
             }
+            runCatching { com.xiaoquexing.app.widget.TodayWidgetProvider.refreshAll(this@XiaoQueXingApp) }
         }
     }
 
