@@ -76,6 +76,7 @@ import com.xiaoquexing.app.ui.profile.ReviewScreen
 import com.xiaoquexing.app.ui.profile.FootprintScreen
 import com.xiaoquexing.app.ui.profile.PlanScreen
 import com.xiaoquexing.app.ui.theme.Motion
+import com.xiaoquexing.app.ui.theme.PredictiveBackPane
 import com.xiaoquexing.app.ui.profile.SettingsScreen
 import com.xiaoquexing.app.ui.profile.SharedSpaceScreen
 import com.xiaoquexing.app.ui.record.RecordDetailScreen
@@ -141,7 +142,15 @@ fun AppNavigation(openCompose: Boolean = false) {
     ).any { it == currentDestination?.route }
 
     val reduceMotion = Motion.reduce()
+    val currentRoute = currentDestination?.route
+    val modalBack = currentRoute != null && currentRoute !in listOf(
+        Screen.Home.route, Screen.Timeline.route, Screen.Album.route, Screen.Profile.route,
+    )
     Box(modifier = Modifier.fillMaxSize()) {
+        PredictiveBackPane(
+            enabled = modalBack,
+            onBack = { navController.popBackStack() },
+        ) {
         NavHost(
             navController = navController,
             startDestination = Screen.Home.route,
@@ -298,6 +307,7 @@ fun AppNavigation(openCompose: Boolean = false) {
                     onBack = { navController.popBackStack() }
                 )
             }
+        }
         }
 
         // 悬浮 iOS 风格 Tab Bar（中央凸起记录按钮）
