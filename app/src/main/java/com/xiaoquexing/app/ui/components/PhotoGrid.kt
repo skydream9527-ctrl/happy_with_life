@@ -64,7 +64,7 @@ fun PhotoGrid(
                 if (uri.startsWith("http") || uri.startsWith("content") || uri.startsWith("file") || uri.startsWith("/")) {
                     AsyncImage(
                         model = uri,
-                        contentDescription = null,
+                        contentDescription = "照片 ${index + 1}",
                         modifier = Modifier
                             .matchParentSize()
                             .clip(RoundedCornerShape(8.dp)),

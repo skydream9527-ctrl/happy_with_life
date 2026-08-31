@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.xiaoquexing.app.data.remote.ApiService
 import com.xiaoquexing.app.data.remote.SessionRepository
 import com.xiaoquexing.app.data.remote.SettingsStore
+import com.xiaoquexing.app.ui.theme.Appearance
 import com.xiaoquexing.app.data.remote.TokenStore
 import com.xiaoquexing.app.util.ReminderScheduler
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,6 +21,8 @@ data class SettingsUi(
     val reminderOn: Boolean = false,
     val analyticsOff: Boolean = false,
     val hidePhone: Boolean = false,
+    val themeMode: String = SettingsStore.MODE_SYSTEM,
+    val largeText: Boolean = false,
     val loggedIn: Boolean = false,
     val deleteRequested: Boolean = false,
     val coolingOver: Boolean = false,
@@ -59,6 +62,16 @@ class SettingsViewModel(
         _ui.value = refresh()
     }
 
+    fun setTheme(mode: String) {
+        Appearance.setMode(store, mode)
+        _ui.value = refresh()
+    }
+
+    fun setLargeText(on: Boolean) {
+        Appearance.setLargeText(store, on)
+        _ui.value = refresh()
+    }
+
     fun requestDelete() {
         store.requestDelete()
         _ui.value = refresh().copy(message = "已进入 7 天冷静期，到期前可取消")
@@ -94,6 +107,8 @@ class SettingsViewModel(
             reminderOn = ReminderScheduler.isEnabled(app),
             analyticsOff = store.analyticsOff,
             hidePhone = store.hidePhone,
+            themeMode = store.themeMode,
+            largeText = store.largeText,
             loggedIn = tokens.current() != null,
             deleteRequested = start > 0,
             coolingOver = start > 0 && now >= until,

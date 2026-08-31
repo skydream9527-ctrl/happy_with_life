@@ -5,6 +5,27 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
+fun scaledTypography(scale: Float): Typography {
+    val s = scale.coerceIn(1.0f, 1.4f)
+    return Typography(
+        displayLarge = Typography.displayLarge.copy(fontSize = Typography.displayLarge.fontSize * s),
+        displayMedium = Typography.displayMedium.copy(fontSize = Typography.displayMedium.fontSize * s),
+        displaySmall = Typography.displaySmall.copy(fontSize = Typography.displaySmall.fontSize * s),
+        headlineLarge = Typography.headlineLarge.copy(fontSize = Typography.headlineLarge.fontSize * s),
+        headlineMedium = Typography.headlineMedium.copy(fontSize = Typography.headlineMedium.fontSize * s),
+        headlineSmall = Typography.headlineSmall.copy(fontSize = Typography.headlineSmall.fontSize * s),
+        titleLarge = Typography.titleLarge.copy(fontSize = Typography.titleLarge.fontSize * s),
+        titleMedium = Typography.titleMedium.copy(fontSize = Typography.titleMedium.fontSize * s),
+        titleSmall = Typography.titleSmall.copy(fontSize = Typography.titleSmall.fontSize * s),
+        bodyLarge = Typography.bodyLarge.copy(fontSize = Typography.bodyLarge.fontSize * s),
+        bodyMedium = Typography.bodyMedium.copy(fontSize = Typography.bodyMedium.fontSize * s),
+        bodySmall = Typography.bodySmall.copy(fontSize = Typography.bodySmall.fontSize * s),
+        labelLarge = Typography.labelLarge.copy(fontSize = Typography.labelLarge.fontSize * s),
+        labelMedium = Typography.labelMedium.copy(fontSize = Typography.labelMedium.fontSize * s),
+        labelSmall = Typography.labelSmall.copy(fontSize = Typography.labelSmall.fontSize * s),
+    )
+}
+
 // iOS 风格排版：紧凑字距、较大标题
 val Typography = Typography(
     displayLarge = TextStyle(
