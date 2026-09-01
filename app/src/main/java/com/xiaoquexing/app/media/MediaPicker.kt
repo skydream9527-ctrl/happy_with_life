@@ -9,6 +9,7 @@ import android.net.Uri
 import android.os.Build
 import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -51,60 +52,62 @@ class MediaPicker(private val activity: ComponentActivity) {
     private var recordingStartedAt: Long = 0
     private var recordStoppedCallback: ((String?, Long) -> Unit)? = null
 
-    // ---- ActivityResult Launchers ----
+    // Launchers 必须由 Compose rememberLauncherForActivityResult 在组合时创建。
+    // Activity 已 RESUMED 后再 registerForActivityResult 会直接闪退。
+    var pickSinglePhotoLauncher: ActivityResultLauncher<PickVisualMediaRequest>? = null
+    var pickMultiplePhotoLauncher: ActivityResultLauncher<PickVisualMediaRequest>? = null
+    var takePictureLauncher: ActivityResultLauncher<Uri>? = null
+    var requestAudioPermLauncher: ActivityResultLauncher<String>? = null
+    var requestCameraPermLauncher: ActivityResultLauncher<String>? = null
 
-    private val pickSinglePhotoLauncher: ActivityResultLauncher<PickVisualMediaRequest> =
-        activity.registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-            val cb = pendingPhotoCallback
-            pendingPhotoCallback = null
-            cb?.invoke(uri?.toString())
-        }
+    fun onPickedSingle(uri: Uri?) {
+        val cb = pendingPhotoCallback
+        pendingPhotoCallback = null
+        cb?.invoke(uri?.toString())
+    }
 
-    private val pickMultiplePhotoLauncher: ActivityResultLauncher<PickVisualMediaRequest> =
-        activity.registerForActivityResult(ActivityResultContracts.PickMultipleVisualMedia(maxItems = 9)) { uris ->
-            val cb = pendingMultiPhotoCallback
-            pendingMultiPhotoCallback = null
-            cb?.invoke(uris.map { it.toString() })
-        }
+    fun onPickedMultiple(uris: List<Uri>) {
+        val cb = pendingMultiPhotoCallback
+        pendingMultiPhotoCallback = null
+        cb?.invoke(uris.map { it.toString() })
+    }
 
-    private val takePictureLauncher: ActivityResultLauncher<Uri> =
-        activity.registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
-            val cb = pendingCameraCallback
-            pendingCameraUri = null
-            pendingCameraCallback = null
-            cb?.invoke(if (success) pendingCameraSavedPath else null)
-        }
+    fun onTakenPicture(success: Boolean) {
+        val cb = pendingCameraCallback
+        val path = pendingCameraSavedPath
+        pendingCameraUri = null
+        pendingCameraCallback = null
+        cb?.invoke(if (success) path else null)
+    }
 
-    private val requestAudioPermLauncher: ActivityResultLauncher<String> =
-        activity.registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-            val cb = pendingAudioPermissionCallback
-            pendingAudioPermissionCallback = null
-            cb?.invoke(granted)
-        }
+    fun onAudioPermission(granted: Boolean) {
+        val cb = pendingAudioPermissionCallback
+        pendingAudioPermissionCallback = null
+        cb?.invoke(granted)
+    }
 
-    private val requestCameraPermLauncher: ActivityResultLauncher<String> =
-        activity.registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-            val cb = pendingCameraPermissionCallback
-            pendingCameraPermissionCallback = null
-            cb?.invoke(granted)
-        }
+    fun onCameraPermission(granted: Boolean) {
+        val cb = pendingCameraPermissionCallback
+        pendingCameraPermissionCallback = null
+        cb?.invoke(granted)
+    }
 
     // ---- 公共 API ----
 
     /** 从相册单选。callback 收到的是可被 Coil 直接加载的 content:// uri 字符串。 */
     fun pickPhoto(callback: (uri: String?) -> Unit) {
         pendingPhotoCallback = callback
-        pickSinglePhotoLauncher.launch(
+        pickSinglePhotoLauncher?.launch(
             PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-        )
+        ) ?: callback(null)
     }
 
     /** 从相册多选（最多 9 张）。 */
     fun pickPhotos(callback: (uris: List<String>) -> Unit) {
         pendingMultiPhotoCallback = callback
-        pickMultiplePhotoLauncher.launch(
+        pickMultiplePhotoLauncher?.launch(
             PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-        )
+        ) ?: callback(emptyList())
     }
 
     /**
@@ -116,7 +119,7 @@ class MediaPicker(private val activity: ComponentActivity) {
             pendingCameraPermissionCallback = { granted ->
                 if (granted) launchCameraInternal(callback) else callback(null)
             }
-            requestCameraPermLauncher.launch(Manifest.permission.CAMERA)
+            requestCameraPermLauncher?.launch(Manifest.permission.CAMERA) ?: callback(null)
             return
         }
         launchCameraInternal(callback)
@@ -136,7 +139,7 @@ class MediaPicker(private val activity: ComponentActivity) {
             pendingCameraUri = uri
             pendingCameraSavedPath = file.absolutePath
             pendingCameraCallback = callback
-            takePictureLauncher.launch(uri)
+            takePictureLauncher?.launch(uri) ?: callback(null)
         } catch (t: Throwable) {
             Log.e(TAG, "takePhoto failed", t)
             callback(null)
@@ -221,7 +224,7 @@ class MediaPicker(private val activity: ComponentActivity) {
             return
         }
         pendingAudioPermissionCallback = callback
-        requestAudioPermLauncher.launch(Manifest.permission.RECORD_AUDIO)
+        requestAudioPermLauncher?.launch(Manifest.permission.RECORD_AUDIO) ?: callback(false)
     }
 
     fun setOnRecordStoppedCallback(callback: (path: String?, durationMs: Long) -> Unit) {
@@ -271,6 +274,21 @@ fun rememberMediaPicker(): MediaPicker {
     val activity = context.findComponentActivity()
         ?: error("MediaPicker 必须在 ComponentActivity 内使用")
     val picker = remember(activity) { MediaPicker(activity) }
+    picker.pickSinglePhotoLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.PickVisualMedia(),
+    ) { picker.onPickedSingle(it) }
+    picker.pickMultiplePhotoLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.PickMultipleVisualMedia(maxItems = 9),
+    ) { picker.onPickedMultiple(it) }
+    picker.takePictureLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.TakePicture(),
+    ) { picker.onTakenPicture(it) }
+    picker.requestAudioPermLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission(),
+    ) { picker.onAudioPermission(it) }
+    picker.requestCameraPermLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission(),
+    ) { picker.onCameraPermission(it) }
     DisposableEffect(picker) {
         onDispose { picker.onDestroy() }
     }

@@ -28,6 +28,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import coil.request.ImageRequest
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -93,7 +95,11 @@ fun RecordCard(
 
             record.getPhotoUriList().firstOrNull()?.let { photo ->
                 coil.compose.AsyncImage(
-                    model = photo,
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(photo)
+                        .size(720)
+                        .crossfade(false)
+                        .build(),
                     contentDescription = "照片",
                     modifier = Modifier
                         .fillMaxWidth()

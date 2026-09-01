@@ -80,6 +80,11 @@ fun PredictiveBackPane(
         onDispose { callback.remove() }
     }
 
+    if (!enabled) {
+        content()
+        return
+    }
+
     val p = if (reduce) 0f else progress.value
     Box(
         modifier = modifier
