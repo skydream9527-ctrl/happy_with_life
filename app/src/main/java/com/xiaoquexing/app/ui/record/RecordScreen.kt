@@ -612,6 +612,8 @@ fun RecordScreen(
                         viewModel.setLink(linkUrlInput, linkUrlInput)
                         linkUrlInput = ""
                         showAddLinkDialog = false
+                    } else {
+                        coroutineScope.launch { snackbarHostState.showSnackbar("请填写链接或标题") }
                     }
                 }) { Text("确定") }
             },
@@ -673,6 +675,8 @@ fun RecordScreen(
                         viewModel.setLocation(locationInput)
                         locationInput = ""
                         showAddLocationDialog = false
+                    } else {
+                        coroutineScope.launch { snackbarHostState.showSnackbar("还没有地点，请先定位或手填") }
                     }
                 }) { Text("用手填") }
             },
