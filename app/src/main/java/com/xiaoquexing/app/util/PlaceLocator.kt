@@ -1,6 +1,7 @@
 package com.xiaoquexing.app.util
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Geocoder
@@ -29,12 +30,16 @@ object PlaceLocator {
         return fine == PackageManager.PERMISSION_GRANTED || coarse == PackageManager.PERMISSION_GRANTED
     }
 
+    @SuppressLint("MissingPermission")
     suspend fun current(context: Context): LocatedPlace? = withContext(Dispatchers.IO) {
         if (!hasPermission(context)) return@withContext null
         val lm = context.getSystemService(Context.LOCATION_SERVICE) as? LocationManager ?: return@withContext null
         val last = listOf(LocationManager.GPS_PROVIDER, LocationManager.NETWORK_PROVIDER, LocationManager.PASSIVE_PROVIDER)
             .filter { lm.isProviderEnabled(it) || it == LocationManager.PASSIVE_PROVIDER }
-            .mapNotNull { runCatching { lm.getLastKnownLocation(it) }.getOrNull() }
+            .mapNotNull { provider ->
+                if (!hasPermission(context)) null
+                else runCatching { lm.getLastKnownLocation(provider) }.getOrNull()
+            }
             .maxByOrNull { it.time }
         val fresh = if (last != null && System.currentTimeMillis() - last.time < 3 * 60_000L) {
             last
@@ -45,6 +50,7 @@ object PlaceLocator {
         LocatedPlace(name = name, lat = fresh.latitude, lng = fresh.longitude)
     }
 
+    @SuppressLint("MissingPermission")
     private suspend fun awaitFix(lm: LocationManager): Location? =
         suspendCancellableCoroutine { cont ->
             val provider = when {

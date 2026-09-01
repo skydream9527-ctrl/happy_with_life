@@ -51,12 +51,15 @@ object MusicShare {
         Regex("https?://\\S+").find(text)?.value?.trimEnd(')', ']', ',', '。', '，') ?: text.takeIf { it.startsWith("http") }.orEmpty()
 
     private fun extractTitle(text: String, url: String): String {
-        val withoutUrl = text.replace(url, " ").replace('\n', ' ').trim()
+        val withoutUrl = if (url.isBlank()) text.replace('\n', ' ').trim()
+        else text.replace(url, " ").replace('\n', ' ').trim()
         if (withoutUrl.isNotBlank() && withoutUrl.length in 1..40 && !withoutUrl.startsWith("http")) {
             return withoutUrl.removePrefix("分享").trim()
         }
         val fromQuery = Regex("[?&](?:s|w|songname|title)=([^&]+)").find(url)?.groupValues?.getOrNull(1)
-        if (!fromQuery.isNullOrBlank()) return Uri.decode(fromQuery)
+        if (!fromQuery.isNullOrBlank()) {
+            return runCatching { java.net.URLDecoder.decode(fromQuery, Charsets.UTF_8.name()) }.getOrDefault(fromQuery)
+        }
         return ""
     }
 }
