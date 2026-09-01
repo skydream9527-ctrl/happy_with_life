@@ -16,12 +16,15 @@ android {
         versionCode = 1
         versionName = "1.0.0"
         // 阿里云公网。本机调试可在根目录 local.properties 写 xqx.api.base=http://10.0.2.2:8080/
-        val localProps = java.util.Properties()
-        rootProject.file("local.properties").takeIf { it.exists() }?.reader()?.use { localProps.load(it) }
-        val apiBase = (findProperty("xqx.api.base") as String?)
-            ?: localProps.getProperty("xqx.api.base")
-            ?: "http://47.94.102.221:8080/"
-        buildConfigField("String", "XQX_API_BASE", "\"${apiBase.trimEnd('/')}/\"")
+        val fromFile = rootProject.file("local.properties").takeIf { it.exists() }
+            ?.readLines()
+            ?.firstOrNull { it.trim().startsWith("xqx.api.base=") }
+            ?.substringAfter("=")
+            ?.trim()
+            ?.trim('"')
+        val apiBase = ((findProperty("xqx.api.base") as String?) ?: fromFile ?: "http://47.94.102.221:8080/")
+            .trimEnd('/') + "/"
+        buildConfigField("String", "XQX_API_BASE", "\"$apiBase\"")
         manifestPlaceholders["usesCleartextTraffic"] = "true"
     }
 
