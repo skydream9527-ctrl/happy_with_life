@@ -16,7 +16,7 @@ implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
 在 `local.properties` 或 `BuildConfig` 写：
 
 ```
-XQX_API_BASE=https://你的域名/
+XQX_API_BASE=http://47.94.102.221/
 ```
 
 调试期如果还是 `http://公网IP/`，需要在 debug 的 `AndroidManifest` 打开明文流量：
