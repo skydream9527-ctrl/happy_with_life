@@ -302,15 +302,16 @@ class RecordViewModel(
 
     fun publish(onSuccess: () -> Unit) {
         val state = _uiState.value
-        if (state.text.isBlank() && state.photoUris.isEmpty() && state.voiceUri == null
-            && state.musicTitle == null && state.linkUrl == null && state.locationName == null
-        ) {
-            _uiState.value = _uiState.value.copy(errorMessage = "请至少记录一些内容～")
-            return
-        }
-        if (state.selectedMood == null) {
-            // ADR-001 原则 1：心情必选一个，仓储层 publish 也会强制校验
-            _uiState.value = _uiState.value.copy(errorMessage = "请先选择一个心情～")
+        val content = com.xiaoquexing.app.util.PublishGuard.hasContent(
+            text = state.text,
+            photoCount = state.photoUris.size,
+            hasVoice = state.voiceUri != null,
+            hasMusic = state.musicTitle != null,
+            hasLink = state.linkUrl != null,
+            hasLocation = state.locationName != null,
+        )
+        com.xiaoquexing.app.util.PublishGuard.missingHint(state.selectedMood, content)?.let { hint ->
+            _uiState.value = state.copy(errorMessage = hint)
             return
         }
 

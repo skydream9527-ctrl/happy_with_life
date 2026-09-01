@@ -20,4 +20,16 @@ class MusicShareTest {
         assertEquals("海阔天空", song!!.title)
         assertEquals("QQ音乐", song.artist)
     }
+
+    @Test
+    fun parseQqLinkInfersPlatform() {
+        val song = MusicShare.parse("https://y.qq.com/n/ryqq/songDetail/003xx", MusicPlatform.NETEASE)
+        assertNotNull(song)
+        assertEquals(MusicPlatform.QQ, song!!.platform)
+    }
+
+    @Test
+    fun blankRejected() {
+        org.junit.Assert.assertNull(MusicShare.parse("   ", MusicPlatform.NETEASE))
+    }
 }

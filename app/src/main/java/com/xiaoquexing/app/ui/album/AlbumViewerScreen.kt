@@ -73,11 +73,11 @@ fun AlbumViewerScreen(
             actions = {
                 androidx.compose.material3.TextButton(
                     onClick = { viewModel.exportImage() },
-                    enabled = !ui.exporting && album != null,
+                    enabled = !ui.exporting,
                 ) { Text("长图") }
                 androidx.compose.material3.TextButton(
                     onClick = { viewModel.exportPdf() },
-                    enabled = !ui.exporting && album != null,
+                    enabled = !ui.exporting,
                 ) { Text("PDF") }
             }
         )

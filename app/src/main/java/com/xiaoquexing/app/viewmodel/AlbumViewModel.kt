@@ -77,7 +77,10 @@ class AlbumViewModel(
     }
 
     fun exportImage() {
-        val snap = _uiState.value.snapshot ?: return
+        val snap = _uiState.value.snapshot ?: run {
+            _uiState.value = _uiState.value.copy(message = "画册还没准备好")
+            return
+        }
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(exporting = true, message = null)
             val ok = runCatching { AlbumExporter.exportLongImage(app, snap) }.getOrDefault(false)
@@ -89,7 +92,10 @@ class AlbumViewModel(
     }
 
     fun exportPdf() {
-        val snap = _uiState.value.snapshot ?: return
+        val snap = _uiState.value.snapshot ?: run {
+            _uiState.value = _uiState.value.copy(message = "画册还没准备好")
+            return
+        }
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(exporting = true, message = null)
             val ok = runCatching { AlbumExporter.exportPdf(app, snap) }.getOrDefault(false)

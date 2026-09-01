@@ -26,11 +26,15 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -45,6 +49,7 @@ import com.xiaoquexing.app.data.entity.PlantType
 import com.xiaoquexing.app.di.rememberXiaoQueXingViewModelFactory
 import com.xiaoquexing.app.ui.components.PlantViewSmall
 import com.xiaoquexing.app.viewmodel.ProfileViewModel
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -54,7 +59,10 @@ fun PlantSelectionScreen(
 ) {
     val plants by viewModel.plants.collectAsState()
     val activePlantType by viewModel.activePlantType.collectAsState()
+    val snackbar = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
 
+    Box(modifier = Modifier.fillMaxSize()) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -93,8 +101,11 @@ fun PlantSelectionScreen(
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable(enabled = isUnlocked) {
-                            viewModel.selectPlant(type)
+                        .clickable {
+                            if (isUnlocked) viewModel.selectPlant(type)
+                            else scope.launch {
+                                snackbar.showSnackbar("${type.displayName} 还需 ${type.unlockGp} GP 解锁")
+                            }
                         },
                     shape = RoundedCornerShape(16.dp),
                     colors = CardDefaults.cardColors(
@@ -183,5 +194,7 @@ fun PlantSelectionScreen(
                 }
             }
         }
+    }
+    SnackbarHost(snackbar, modifier = Modifier.align(Alignment.BottomCenter))
     }
 }
