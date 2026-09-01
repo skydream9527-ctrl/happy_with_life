@@ -1,7 +1,10 @@
 package com.xiaoquexing.app.data.repository
 
 import androidx.room.withTransaction
+import com.xiaoquexing.app.data.DataBootstrap
 import com.xiaoquexing.app.data.db.AppDatabase
+import com.xiaoquexing.app.data.db.entity.SpaceEntity
+import com.xiaoquexing.app.data.db.entity.UserEntity
 import com.xiaoquexing.app.data.db.entity.MediaStatus
 import com.xiaoquexing.app.data.db.entity.MediaTypes
 import com.xiaoquexing.app.data.db.entity.OutboxEventEntity
@@ -104,8 +107,7 @@ class RecordRepository(private val db: AppDatabase) {
     suspend fun publish(draft: Record): PublishResult = db.withTransaction {
         val mood = requireNotNull(draft.moodTag) { "心情必选（ADR-001 原则 1）" }
         val now = System.currentTimeMillis()
-        val space = spaceDao.getDefaultSpace() ?: error("默认空间未初始化，请先完成 DataBootstrap")
-        val user = userDao.getFirstUser() ?: error("本地用户未初始化，请先完成 DataBootstrap")
+        val (space, user) = requireIdentity()
         val scopeKey = "u:${user.localId}"
 
         val occurredAt = if (draft.createdAt > 0) draft.createdAt else now
@@ -170,8 +172,7 @@ class RecordRepository(private val db: AppDatabase) {
     suspend fun seedRecordWithFixedGp(draft: Record): Long = db.withTransaction {
         val mood = requireNotNull(draft.moodTag) { "种子记录也必须有心情" }
         val now = System.currentTimeMillis()
-        val space = spaceDao.getDefaultSpace() ?: error("默认空间未初始化")
-        val user = userDao.getFirstUser() ?: error("本地用户未初始化")
+        val (space, user) = requireIdentity()
         val scopeKey = "u:${user.localId}"
         val occurredAt = if (draft.createdAt > 0) draft.createdAt else now
         val dateKey = DateKeys.epochDay(occurredAt)
@@ -208,8 +209,7 @@ class RecordRepository(private val db: AppDatabase) {
         require(raw.deletedAt == null) { "已删除的记录不能编辑（ADR D6.7）" }
         val mood = requireNotNull(draft.moodTag) { "心情必选（ADR-001 原则 1）" }
         val now = System.currentTimeMillis()
-        val space = spaceDao.getDefaultSpace() ?: error("默认空间未初始化")
-        val user = userDao.getFirstUser() ?: error("本地用户未初始化")
+        val (space, user) = requireIdentity()
         val scopeKey = "u:${user.localId}"
 
         val occurredAt = if (draft.createdAt > 0) draft.createdAt else now
@@ -271,8 +271,7 @@ class RecordRepository(private val db: AppDatabase) {
     /** 软删除并级联重算（ADR D6）：GP 回退、阶段可降级、成就可回锁，墓碑进 Outbox。 */
     suspend fun softDelete(localId: Long) = db.withTransaction {
         val raw = recordDao.getRawById(localId) ?: error("记录 $localId 不存在")
-        val space = spaceDao.getDefaultSpace() ?: error("默认空间未初始化")
-        val user = userDao.getFirstUser() ?: error("本地用户未初始化")
+        val (space, user) = requireIdentity()
         val now = System.currentTimeMillis()
         val prevTotal = recordDao.sumAllGp(space.localId)
 
@@ -480,6 +479,16 @@ class RecordRepository(private val db: AppDatabase) {
             createdAt = d.record.occurredAt,
             isBackdated = d.record.isBackdated
         )
+    }
+
+    private suspend fun requireIdentity(): Pair<SpaceEntity, UserEntity> {
+        repeat(2) {
+            val space = spaceDao.getDefaultSpace()
+            val user = userDao.getFirstUser()
+            if (space != null && user != null) return space to user
+            runCatching { DataBootstrap(db).ensureSeeded() }
+        }
+        error("本地空间未初始化")
     }
 
     private fun jsonEscape(value: String): String =

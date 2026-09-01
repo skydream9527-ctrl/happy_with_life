@@ -420,9 +420,9 @@ fun RecordScreen(
             }
 
             // Music
-            if (uiState.musicTitle != null) {
+            uiState.musicTitle?.let { title ->
                 MusicCard(
-                    title = uiState.musicTitle!!,
+                    title = title,
                     artist = uiState.musicArtist ?: "未知歌手",
                     onRemove = { viewModel.removeMusic() }
                 )
@@ -430,9 +430,9 @@ fun RecordScreen(
             }
 
             // Link
-            if (uiState.linkUrl != null) {
+            uiState.linkUrl?.let { url ->
                 LinkCard(
-                    url = uiState.linkUrl!!,
+                    url = url,
                     title = uiState.linkTitle,
                     summary = uiState.linkSummary,
                     onRemove = { viewModel.removeLink() }
@@ -441,9 +441,9 @@ fun RecordScreen(
             }
 
             // Location
-            if (uiState.locationName != null) {
+            uiState.locationName?.let { locationName ->
                 LocationCard(
-                    locationName = uiState.locationName!!,
+                    locationName = locationName,
                     onRemove = { viewModel.removeLocation() }
                 )
                 Spacer(modifier = Modifier.height(12.dp))

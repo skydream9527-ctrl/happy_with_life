@@ -54,7 +54,7 @@ fun PredictiveBackPane(
     fun commit() {
         scope.launch {
             if (!reduce) progress.animateTo(1f, tween(120))
-            onBack()
+            runCatching { onBack() }
             progress.snapTo(0f)
         }
     }

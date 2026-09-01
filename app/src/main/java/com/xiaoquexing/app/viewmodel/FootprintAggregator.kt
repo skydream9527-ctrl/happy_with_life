@@ -12,8 +12,8 @@ data class FootprintPlace(
 
 fun groupFootprints(records: List<Record>): List<FootprintPlace> {
     return records
-        .filter { !it.locationName.isNullOrBlank() }
-        .groupBy { it.locationName!!.trim() }
+        .mapNotNull { rec -> rec.locationName?.trim()?.takeIf { it.isNotEmpty() }?.let { it to rec } }
+        .groupBy({ it.first }, { it.second })
         .map { (name, rows) ->
             FootprintPlace(
                 name = name,
