@@ -35,14 +35,16 @@ class TodayWidgetProvider : AppWidgetProvider() {
             ids.forEach { id -> manager.updateAppWidget(id, views(context, snap)) }
         }
 
-        fun load(context: Context): WidgetSnapshot = runBlocking {
-            val db = AppDatabase.getInstance(context)
-            val today = DateKeys.epochDay(System.currentTimeMillis())
-            val count = db.recordDao().countOnDateAll(today)
-            val latest = db.recordDao().latestRecord()
-            val gp = db.spaceDao().getDefaultSpace()?.let { db.recordDao().sumAllGp(it.localId) } ?: 0
-            WidgetCopy.of(count, latest?.moodTag, latest?.contentText, gp)
-        }
+        fun load(context: Context): WidgetSnapshot = runCatching {
+            runBlocking {
+                val db = AppDatabase.getInstance(context)
+                val today = DateKeys.epochDay(System.currentTimeMillis())
+                val count = db.recordDao().countOnDateAll(today)
+                val latest = db.recordDao().latestRecord()
+                val gp = db.spaceDao().getDefaultSpace()?.let { db.recordDao().sumAllGp(it.localId) } ?: 0
+                WidgetCopy.of(count, latest?.moodTag, latest?.contentText, gp)
+            }
+        }.getOrElse { WidgetCopy.of(0, null, null, 0) }
 
         private fun views(context: Context, snap: WidgetSnapshot): RemoteViews {
             val views = RemoteViews(context.packageName, R.layout.widget_today)

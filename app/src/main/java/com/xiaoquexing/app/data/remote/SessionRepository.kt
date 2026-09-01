@@ -43,7 +43,15 @@ class SessionRepository(
         val me = runCatching { api.me().data }.getOrNull()
         tokens.save(pair, me)
         if (me != null) tokens.bindPersonalSpace(me.personalSpaceId)
-        return tokens.current() ?: error("session missing after auth")
+        return tokens.current() ?: Session(
+            accessToken = pair.accessToken,
+            refreshToken = pair.refreshToken,
+            userId = pair.userId,
+            deviceId = pair.deviceId,
+            personalSpaceId = me?.personalSpaceId.orEmpty(),
+            displayName = me?.displayName ?: pair.displayName,
+            maskedPhone = me?.maskedPhone.orEmpty(),
+        )
     }
 
     suspend fun refresh(): Session? {

@@ -1,11 +1,14 @@
 package com.xiaoquexing.app
 
 import android.app.Application
+import android.util.Log
 import com.xiaoquexing.app.data.db.MigrationGuard
 import com.xiaoquexing.app.data.entity.Record
 import com.xiaoquexing.app.di.AppContainer
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
@@ -21,7 +24,8 @@ class XiaoQueXingApp : Application() {
         MigrationGuard.backupV1IfPresent(this, DATABASE_NAME)
         container = AppContainer(this)
 
-        CoroutineScope(Dispatchers.IO).launch {
+        val handler = CoroutineExceptionHandler { _, e -> Log.e("XiaoQueXing", "startup", e) }
+        CoroutineScope(SupervisorJob() + Dispatchers.IO + handler).launch {
             // 首启种子（用户/默认空间/植物目录/成就定义/标签注册表）
             val firstInstall = runCatching { container.bootstrap.ensureSeeded() }.getOrDefault(false)
             // Demo 记录只存在于 Debug 构建（Z1-07 / ADR D12：正式包首启零 Demo 记录）

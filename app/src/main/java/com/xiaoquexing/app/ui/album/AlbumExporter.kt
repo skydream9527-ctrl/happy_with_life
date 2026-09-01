@@ -14,10 +14,10 @@ import com.xiaoquexing.app.viewmodel.AlbumSnapshot
 
 object AlbumExporter {
     fun exportLongImage(context: Context, album: AlbumSnapshot): Boolean {
-        val pages = pageTexts(album)
+        val pages = pageTexts(album).ifEmpty { listOf(listOf(album.title.ifBlank { "画册" })) }
         val width = 1080
         val pageH = 420
-        val bmp = Bitmap.createBitmap(width, pageH * pages.size + 80, Bitmap.Config.ARGB_8888)
+        val bmp = Bitmap.createBitmap(width, (pageH * pages.size + 80).coerceAtLeast(1), Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bmp)
         canvas.drawColor(Color.parseColor("#F7F4EE"))
         val title = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -31,7 +31,7 @@ object AlbumExporter {
         }
         pages.forEachIndexed { i, lines ->
             val top = 60f + i * pageH
-            canvas.drawText(lines.first(), 48f, top, title)
+            canvas.drawText(lines.firstOrNull().orEmpty(), 48f, top, title)
             lines.drop(1).forEachIndexed { j, line ->
                 canvas.drawText(line, 48f, top + 64f + j * 48f, body)
             }
@@ -55,7 +55,7 @@ object AlbumExporter {
             val page = doc.startPage(PdfDocument.PageInfo.Builder(595, 842, i + 1).create())
             val canvas = page.canvas
             canvas.drawColor(Color.WHITE)
-            canvas.drawText(lines.first(), 48f, 72f, title)
+            canvas.drawText(lines.firstOrNull().orEmpty(), 48f, 72f, title)
             lines.drop(1).forEachIndexed { j, line ->
                 canvas.drawText(line, 48f, 110f + j * 22f, body)
             }

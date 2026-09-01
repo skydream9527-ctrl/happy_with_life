@@ -261,7 +261,9 @@ object ShareCardRenderer {
             var sample = 1
             val w = bounds.outWidth.coerceAtLeast(1)
             val h = bounds.outHeight.coerceAtLeast(1)
-            while (w / sample > maxW * 2 || h / sample > maxH * 2) sample *= 2
+            val capW = maxW.coerceAtLeast(1)
+            val capH = maxH.coerceAtLeast(1)
+            while (w / sample > capW * 2 || h / sample > capH * 2) sample *= 2
             val opts = BitmapFactory.Options().apply { inSampleSize = sample }
             openStream(context, uriOrPath)?.use { BitmapFactory.decodeStream(it, null, opts) }
         }.getOrNull()
