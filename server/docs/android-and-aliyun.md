@@ -14,9 +14,9 @@ chmod +x deploy/scripts/first-boot.sh
 ./deploy/scripts/first-boot.sh
 ```
 
-脚本会生成密钥、建库、跑 migration、用 Nginx 对外提供 `http://47.94.102.221/`。
+脚本会生成密钥、建库、跑 migration。当前这台 ECS 直接暴露 `http://47.94.102.221:8080/`（未挂 80 端口 Nginx）。
 
-5. 浏览器或安卓访问 `http://47.94.102.221/health/live` 应返回 `ok`。安全组需放行 80（若只跑 Go 进程则放行 8080，并把客户端改成带端口）。
+5. 浏览器或安卓访问 `http://47.94.102.221:8080/health/live` 应返回 `ok`。安全组需放行 **8080**。以后上 Nginx 再开 80/443。
 6. 短信签名批下来后，把 `.env` 里 `APP_ENV=prod`、`SMS_PROVIDER=aliyun`，并填写签名和模板，再换成 `docker-compose.ecs.yml` 去连 RDS / Tair。
 
 生产禁止内存库和 mock 短信。手机号只存哈希和密文，接口只回 `138****5678`。
@@ -24,7 +24,7 @@ chmod +x deploy/scripts/first-boot.sh
 ## 安卓怎么连
 
 1. 拷贝 `clients/android/` 三个 Kotlin 文件到 App 工程。
-2. Base URL 写成 `http://47.94.102.221/`（当前 App 默认）或以后换成 `https://api.你的域名/`。
+2. Base URL 写成 `http://47.94.102.221:8080/`（当前 App 默认）或以后换成 `https://api.你的域名/`。
 3. 流程：
 
 - `smsSend(phone)` → `smsVerify(phone, code, deviceId)` 得到 Token
