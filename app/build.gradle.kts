@@ -15,8 +15,14 @@ android {
         targetSdk = 34
         versionCode = 1
         versionName = "1.0.0"
-        buildConfigField("String", "XQX_API_BASE", "\"http://10.0.2.2:8080/\"")
-        manifestPlaceholders["usesCleartextTraffic"] = "false"
+        // 阿里云公网。本机调试可在根目录 local.properties 写 xqx.api.base=http://10.0.2.2:8080/
+        val localProps = java.util.Properties()
+        rootProject.file("local.properties").takeIf { it.exists() }?.reader()?.use { localProps.load(it) }
+        val apiBase = (findProperty("xqx.api.base") as String?)
+            ?: localProps.getProperty("xqx.api.base")
+            ?: "http://47.94.102.221/"
+        buildConfigField("String", "XQX_API_BASE", "\"${apiBase.trimEnd('/')}/\"")
+        manifestPlaceholders["usesCleartextTraffic"] = "true"
     }
 
     buildTypes {
@@ -25,6 +31,7 @@ android {
         }
         release {
             isMinifyEnabled = false
+            manifestPlaceholders["usesCleartextTraffic"] = "true"
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
