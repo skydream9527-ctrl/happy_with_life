@@ -5,6 +5,7 @@ import kotlinx.serialization.json.Json
 import okhttp3.Interceptor
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
+import okhttp3.ResponseBody.Companion.toResponseBody
 import retrofit2.Retrofit
 import java.util.concurrent.TimeUnit
 
@@ -35,12 +36,13 @@ fun createApiService(
             val raw = runCatching { body.string() }.getOrDefault(response.message)
             body.close()
             val safe = raw.replace("\\", "\\\\").replace("\"", "\\\"").take(180).ifBlank { "请求失败 ${response.code}" }
-            val json = """{"error":{"code":"HTTP_${response.code}","message":"$safe","retryable":false}}"""
-            return response.newBuilder()
-                .body(okhttp3.ResponseBody.create("application/json".toMediaType(), json))
+            val payload = """{"error":{"code":"HTTP_${response.code}","message":"$safe","retryable":false}}"""
+            response.newBuilder()
+                .body(payload.toResponseBody("application/json".toMediaType()))
                 .build()
+        } else {
+            response
         }
-        response
     }
     val client = OkHttpClient.Builder()
         .connectTimeout(15, TimeUnit.SECONDS)
