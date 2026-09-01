@@ -14,7 +14,7 @@ export OSS_PROVIDER=mock
 go run ./cmd/api
 ```
 
-当前线上：`http://47.94.102.221/`  
+当前线上：`http://47.94.102.221:8080/`  
 模拟器打本机：`http://10.0.2.2:8080/`（`local.properties` 里写 `xqx.api.base=http://10.0.2.2:8080/`）
 
 ## 登录

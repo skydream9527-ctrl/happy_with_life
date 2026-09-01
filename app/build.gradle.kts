@@ -20,7 +20,7 @@ android {
         rootProject.file("local.properties").takeIf { it.exists() }?.reader()?.use { localProps.load(it) }
         val apiBase = (findProperty("xqx.api.base") as String?)
             ?: localProps.getProperty("xqx.api.base")
-            ?: "http://47.94.102.221/"
+            ?: "http://47.94.102.221:8080/"
         buildConfigField("String", "XQX_API_BASE", "\"${apiBase.trimEnd('/')}/\"")
         manifestPlaceholders["usesCleartextTraffic"] = "true"
     }
