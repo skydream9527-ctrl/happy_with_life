@@ -61,13 +61,20 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import android.Manifest
+import com.xiaoquexing.app.util.MusicPlatform
+import com.xiaoquexing.app.util.MusicShare
+import com.xiaoquexing.app.util.PlaceLocator
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.xiaoquexing.app.di.rememberXiaoQueXingViewModelFactory
 import com.xiaoquexing.app.media.rememberMediaPicker
@@ -103,8 +110,31 @@ fun RecordScreen(
     var showPhotoSourceSheet by remember { mutableStateOf(false) }
     var musicTitleInput by remember { mutableStateOf("") }
     var musicArtistInput by remember { mutableStateOf("") }
+    var musicPlatform by remember { mutableStateOf(MusicPlatform.NETEASE) }
+    var locating by remember { mutableStateOf(false) }
     var linkUrlInput by remember { mutableStateOf("") }
     var locationInput by remember { mutableStateOf("") }
+    val context = LocalContext.current
+    val locationPermission = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { granted ->
+        if (granted.values.any { it }) {
+            locating = true
+            coroutineScope.launch {
+                val place = runCatching { PlaceLocator.current(context) }.getOrNull()
+                locating = false
+                if (place != null) {
+                    viewModel.setLocation(place.name, place.lat, place.lng)
+                    showAddLocationDialog = false
+                    snackbarHostState.showSnackbar("已定位：${place.name}")
+                } else {
+                    snackbarHostState.showSnackbar("暂时拿不到定位，请打开系统定位后重试")
+                }
+            }
+        } else {
+            coroutineScope.launch { snackbarHostState.showSnackbar("需要定位权限才能获取当前位置") }
+        }
+    }
     var showDatePicker by remember { mutableStateOf(false) }
     var showDeleteConfirm by remember { mutableStateOf(false) }
 
@@ -171,6 +201,11 @@ fun RecordScreen(
         uiState.text.isNotBlank() || uiState.photoUris.isNotEmpty() || uiState.voiceUri != null ||
             uiState.musicTitle != null || uiState.linkUrl != null || uiState.locationName != null
         )
+    val publishHint = when {
+        uiState.selectedMood == null -> "发布前请先选一个心情"
+        !canPublish -> "写点文字、照片、语音、音乐或地点后再发布"
+        else -> null
+    }
     Scaffold(
         modifier = Modifier.imePadding(),
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -187,13 +222,21 @@ fun RecordScreen(
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.primary,
                 )
+                if (publishHint != null) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = publishHint,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
                 Spacer(modifier = Modifier.height(8.dp))
                 Button(
                     onClick = { viewModel.publish(onPublished) },
                     modifier = Modifier.fillMaxWidth().height(52.dp),
                     shape = RoundedCornerShape(14.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-                    enabled = !uiState.isPublishing && canPublish,
+                    enabled = !uiState.isPublishing,
                 ) {
                     if (uiState.isPublishing) {
                         CircularProgressIndicator(modifier = Modifier.size(22.dp), color = Color.White, strokeWidth = 2.dp)
@@ -493,35 +536,54 @@ fun RecordScreen(
         }
     }
 
-    // Add Music Dialog
     if (showAddMusicDialog) {
         AlertDialog(
             onDismissRequest = { showAddMusicDialog = false },
             title = { Text("添加音乐") },
             text = {
                 Column {
+                    Text("从平台选歌，再把分享链接或歌名粘贴回来", style = MaterialTheme.typography.bodySmall)
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        TextButton(onClick = {
+                            musicPlatform = MusicPlatform.NETEASE
+                            MusicShare.open(context, MusicPlatform.NETEASE, musicTitleInput)
+                        }) { Text("网易云音乐") }
+                        TextButton(onClick = {
+                            musicPlatform = MusicPlatform.QQ
+                            MusicShare.open(context, MusicPlatform.QQ, musicTitleInput)
+                        }) { Text("QQ音乐") }
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
                     OutlinedTextField(
                         value = musicTitleInput,
                         onValueChange = { musicTitleInput = it },
-                        label = { Text("歌曲名称") },
+                        label = { Text("粘贴分享链接或歌名") },
                         modifier = Modifier.fillMaxWidth()
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     OutlinedTextField(
                         value = musicArtistInput,
                         onValueChange = { musicArtistInput = it },
-                        label = { Text("歌手") },
+                        label = { Text("歌手（可选）") },
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
             },
             confirmButton = {
                 TextButton(onClick = {
-                    if (musicTitleInput.isNotBlank()) {
-                        viewModel.setMusic(musicTitleInput, musicArtistInput.ifBlank { "未知歌手" })
+                    val song = MusicShare.parse(musicTitleInput, musicPlatform)
+                    if (song != null) {
+                        viewModel.setMusic(
+                            title = song.title,
+                            artist = musicArtistInput.ifBlank { song.artist },
+                            uri = song.uri,
+                        )
                         musicTitleInput = ""
                         musicArtistInput = ""
                         showAddMusicDialog = false
+                    } else {
+                        coroutineScope.launch { snackbarHostState.showSnackbar("请填写歌名或粘贴网易云 / QQ 音乐链接") }
                     }
                 }) { Text("确定") }
             },
@@ -559,18 +621,51 @@ fun RecordScreen(
         )
     }
 
-    // Add Location Dialog
     if (showAddLocationDialog) {
         AlertDialog(
-            onDismissRequest = { showAddLocationDialog = false },
+            onDismissRequest = { if (!locating) showAddLocationDialog = false },
             title = { Text("添加地点") },
             text = {
-                OutlinedTextField(
-                    value = locationInput,
-                    onValueChange = { locationInput = it },
-                    label = { Text("地点名称") },
-                    modifier = Modifier.fillMaxWidth()
-                )
+                Column {
+                    Text("使用手机定位获取当前地点", style = MaterialTheme.typography.bodySmall)
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Button(
+                        onClick = {
+                            if (PlaceLocator.hasPermission(context)) {
+                                locating = true
+                                coroutineScope.launch {
+                                    val place = runCatching { PlaceLocator.current(context) }.getOrNull()
+                                    locating = false
+                                    if (place != null) {
+                                        viewModel.setLocation(place.name, place.lat, place.lng)
+                                        showAddLocationDialog = false
+                                        snackbarHostState.showSnackbar("已定位：${place.name}")
+                                    } else {
+                                        snackbarHostState.showSnackbar("暂时拿不到定位，请打开系统定位后重试")
+                                    }
+                                }
+                            } else {
+                                locationPermission.launch(
+                                    arrayOf(
+                                        Manifest.permission.ACCESS_FINE_LOCATION,
+                                        Manifest.permission.ACCESS_COARSE_LOCATION,
+                                    )
+                                )
+                            }
+                        },
+                        enabled = !locating,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text(if (locating) "定位中…" else "获取当前位置")
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = locationInput,
+                        onValueChange = { locationInput = it },
+                        label = { Text("定位失败时可手填") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
             },
             confirmButton = {
                 TextButton(onClick = {
@@ -579,10 +674,10 @@ fun RecordScreen(
                         locationInput = ""
                         showAddLocationDialog = false
                     }
-                }) { Text("确定") }
+                }) { Text("用手填") }
             },
             dismissButton = {
-                TextButton(onClick = { showAddLocationDialog = false }) { Text("取消") }
+                TextButton(onClick = { if (!locating) showAddLocationDialog = false }) { Text("取消") }
             }
         )
     }
@@ -618,7 +713,12 @@ fun RecordScreen(
                     onClick = {
                         showPhotoSourceSheet = false
                         mediaPicker.takePhoto { path ->
-                            if (path != null) viewModel.addPhoto(path)
+                            if (path != null) {
+                                viewModel.addPhoto(path)
+                                coroutineScope.launch { snackbarHostState.showSnackbar("照片已加入这条记录") }
+                            } else {
+                                coroutineScope.launch { snackbarHostState.showSnackbar("拍照取消或相机无法打开") }
+                            }
                         }
                     }
                 )

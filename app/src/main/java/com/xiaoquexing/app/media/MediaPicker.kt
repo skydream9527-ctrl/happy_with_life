@@ -3,6 +3,7 @@ package com.xiaoquexing.app.media
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.media.MediaRecorder
 import android.net.Uri
@@ -77,7 +78,9 @@ class MediaPicker(private val activity: ComponentActivity) {
         val path = pendingCameraSavedPath
         pendingCameraUri = null
         pendingCameraCallback = null
-        cb?.invoke(if (success) path else null)
+        val file = path?.let { File(it) }
+        val ok = success && file != null && file.exists() && file.length() > 0
+        cb?.invoke(if (ok) path else null)
     }
 
     fun onAudioPermission(granted: Boolean) {
@@ -139,6 +142,7 @@ class MediaPicker(private val activity: ComponentActivity) {
             pendingCameraUri = uri
             pendingCameraSavedPath = file.absolutePath
             pendingCameraCallback = callback
+            grantCameraUri(activity, uri)
             takePictureLauncher?.launch(uri) ?: callback(null)
         } catch (t: Throwable) {
             Log.e(TAG, "takePhoto failed", t)
@@ -281,7 +285,7 @@ fun rememberMediaPicker(): MediaPicker {
         ActivityResultContracts.PickMultipleVisualMedia(maxItems = 9),
     ) { picker.onPickedMultiple(it) }
     picker.takePictureLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.TakePicture(),
+        CapturePictureContract(),
     ) { picker.onTakenPicture(it) }
     picker.requestAudioPermLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission(),
@@ -296,6 +300,24 @@ fun rememberMediaPicker(): MediaPicker {
 }
 
 /** 取应用专属文件目录的 helper，方便在 Composable 里取 photo/audio 路径。 */
+private fun grantCameraUri(context: Context, uri: Uri) {
+    val flags = Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION
+    val probe = Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE)
+    context.packageManager.queryIntentActivities(probe, PackageManager.MATCH_DEFAULT_ONLY).forEach { info ->
+        runCatching {
+            context.grantUriPermission(info.activityInfo.packageName, uri, flags)
+        }
+    }
+}
+
+class CapturePictureContract : ActivityResultContracts.TakePicture() {
+    override fun createIntent(context: Context, input: Uri): Intent {
+        return super.createIntent(context, input).apply {
+            addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+    }
+}
+
 fun Context.mediaCacheDir(type: String): File {
     val base = getExternalFilesDir(type) ?: filesDir
     if (!base.exists()) base.mkdirs()

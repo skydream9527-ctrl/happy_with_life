@@ -4,6 +4,9 @@
     <external-files-path
         name="my_images"
         path="Pictures/" />
+    <external-files-path
+        name="ext_all"
+        path="." />
     <!-- 应用专属音频目录 -->
     <external-files-path
         name="my_audio"
