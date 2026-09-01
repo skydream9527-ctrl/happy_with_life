@@ -16,6 +16,8 @@ object FileUtil {
     fun createImageFile(context: Context): File {
         val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
         val storageDir = context.getExternalFilesDir(android.os.Environment.DIRECTORY_PICTURES)
+            ?: File(context.filesDir, "Pictures").apply { mkdirs() }
+        if (!storageDir.exists()) storageDir.mkdirs()
         return File.createTempFile("JPEG_${timeStamp}_", ".jpg", storageDir)
     }
 
