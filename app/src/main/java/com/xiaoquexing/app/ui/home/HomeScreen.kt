@@ -201,8 +201,9 @@ private fun NavIconButton(
 @Composable
 private fun PlantHeroCard(uiState: com.xiaoquexing.app.viewmodel.HomeUiState) {
     // 轻微摇摆动画（对应设计稿 sway keyframes）
+    val reduceMotion = com.xiaoquexing.app.ui.theme.Motion.reduce()
     val transition = rememberInfiniteTransition(label = "sway")
-    val sway by transition.animateFloat(
+    val animatedSway by transition.animateFloat(
         initialValue = -1.5f,
         targetValue = 1.5f,
         animationSpec = infiniteRepeatable(
@@ -211,6 +212,7 @@ private fun PlantHeroCard(uiState: com.xiaoquexing.app.viewmodel.HomeUiState) {
         ),
         label = "swayAngle"
     )
+    val sway = if (reduceMotion) 0f else animatedSway
 
     Box(
         modifier = Modifier

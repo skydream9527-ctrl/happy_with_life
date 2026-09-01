@@ -35,10 +35,8 @@ class XiaoQueXingApp : Application() {
             // 软删除记录的孤儿媒体清理（Z1-05）
             runCatching { container.mediaImporter.cleanupOrphanFiles() }
             runCatching { container.sessionRepository.restore() }
-            runCatching { container.syncEngine.syncAll() }
             runCatching {
                 com.xiaoquexing.app.data.remote.SyncWork.ensurePeriodic(this@XiaoQueXingApp)
-                com.xiaoquexing.app.data.remote.SyncWork.enqueueOnce(this@XiaoQueXingApp)
             }
             runCatching { com.xiaoquexing.app.util.ReminderScheduler.ensure(this@XiaoQueXingApp) }
             runCatching { com.xiaoquexing.app.widget.TodayWidgetProvider.refreshAll(this@XiaoQueXingApp) }
