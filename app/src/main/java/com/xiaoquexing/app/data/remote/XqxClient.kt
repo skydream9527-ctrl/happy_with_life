@@ -28,7 +28,19 @@ fun createApiService(
             .header("X-App-Version", appVersion)
             .header("Accept", "application/json")
         tokenProvider()?.let { b.header("Authorization", "Bearer $it") }
-        chain.proceed(b.build())
+        val response = chain.proceed(b.build())
+        val body = response.body
+        val contentType = body?.contentType()?.toString().orEmpty()
+        if (!response.isSuccessful && body != null && !contentType.contains("json", ignoreCase = true)) {
+            val raw = runCatching { body.string() }.getOrDefault(response.message)
+            body.close()
+            val safe = raw.replace("\\", "\\\\").replace("\"", "\\\"").take(180).ifBlank { "请求失败 ${response.code}" }
+            val json = """{"error":{"code":"HTTP_${response.code}","message":"$safe","retryable":false}}"""
+            return response.newBuilder()
+                .body(okhttp3.ResponseBody.create("application/json".toMediaType(), json))
+                .build()
+        }
+        response
     }
     val client = OkHttpClient.Builder()
         .connectTimeout(15, TimeUnit.SECONDS)

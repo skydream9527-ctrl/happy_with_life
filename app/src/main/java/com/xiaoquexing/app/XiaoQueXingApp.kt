@@ -23,10 +23,10 @@ class XiaoQueXingApp : Application() {
 
         CoroutineScope(Dispatchers.IO).launch {
             // 首启种子（用户/默认空间/植物目录/成就定义/标签注册表）
-            val firstInstall = container.bootstrap.ensureSeeded()
+            val firstInstall = runCatching { container.bootstrap.ensureSeeded() }.getOrDefault(false)
             // Demo 记录只存在于 Debug 构建（Z1-07 / ADR D12：正式包首启零 Demo 记录）
             if (firstInstall && BuildConfig.DEBUG) {
-                seedDemoRecords()
+                runCatching { seedDemoRecords() }
             }
             // 软删除记录的孤儿媒体清理（Z1-05）
             runCatching { container.mediaImporter.cleanupOrphanFiles() }

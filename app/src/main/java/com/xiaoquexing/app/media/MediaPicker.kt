@@ -19,6 +19,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import com.xiaoquexing.app.data.media.VoiceFiles
 import com.xiaoquexing.app.util.FileUtil
+import com.xiaoquexing.app.util.findComponentActivity
 import java.io.File
 
 /**
@@ -267,7 +268,7 @@ class MediaPicker(private val activity: ComponentActivity) {
 @Composable
 fun rememberMediaPicker(): MediaPicker {
     val context = LocalContext.current
-    val activity = context as? ComponentActivity
+    val activity = context.findComponentActivity()
         ?: error("MediaPicker 必须在 ComponentActivity 内使用")
     val picker = remember(activity) { MediaPicker(activity) }
     DisposableEffect(picker) {
