@@ -32,7 +32,7 @@ class MediaImporter(
         pending.forEach { media ->
             val sourceUri = media.sourceUri ?: return@forEach
             runCatching {
-                val file = persistNormalized(Uri.parse(sourceUri), media.recordId, media.sortOrder, media.localId)
+                val file = persistNormalized(sourceUri, media.recordId, media.sortOrder, media.localId)
                 mediaDao.updateLocalPath(media.localId, file.absolutePath, MediaStatus.READY, System.currentTimeMillis())
                 copied++
             }.onFailure {
@@ -51,7 +51,7 @@ class MediaImporter(
 
     fun persistPreview(uri: String): String? = runCatching {
         val dest = File(context.cacheDir, "photo_preview_${System.currentTimeMillis()}.jpg")
-        PhotoNormalize.write(context, Uri.parse(uri), dest).absolutePath
+        persistSource(uri, dest).absolutePath
     }.getOrNull()
 
     /** 删除软删除超过保留期的记录的媒体文件；行保留（同步元数据），local_path 置空。 */
@@ -67,10 +67,20 @@ class MediaImporter(
             removed
         }
 
-    private fun persistNormalized(uri: Uri, recordId: Long, sortOrder: Int, mediaId: Long): File {
+    private fun persistNormalized(source: String, recordId: Long, sortOrder: Int, mediaId: Long): File {
         val dir = File(context.filesDir, MEDIA_DIR).apply { mkdirs() }
         val target = File(dir, "r${recordId}_m${mediaId}_s${sortOrder}.jpg")
-        return PhotoNormalize.write(context, uri, target)
+        return persistSource(source, target)
+    }
+
+    private fun persistSource(source: String, dest: File): File {
+        val file = when {
+            source.startsWith("/") -> File(source)
+            source.startsWith("file:") -> File(Uri.parse(source).path ?: source.removePrefix("file://"))
+            else -> null
+        }
+        if (file != null && file.exists()) return PhotoNormalize.writeFile(file, dest)
+        return PhotoNormalize.write(context, Uri.parse(source), dest)
     }
 
     companion object {

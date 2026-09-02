@@ -2,12 +2,15 @@ package com.xiaoquexing.app.media
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.media.MediaRecorder
 import android.net.Uri
 import android.os.Build
+import android.provider.MediaStore
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -58,6 +61,7 @@ class MediaPicker(private val activity: ComponentActivity) {
     var pickSinglePhotoLauncher: ActivityResultLauncher<PickVisualMediaRequest>? = null
     var pickMultiplePhotoLauncher: ActivityResultLauncher<PickVisualMediaRequest>? = null
     var takePictureLauncher: ActivityResultLauncher<Uri>? = null
+    var takePreviewLauncher: ActivityResultLauncher<Void?>? = null
     var requestAudioPermLauncher: ActivityResultLauncher<String>? = null
     var requestCameraPermLauncher: ActivityResultLauncher<String>? = null
 
@@ -76,11 +80,37 @@ class MediaPicker(private val activity: ComponentActivity) {
     fun onTakenPicture(success: Boolean) {
         val cb = pendingCameraCallback
         val path = pendingCameraSavedPath
+        val uri = pendingCameraUri
         pendingCameraUri = null
+        pendingCameraSavedPath = null
         pendingCameraCallback = null
-        val file = path?.let { File(it) }
-        val ok = success && file != null && file.exists() && file.length() > 0
-        cb?.invoke(if (ok) path else null)
+        if (!success) {
+            uri?.let { runCatching { activity.contentResolver.delete(it, null, null) } }
+            cb?.invoke(null)
+            return
+        }
+        val fromFile = path?.let { File(it) }?.takeIf { it.exists() && it.length() > 0 }?.absolutePath
+        val copied = fromFile ?: uri?.let { copyUriToPrivate(it) }
+        cb?.invoke(copied)
+    }
+
+    fun onPreviewTaken(bitmap: Bitmap?) {
+        val cb = pendingCameraCallback
+        pendingCameraCallback = null
+        if (bitmap == null) {
+            cb?.invoke(null)
+            return
+        }
+        val dest = runCatching { FileUtil.createImageFile(activity) }.getOrNull()
+        if (dest == null) {
+            cb?.invoke(null)
+            return
+        }
+        val ok = runCatching {
+            dest.outputStream().use { bitmap.compress(Bitmap.CompressFormat.JPEG, 92, it) }
+            dest.length() > 0
+        }.getOrDefault(false)
+        cb?.invoke(if (ok) dest.absolutePath else null)
     }
 
     fun onAudioPermission(granted: Boolean) {
@@ -132,23 +162,56 @@ class MediaPicker(private val activity: ComponentActivity) {
     private var pendingCameraSavedPath: String? = null
 
     private fun launchCameraInternal(callback: (path: String?) -> Unit) {
+        pendingCameraCallback = callback
+        val probe = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        val hasCameraApp = probe.resolveActivity(activity.packageManager) != null
+        if (!hasCameraApp) {
+            takePreviewLauncher?.launch(null) ?: callback(null)
+            return
+        }
         try {
-            val file = FileUtil.createImageFile(activity)
-            val uri = androidx.core.content.FileProvider.getUriForFile(
-                activity,
-                "${activity.packageName}.fileprovider",
-                file
-            )
+            val (uri, path) = createCaptureTarget()
             pendingCameraUri = uri
-            pendingCameraSavedPath = file.absolutePath
-            pendingCameraCallback = callback
+            pendingCameraSavedPath = path
             grantCameraUri(activity, uri)
-            takePictureLauncher?.launch(uri) ?: callback(null)
+            val launched = runCatching { takePictureLauncher?.launch(uri) }.getOrNull() != null && takePictureLauncher != null
+            if (!launched) {
+                takePreviewLauncher?.launch(null) ?: callback(null)
+            }
         } catch (t: Throwable) {
             Log.e(TAG, "takePhoto failed", t)
-            callback(null)
+            runCatching { takePreviewLauncher?.launch(null) }.onFailure { callback(null) }
         }
     }
+
+    private fun createCaptureTarget(): Pair<Uri, String?> {
+        val values = ContentValues().apply {
+            put(MediaStore.Images.Media.DISPLAY_NAME, "xqx_${System.currentTimeMillis()}.jpg")
+            put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/XiaoQueXing")
+            }
+        }
+        val media = runCatching {
+            activity.contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
+        }.getOrNull()
+        if (media != null) return media to null
+        val file = FileUtil.createImageFile(activity)
+        val uri = androidx.core.content.FileProvider.getUriForFile(
+            activity,
+            "${activity.packageName}.fileprovider",
+            file,
+        )
+        return uri to file.absolutePath
+    }
+
+    private fun copyUriToPrivate(uri: Uri): String? = runCatching {
+        val dest = FileUtil.createImageFile(activity)
+        activity.contentResolver.openInputStream(uri)?.use { input ->
+            dest.outputStream().use { input.copyTo(it) }
+        }
+        dest.takeIf { it.exists() && it.length() > 0 }?.absolutePath
+    }.getOrNull()
 
     /**
      * 开始录音。返回是否成功（false 通常是权限被拒）。
@@ -287,6 +350,9 @@ fun rememberMediaPicker(): MediaPicker {
     picker.takePictureLauncher = rememberLauncherForActivityResult(
         CapturePictureContract(),
     ) { picker.onTakenPicture(it) }
+    picker.takePreviewLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.TakePicturePreview(),
+    ) { picker.onPreviewTaken(it) }
     picker.requestAudioPermLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission(),
     ) { picker.onAudioPermission(it) }
@@ -314,6 +380,7 @@ class CapturePictureContract : ActivityResultContracts.TakePicture() {
     override fun createIntent(context: Context, input: Uri): Intent {
         return super.createIntent(context, input).apply {
             addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            clipData = android.content.ClipData.newUri(context.contentResolver, "photo", input)
         }
     }
 }

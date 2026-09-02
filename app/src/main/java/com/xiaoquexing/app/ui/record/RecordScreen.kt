@@ -108,6 +108,7 @@ fun RecordScreen(
     var showAddLinkDialog by remember { mutableStateOf(false) }
     var showAddLocationDialog by remember { mutableStateOf(false) }
     var showPhotoSourceSheet by remember { mutableStateOf(false) }
+    var pendingCamera by remember { mutableStateOf(false) }
     var musicTitleInput by remember { mutableStateOf("") }
     var musicArtistInput by remember { mutableStateOf("") }
     var musicPlatform by remember { mutableStateOf(MusicPlatform.NETEASE) }
@@ -161,6 +162,21 @@ fun RecordScreen(
                     coroutineScope.launch {
                         snackbarHostState.showSnackbar("录音失败或文件损坏")
                     }
+                }
+            }
+        }
+    }
+
+    LaunchedEffect(showPhotoSourceSheet, pendingCamera) {
+        if (!showPhotoSourceSheet && pendingCamera) {
+            pendingCamera = false
+            kotlinx.coroutines.delay(180)
+            mediaPicker.takePhoto { path ->
+                if (path != null) {
+                    viewModel.addPhoto(path)
+                    coroutineScope.launch { snackbarHostState.showSnackbar("照片已加入这条记录") }
+                } else {
+                    coroutineScope.launch { snackbarHostState.showSnackbar("拍照取消或相机无法打开") }
                 }
             }
         }
@@ -233,8 +249,8 @@ fun RecordScreen(
                 Spacer(modifier = Modifier.height(8.dp))
                 Button(
                     onClick = { viewModel.publish(onPublished) },
-                    modifier = Modifier.fillMaxWidth().height(52.dp),
-                    shape = RoundedCornerShape(14.dp),
+                    modifier = Modifier.fillMaxWidth().height(50.dp),
+                    shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                     enabled = !uiState.isPublishing,
                 ) {
@@ -715,15 +731,8 @@ fun RecordScreen(
                     icon = Icons.Default.CameraAlt,
                     label = "拍照",
                     onClick = {
+                        pendingCamera = true
                         showPhotoSourceSheet = false
-                        mediaPicker.takePhoto { path ->
-                            if (path != null) {
-                                viewModel.addPhoto(path)
-                                coroutineScope.launch { snackbarHostState.showSnackbar("照片已加入这条记录") }
-                            } else {
-                                coroutineScope.launch { snackbarHostState.showSnackbar("拍照取消或相机无法打开") }
-                            }
-                        }
                     }
                 )
                 Spacer(modifier = Modifier.height(8.dp))
