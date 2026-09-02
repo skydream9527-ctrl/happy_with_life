@@ -75,10 +75,11 @@ fun ProfileScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.secondaryContainer)
-                    .padding(24.dp),
+                    .padding(horizontal = 20.dp, vertical = 16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                Text("我的", style = MaterialTheme.typography.displayLarge, modifier = Modifier.fillMaxWidth())
+                Spacer(modifier = Modifier.height(16.dp))
                 // Avatar
                 Box(
                     modifier = Modifier

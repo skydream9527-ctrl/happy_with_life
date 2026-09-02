@@ -46,14 +46,7 @@ fun LoginScreen(
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 20.dp),
     ) {
-        TopAppBar(
-            title = { Text("登录") },
-            navigationIcon = {
-                IconButton(onClick = onBack) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = "返回")
-                }
-            },
-        )
+        com.xiaoquexing.app.ui.theme.IosNavBar(title = "登录", onBack = onBack)
         val session = ui.session
         if (session != null) {
             Text("${session.displayName.ifBlank { "已登录" }} · ${session.maskedPhone}")

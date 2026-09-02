@@ -60,14 +60,7 @@ fun AlbumScreen(
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = { viewModel.showCreateDialog() },
-                containerColor = MaterialTheme.colorScheme.primary
-            ) {
-                Icon(Icons.Default.Add, contentDescription = "新建画册", tint = Color.White)
-            }
-        }
+        floatingActionButton = {}
     ) { padding ->
         Column(
             modifier = Modifier
@@ -75,10 +68,16 @@ fun AlbumScreen(
                 .padding(padding)
         ) {
             Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp)) {
-                Text(
-                    text = "电子画册",
-                    style = MaterialTheme.typography.displayLarge
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(text = "画册", style = MaterialTheme.typography.displayLarge)
+                    TextButton(onClick = { viewModel.showCreateDialog() }) {
+                        Text("新建", color = MaterialTheme.colorScheme.primary)
+                    }
+                }
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
                     text = "将美好回忆装订成册",

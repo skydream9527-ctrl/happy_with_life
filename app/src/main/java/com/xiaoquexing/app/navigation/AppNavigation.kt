@@ -366,19 +366,7 @@ private fun FloatingTabBar(
                     .padding(horizontal = 8.dp, vertical = 6.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                tabItems.take(2).forEach { tab ->
-                    TabItemButton(
-                        tab = tab,
-                        isSelected = currentRoute == tab.screen.route,
-                        onClick = { onTabClick(tab.screen) },
-                        modifier = Modifier.weight(1f)
-                    )
-                }
-
-                // 中央记录按钮占位
-                Spacer(modifier = Modifier.size(56.dp))
-
-                tabItems.drop(2).forEach { tab ->
+                tabItems.forEach { tab ->
                     TabItemButton(
                         tab = tab,
                         isSelected = currentRoute == tab.screen.route,
@@ -389,50 +377,6 @@ private fun FloatingTabBar(
             }
         }
 
-        // 中央凸起记录按钮
-        val recordActive = currentRoute == Screen.Record.route
-        val scale by animateFloatAsState(
-            targetValue = if (recordActive) 1.06f else 1f,
-            animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
-            label = "recordScale"
-        )
-        Box(
-            modifier = Modifier
-                .align(Alignment.Center)
-                .offset(y = (-10).dp)
-                .size(52.dp)
-                .graphicsLayer {
-                    scaleX = scale
-                    scaleY = scale
-                }
-                .shadow(
-                    elevation = 10.dp,
-                    shape = CircleShape,
-                    ambientColor = GreenShadow,
-                    spotColor = GreenShadow
-                )
-                .clip(CircleShape)
-                .background(
-                    brush = Brush.linearGradient(
-                        listOf(
-                            MaterialTheme.colorScheme.primary,
-                            RecordBtnDark
-                        )
-                    )
-                )
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null
-                ) { onRecordClick() },
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = Icons.Default.Add,
-                contentDescription = "记录",
-                tint = Color.White,
-                modifier = Modifier.size(24.dp)
-            )
-        }
     }
 }
 

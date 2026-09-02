@@ -280,16 +280,22 @@ fun RecordScreen(
                     color = MaterialTheme.colorScheme.onBackground,
                     modifier = Modifier.align(Alignment.Center)
                 )
-                IconButton(
+                TextButton(
                     onClick = onBack,
-                    modifier = Modifier
-                        .align(Alignment.CenterStart)
-                        .padding(start = 8.dp)
+                    modifier = Modifier.align(Alignment.CenterStart),
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.ArrowBack,
-                        contentDescription = "返回",
-                        tint = MaterialTheme.colorScheme.primary
+                    Text("取消", color = MaterialTheme.colorScheme.primary, fontSize = 17.sp)
+                }
+                TextButton(
+                    onClick = { viewModel.publish(onPublished) },
+                    enabled = !uiState.isPublishing,
+                    modifier = Modifier.align(Alignment.CenterEnd),
+                ) {
+                    Text(
+                        if (uiState.editingId > 0) "保存" else "发布",
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 17.sp,
                     )
                 }
             }
