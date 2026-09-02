@@ -20,7 +20,7 @@ val OrangeAccent = Color(0xFFF4A261)      // --mood-warm
 val BrownTrunk = Color(0xFF8B6F4E)
 
 // 中性色（暖灰）
-val BackgroundLight = Color(0xFFFBFBF9)   // --qx-background
+val BackgroundLight = Color(0xFFF2F2F7)   // iOS grouped background
 val CardBg = Color(0xFFFFFFFF)            // --qx-surface
 val TextPrimary = Color(0xFF1A1918)       // --qx-foreground
 val TextSecondary = Color(0xFF6B6862)     // --qx-foreground-secondary

@@ -345,24 +345,19 @@ private fun FloatingTabBar(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp)
             .navigationBarsPadding()
-            .padding(bottom = 10.dp)
     ) {
         // 胶囊形主体
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(62.dp)
+                .height(50.dp)
                 .shadow(
-                    elevation = 12.dp,
-                    shape = RoundedCornerShape(24.dp),
-                    ambientColor = Color.Black.copy(alpha = 0.08f),
-                    spotColor = Color.Black.copy(alpha = 0.08f)
+                    elevation = 0.dp,
+                    shape = RoundedCornerShape(0.dp),
                 )
-                .clip(RoundedCornerShape(24.dp))
                 .background(barColor)
-                .border(0.5.dp, borderColor, RoundedCornerShape(24.dp)),
+                .border(0.5.dp, borderColor),
             color = Color.Transparent
         ) {
             Row(

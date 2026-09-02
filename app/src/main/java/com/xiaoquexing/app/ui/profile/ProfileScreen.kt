@@ -115,8 +115,11 @@ fun ProfileScreen(
         // Menu items
         item {
             Column(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(MaterialTheme.colorScheme.surface),
+                verticalArrangement = Arrangement.spacedBy(0.dp)
             ) {
                 Text("种植", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 MenuItem(
