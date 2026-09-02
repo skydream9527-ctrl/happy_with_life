@@ -23,10 +23,10 @@ val BrownTrunk = Color(0xFF8B6F4E)
 val BackgroundLight = Color(0xFFF2F2F7)   // iOS grouped background
 val CardBg = Color(0xFFFFFFFF)            // --qx-surface
 val TextPrimary = Color(0xFF1A1918)       // --qx-foreground
-val TextSecondary = Color(0xFF6B6862)     // --qx-foreground-secondary
+val TextSecondary = Color(0xFF8E8E93)
 
 // 分隔线
-val SeparatorColor = Color(0xFFE5E4E0)    // --qx-separator-opaque
+val SeparatorColor = Color(0xFFC6C6C8)
 
 // 心情色（iOS 柔和风格）
 val MoodHappy = Color(0xFFF5C842)
@@ -42,8 +42,8 @@ val MoodGrateful = Color(0xFFCE93D8)
 
 // 深色模式
 val GreenDarkPrimary = Color(0xFF7AB886)
-val DarkBackground = Color(0xFF161815)
-val DarkSurface = Color(0xFF1E211D)
-val DarkCard = Color(0xFF282B26)
-val DarkTextPrimary = Color(0xFFE8E7E3)
-val DarkTextSecondary = Color(0xFFA0A29B)
+val DarkBackground = Color(0xFF000000)
+val DarkSurface = Color(0xFF1C1C1E)
+val DarkCard = Color(0xFF2C2C2E)
+val DarkTextPrimary = Color(0xFFF2F2F7)
+val DarkTextSecondary = Color(0xFF8E8E93)

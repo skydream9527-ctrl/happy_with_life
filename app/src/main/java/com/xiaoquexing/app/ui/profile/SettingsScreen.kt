@@ -4,6 +4,7 @@ import android.Manifest
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -57,16 +58,11 @@ fun SettingsScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .statusBarsPadding()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp),
+            .background(MaterialTheme.colorScheme.background)
+            .verticalScroll(rememberScrollState()),
     ) {
-        TopAppBar(
-            title = { Text("设置") },
-            navigationIcon = {
-                IconButton(onClick = onBack) { Icon(Icons.Default.ArrowBack, contentDescription = "返回") }
-            },
-        )
+        com.xiaoquexing.app.ui.theme.IosNavBar(title = "设置", onBack = onBack)
+        Column(modifier = Modifier.padding(horizontal = 16.dp)) {
         Text("通知", style = MaterialTheme.typography.titleMedium)
         ToggleRow("每天 21:00 提醒记录", ui.reminderOn) { on ->
             if (on && Build.VERSION.SDK_INT >= 33) permission.launch(Manifest.permission.POST_NOTIFICATIONS)
@@ -146,6 +142,7 @@ fun SettingsScreen(
         Spacer(Modifier.height(24.dp))
         Text("关于 小确幸 ${BuildConfig.VERSION_NAME}", style = MaterialTheme.typography.bodySmall)
         Spacer(Modifier.height(32.dp))
+        }
     }
 }
 

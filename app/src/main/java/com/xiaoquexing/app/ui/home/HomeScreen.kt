@@ -30,6 +30,7 @@ import androidx.compose.material.icons.outlined.Spa
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -110,7 +111,10 @@ fun HomeScreen(
                             color = MaterialTheme.colorScheme.primary
                         )
                     }
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
+                        TextButton(onClick = onNavigateToRecord) {
+                            Text("写", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.SemiBold)
+                        }
                         NavIconButton(
                             icon = Icons.Outlined.Spa,
                             contentDescription = "植物选择",
