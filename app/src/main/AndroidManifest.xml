@@ -23,6 +23,10 @@
         </intent>
         <package android:name="com.netease.cloudmusic" />
         <package android:name="com.tencent.qqmusic" />
+        <package android:name="com.android.camera" />
+        <package android:name="com.android.camera2" />
+        <package android:name="com.mlab.cam" />
+        <package android:name="com.xiaomi.camera" />
     </queries>
 
     <application

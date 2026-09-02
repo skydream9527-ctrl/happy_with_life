@@ -109,6 +109,7 @@ fun RecordScreen(
     var showAddLocationDialog by remember { mutableStateOf(false) }
     var showPhotoSourceSheet by remember { mutableStateOf(false) }
     var pendingCamera by remember { mutableStateOf(false) }
+    var showInAppCamera by remember { mutableStateOf(false) }
     var musicTitleInput by remember { mutableStateOf("") }
     var musicArtistInput by remember { mutableStateOf("") }
     var musicPlatform by remember { mutableStateOf(MusicPlatform.NETEASE) }
@@ -167,18 +168,22 @@ fun RecordScreen(
         }
     }
 
+    val cameraPermission = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission(),
+    ) { granted ->
+        if (granted) showInAppCamera = true
+        else coroutineScope.launch { snackbarHostState.showSnackbar("需要相机权限才能拍照") }
+    }
+
     LaunchedEffect(showPhotoSourceSheet, pendingCamera) {
         if (!showPhotoSourceSheet && pendingCamera) {
             pendingCamera = false
             kotlinx.coroutines.delay(180)
-            mediaPicker.takePhoto { path ->
-                if (path != null) {
-                    viewModel.addPhoto(path)
-                    coroutineScope.launch { snackbarHostState.showSnackbar("照片已加入这条记录") }
-                } else {
-                    coroutineScope.launch { snackbarHostState.showSnackbar("拍照取消或相机无法打开") }
-                }
-            }
+            val granted = androidx.core.content.ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.CAMERA,
+            ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+            if (granted) showInAppCamera = true else cameraPermission.launch(Manifest.permission.CAMERA)
         }
     }
 
@@ -777,6 +782,17 @@ fun RecordScreen(
             dismissButton = {
                 TextButton(onClick = { showDeleteConfirm = false }) { Text("取消") }
             },
+        )
+    }
+
+    if (showInAppCamera) {
+        InAppCamera(
+            onCaptured = { path ->
+                showInAppCamera = false
+                viewModel.addPhoto(path)
+                coroutineScope.launch { snackbarHostState.showSnackbar("照片已加入这条记录") }
+            },
+            onCancel = { showInAppCamera = false },
         )
     }
 }

@@ -84,14 +84,16 @@ class MediaPicker(private val activity: ComponentActivity) {
         pendingCameraUri = null
         pendingCameraSavedPath = null
         pendingCameraCallback = null
-        if (!success) {
-            uri?.let { runCatching { activity.contentResolver.delete(it, null, null) } }
-            cb?.invoke(null)
-            return
-        }
         val fromFile = path?.let { File(it) }?.takeIf { it.exists() && it.length() > 0 }?.absolutePath
         val copied = fromFile ?: uri?.let { copyUriToPrivate(it) }
-        cb?.invoke(copied)
+        if (copied != null) {
+            cb?.invoke(copied)
+            return
+        }
+        if (!success) {
+            uri?.let { runCatching { activity.contentResolver.delete(it, null, null) } }
+        }
+        cb?.invoke(null)
     }
 
     fun onPreviewTaken(bitmap: Bitmap?) {
@@ -196,6 +198,10 @@ class MediaPicker(private val activity: ComponentActivity) {
             activity.contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
         }.getOrNull()
         if (media != null) return media to null
+        val brand = (Build.MANUFACTURER + Build.BRAND).lowercase()
+        if (brand.contains("xiaomi") || brand.contains("redmi") || brand.contains("poco") || brand.contains("blackshark")) {
+            error("xiaomi-skip-fileprovider")
+        }
         val file = FileUtil.createImageFile(activity)
         val uri = androidx.core.content.FileProvider.getUriForFile(
             activity,
@@ -373,6 +379,9 @@ private fun grantCameraUri(context: Context, uri: Uri) {
         runCatching {
             context.grantUriPermission(info.activityInfo.packageName, uri, flags)
         }
+    }
+    listOf("com.android.camera", "com.android.camera2", "com.mlab.cam", "com.xiaomi.camera").forEach { pkg ->
+        runCatching { context.grantUriPermission(pkg, uri, flags) }
     }
 }
 
