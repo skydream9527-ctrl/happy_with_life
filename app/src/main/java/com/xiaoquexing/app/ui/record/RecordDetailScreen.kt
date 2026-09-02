@@ -66,12 +66,7 @@ fun RecordDetailScreen(
             .statusBarsPadding()
             .padding(horizontal = 16.dp),
     ) {
-        TopAppBar(
-            title = { Text("记录") },
-            navigationIcon = {
-                IconButton(onClick = onBack) { Icon(Icons.Default.ArrowBack, contentDescription = "返回") }
-            },
-        )
+        com.xiaoquexing.app.ui.theme.IosNavBar(title = "记录", onBack = onBack)
         if (rec == null) {
             Text(if (ui.gone) "这条记录不存在或已删除" else "加载中…")
             return

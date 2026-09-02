@@ -76,19 +76,10 @@ fun TimelineScreen(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Spacer(modifier = Modifier.height(12.dp))
-            OutlinedTextField(
+            com.xiaoquexing.app.ui.theme.IosSearchField(
                 value = uiState.query.search,
                 onValueChange = viewModel::onSearch,
-                modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("搜索正文、心情、标签") },
-                singleLine = true,
-                shape = RoundedCornerShape(14.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Color.Transparent,
-                    unfocusedBorderColor = Color.Transparent,
-                    focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                )
+                placeholder = "搜索正文、心情、标签",
             )
             Spacer(modifier = Modifier.height(10.dp))
             Row(

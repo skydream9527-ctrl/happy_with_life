@@ -62,17 +62,7 @@ fun AchievementScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("成就墙") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "返回")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                )
-            )
+            com.xiaoquexing.app.ui.theme.IosNavBar(title = "成就墙", onBack = onBack)
         }
     ) { padding ->
         Column(

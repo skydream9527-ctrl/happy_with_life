@@ -44,12 +44,7 @@ fun PlanScreen(
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 16.dp),
     ) {
-        TopAppBar(
-            title = { Text("订阅") },
-            navigationIcon = {
-                IconButton(onClick = onBack) { Icon(Icons.Default.ArrowBack, contentDescription = "返回") }
-            },
-        )
+        com.xiaoquexing.app.ui.theme.IosNavBar(title = "订阅", onBack = onBack)
         Text("当前：${ui.tierLabel}", style = MaterialTheme.typography.titleMedium)
         Text(
             "支付通道尚未接入（Play / 微信 / 支付宝都还没有）。下面只是权益对照和本机预览开关。",

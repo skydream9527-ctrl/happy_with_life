@@ -50,14 +50,7 @@ fun SharedSpaceScreen(
             .padding(horizontal = 16.dp)
             .verticalScroll(rememberScrollState()),
     ) {
-        TopAppBar(
-            title = { Text("共享空间") },
-            navigationIcon = {
-                IconButton(onClick = onBack) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = "返回")
-                }
-            },
-        )
+        com.xiaoquexing.app.ui.theme.IosNavBar(title = "共享空间", onBack = onBack)
         if (ui.session == null) {
             Text("合种需要先登录。两个人各自登录后，一方建空间并发邀请码，另一方粘贴加入。")
             Spacer(Modifier.height(12.dp))

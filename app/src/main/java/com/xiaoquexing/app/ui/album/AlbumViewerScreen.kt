@@ -63,23 +63,21 @@ fun AlbumViewerScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        TopAppBar(
-            title = { Text(album?.title ?: "我的画册", fontWeight = FontWeight.Bold) },
-            navigationIcon = {
-                IconButton(onClick = onBack) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = "返回")
+        com.xiaoquexing.app.ui.theme.IosNavBar(
+            title = album?.title ?: "我的画册",
+            onBack = onBack,
+            trailing = {
+                Row {
+                    androidx.compose.material3.TextButton(
+                        onClick = { viewModel.exportImage() },
+                        enabled = !ui.exporting,
+                    ) { Text("长图") }
+                    androidx.compose.material3.TextButton(
+                        onClick = { viewModel.exportPdf() },
+                        enabled = !ui.exporting,
+                    ) { Text("PDF") }
                 }
             },
-            actions = {
-                androidx.compose.material3.TextButton(
-                    onClick = { viewModel.exportImage() },
-                    enabled = !ui.exporting,
-                ) { Text("长图") }
-                androidx.compose.material3.TextButton(
-                    onClick = { viewModel.exportPdf() },
-                    enabled = !ui.exporting,
-                ) { Text("PDF") }
-            }
         )
         ui.message?.let {
             Text(

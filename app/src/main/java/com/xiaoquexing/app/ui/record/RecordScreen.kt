@@ -566,6 +566,7 @@ fun RecordScreen(
     if (showAddMusicDialog) {
         AlertDialog(
             onDismissRequest = { showAddMusicDialog = false },
+            shape = RoundedCornerShape(14.dp),
             title = { Text("添加音乐") },
             text = {
                 Column {
@@ -624,6 +625,7 @@ fun RecordScreen(
     if (showAddLinkDialog) {
         AlertDialog(
             onDismissRequest = { showAddLinkDialog = false },
+            shape = RoundedCornerShape(14.dp),
             title = { Text("添加链接") },
             text = {
                 OutlinedTextField(
@@ -653,6 +655,7 @@ fun RecordScreen(
     if (showAddLocationDialog) {
         AlertDialog(
             onDismissRequest = { if (!locating) showAddLocationDialog = false },
+            shape = RoundedCornerShape(14.dp),
             title = { Text("添加地点") },
             text = {
                 Column {
