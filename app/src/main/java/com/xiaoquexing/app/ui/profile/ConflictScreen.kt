@@ -43,12 +43,7 @@ fun ConflictScreen(
             .statusBarsPadding()
             .padding(horizontal = 16.dp),
     ) {
-        TopAppBar(
-            title = { Text("同步冲突") },
-            navigationIcon = {
-                IconButton(onClick = onBack) { Icon(Icons.Default.ArrowBack, contentDescription = "返回") }
-            },
-        )
+        com.xiaoquexing.app.ui.theme.IosNavBar(title = "同步冲突", onBack = onBack)
         Text("本地和云端不是同一版本。选保留哪一边，不会自动合并。", style = MaterialTheme.typography.bodySmall)
         Spacer(Modifier.height(8.dp))
         ui.message?.let { Text(it, color = MaterialTheme.colorScheme.primary) }

@@ -68,14 +68,7 @@ fun PlantSelectionScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        TopAppBar(
-            title = { Text("选择植物", fontWeight = FontWeight.Bold) },
-            navigationIcon = {
-                IconButton(onClick = onBack) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = "返回")
-                }
-            }
-        )
+        com.xiaoquexing.app.ui.theme.IosNavBar(title = "选择植物", onBack = onBack)
 
         Text(
             text = "选择一棵植物陪你记录生活 🌱",

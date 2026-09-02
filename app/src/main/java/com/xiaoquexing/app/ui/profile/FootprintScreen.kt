@@ -48,13 +48,9 @@ fun FootprintScreen(
             .statusBarsPadding()
             .padding(horizontal = 16.dp),
     ) {
-        TopAppBar(
-            title = { Text(selected?.name ?: "足迹") },
-            navigationIcon = {
-                IconButton(onClick = { if (selected != null) viewModel.close() else onBack() }) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = "返回")
-                }
-            },
+        com.xiaoquexing.app.ui.theme.IosNavBar(
+            title = selected?.name ?: "足迹",
+            onBack = { if (selected != null) viewModel.close() else onBack() },
         )
         if (selected == null) {
             Text("按记录里的地点汇总，不依赖地图密钥。", style = MaterialTheme.typography.bodySmall)

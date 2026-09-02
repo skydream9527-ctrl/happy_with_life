@@ -42,14 +42,7 @@ fun PlantGuideScreen(onBack: () -> Unit) {
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        TopAppBar(
-            title = { Text("植物图鉴", fontWeight = FontWeight.Bold) },
-            navigationIcon = {
-                IconButton(onClick = onBack) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = "返回")
-                }
-            }
-        )
+        com.xiaoquexing.app.ui.theme.IosNavBar(title = "植物图鉴", onBack = onBack)
 
         LazyColumn(
             modifier = Modifier.fillMaxSize(),

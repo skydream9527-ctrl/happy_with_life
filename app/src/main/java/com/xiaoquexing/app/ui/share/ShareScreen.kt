@@ -112,17 +112,7 @@ fun ShareScreen(
     Scaffold(
         snackbarHost = { androidx.compose.material3.SnackbarHost(snackbarHostState) },
         topBar = {
-            TopAppBar(
-                title = { Text("分享") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "返回")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                )
-            )
+            com.xiaoquexing.app.ui.theme.IosNavBar(title = "分享", onBack = onBack)
         }
     ) { padding ->
         Column(

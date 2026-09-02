@@ -57,12 +57,7 @@ fun ReviewScreen(
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 16.dp),
     ) {
-        TopAppBar(
-            title = { Text("月年回顾") },
-            navigationIcon = {
-                IconButton(onClick = onBack) { Icon(Icons.Default.ArrowBack, contentDescription = "返回") }
-            },
-        )
+        com.xiaoquexing.app.ui.theme.IosNavBar(title = "月年回顾", onBack = onBack)
         ui.month?.let { month ->
             Text(month.title, style = MaterialTheme.typography.headlineSmall)
             Text("${month.recordCount} 条 · ${month.totalGp} GP · 写了 ${month.daysWritten} 天")

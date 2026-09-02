@@ -5,6 +5,7 @@ import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -78,18 +79,22 @@ fun SettingsScreen(
         ToggleRow("个人页隐藏手机号", ui.hidePhone, viewModel::setHidePhone)
         Spacer(Modifier.height(16.dp))
         Text("外观", style = MaterialTheme.typography.titleMedium)
-        Row(modifier = Modifier.fillMaxWidth()) {
+        Column {
             listOf(
                 SettingsStore.MODE_SYSTEM to "跟随系统",
                 SettingsStore.MODE_LIGHT to "浅色",
                 SettingsStore.MODE_DARK to "深色",
             ).forEach { (mode, label) ->
-                FilterChip(
-                    selected = ui.themeMode == mode,
-                    onClick = { viewModel.setTheme(mode) },
-                    label = { Text(label) },
-                    modifier = Modifier.padding(end = 8.dp),
-                )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 10.dp)
+                        .clickable { viewModel.setTheme(mode) },
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(label, modifier = Modifier.weight(1f))
+                    if (ui.themeMode == mode) Text("✓", color = MaterialTheme.colorScheme.primary)
+                }
             }
         }
         ToggleRow("大字体（1.3 倍）", ui.largeText, viewModel::setLargeText)
